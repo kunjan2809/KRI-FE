@@ -90,6 +90,7 @@ export type IUserCard = {
   totalPosts: number;
   totalFollowers: number;
   totalFollowing: number;
+  joinDate: Date;
 };
 
 export type IUserItem = {

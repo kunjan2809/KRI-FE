@@ -26,8 +26,8 @@ type Props = {
 
 export default function UserCard({ user }: Props) {
   const theme = useTheme();
-
-  const { name, coverUrl, role, totalFollowers, totalPosts, avatarUrl, totalFollowing } = user;
+  
+  const { name, coverUrl, totalFollowers, totalPosts, avatarUrl, totalFollowing, joinDate  } = user;
 
   return (
     <Card sx={{ textAlign: 'center' }}>
@@ -69,7 +69,7 @@ export default function UserCard({ user }: Props) {
       <ListItemText
         sx={{ mt: 7, mb: 1 }}
         primary={name}
-        secondary={role}
+        secondary={new Date(joinDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
         primaryTypographyProps={{ typography: 'subtitle1' }}
         secondaryTypographyProps={{ component: 'span', mt: 0.5 }}
       />
@@ -99,14 +99,14 @@ export default function UserCard({ user }: Props) {
       >
         <div>
           <Typography variant="caption" component="div" sx={{ mb: 0.5, color: 'text.secondary' }}>
-            Follower
+            Orders
           </Typography>
           {fShortenNumber(totalFollowers)}
         </div>
 
         <div>
           <Typography variant="caption" component="div" sx={{ mb: 0.5, color: 'text.secondary' }}>
-            Following
+            Pending
           </Typography>
 
           {fShortenNumber(totalFollowing)}
@@ -114,7 +114,7 @@ export default function UserCard({ user }: Props) {
 
         <div>
           <Typography variant="caption" component="div" sx={{ mb: 0.5, color: 'text.secondary' }}>
-            Total Post
+            Returns
           </Typography>
           {fShortenNumber(totalPosts)}
         </div>

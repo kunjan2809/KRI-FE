@@ -54,7 +54,7 @@ export default function OverviewAppView() {
 
         <Grid xs={12} md={4}>
           <AppWidgetSummary
-            title="Total Active Users"
+            title="Monthly Orders"
             percent={2.6}
             total={18765}
             chart={{
@@ -65,7 +65,7 @@ export default function OverviewAppView() {
 
         <Grid xs={12} md={4}>
           <AppWidgetSummary
-            title="Total Installed"
+            title="Total Revenue"
             percent={0.2}
             total={4876}
             chart={{
@@ -77,7 +77,7 @@ export default function OverviewAppView() {
 
         <Grid xs={12} md={4}>
           <AppWidgetSummary
-            title="Total Downloads"
+            title="New users this month"
             percent={-0.1}
             total={678}
             chart={{
@@ -89,13 +89,13 @@ export default function OverviewAppView() {
 
         <Grid xs={12} md={6} lg={4}>
           <AppCurrentDownload
-            title="Current Download"
+            title="Order summary"
             chart={{
               series: [
-                { label: 'Mac', value: 12244 },
-                { label: 'Window', value: 53345 },
-                { label: 'iOS', value: 44313 },
-                { label: 'Android', value: 78343 },
+                { label: 'Rings', value: 12244 },
+                { label: 'Bracelets', value: 53345 },
+                { label: 'Earrings', value: 44313 },
+                { label: 'Necklaces', value: 78343 },
               ],
             }}
           />
@@ -103,7 +103,7 @@ export default function OverviewAppView() {
 
         <Grid xs={12} md={6} lg={8}>
           <AppAreaInstalled
-            title="Area Installed"
+            title="Order Places"
             subheader="(+43%) than last year"
             chart={{
               categories: [
@@ -152,28 +152,6 @@ export default function OverviewAppView() {
           />
         </Grid>
 
-        <Grid xs={12} lg={8}>
-          <AppNewInvoice
-            title="New Invoice"
-            tableData={_appInvoices}
-            tableLabels={[
-              { id: 'id', label: 'Invoice ID' },
-              { id: 'category', label: 'Category' },
-              { id: 'price', label: 'Price' },
-              { id: 'status', label: 'Status' },
-              { id: '' },
-            ]}
-          />
-        </Grid>
-
-        <Grid xs={12} md={6} lg={4}>
-          <EcommerceCurrentBalance
-            title="Current Balance"
-            currentBalance={187650}
-            sentAmount={25500}
-          />
-        </Grid>
-
         <Grid xs={12} md={6} lg={4}>
           <EcommerceLatestOrders
             id="demo__5"
@@ -194,7 +172,19 @@ export default function OverviewAppView() {
           <EcommerceLatestInvoices
             id="demo__5"
             title="Invoices"
-            list={_appInvoices.slice(0, 5)}
+            list={_appInvoices.slice(0, 5) as any}
+          />
+        </Grid>
+
+        <Grid xs={12} lg={8}>
+          <div> </div>
+        </Grid>
+
+        <Grid xs={12} md={6} lg={4}>
+          <EcommerceCurrentBalance
+            title="Monthly Revenue"
+            currentBalance={187650}
+            sentAmount={25500}
           />
         </Grid>
       </Grid>

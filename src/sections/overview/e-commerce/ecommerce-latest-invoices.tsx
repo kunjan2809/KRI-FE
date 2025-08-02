@@ -1,7 +1,6 @@
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
-import Avatar from '@mui/material/Avatar';
 import CardHeader from '@mui/material/CardHeader';
 import Card, { CardProps } from '@mui/material/Card';
 import ListItemText from '@mui/material/ListItemText';
@@ -9,7 +8,6 @@ import ListItemText from '@mui/material/ListItemText';
 import { fCurrency } from 'src/utils/format-number';
 
 import Scrollbar from 'src/components/scrollbar';
-import { ColorPreview } from 'src/components/color-utils';
 import Label from 'src/components/label';
 
 // ----------------------------------------------------------------------
@@ -20,6 +18,7 @@ type ItemProps = {
   price: number;
   category: string;
   status: string;
+  date: string;
 };
 
 interface Props extends CardProps {
@@ -51,8 +50,7 @@ type ProductItemProps = {
 };
 
 function ProductItem({ invoice }: ProductItemProps) {
-  const { invoiceNumber, price, category, status } = invoice;
-
+  const { invoiceNumber, price, date, status } = invoice;
   return (
     <Stack direction="row" spacing={2}>
 
@@ -62,7 +60,7 @@ function ProductItem({ invoice }: ProductItemProps) {
         secondary={
           <Stack direction="row" justifyContent="space-between">
             <Box component="span" >
-              {category}
+              {new Date(date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
             </Box>
             <Box component="span" >
               {fCurrency(price)}

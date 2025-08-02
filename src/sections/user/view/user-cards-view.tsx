@@ -12,11 +12,11 @@ import Iconify from 'src/components/iconify';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 
-import UserCardList from '../user-card-list';
 import { Tab, Tabs } from '@mui/material';
 import Label from 'src/components/label';
 import { useCallback, useState } from 'react';
 import { alpha } from '@mui/material/styles';
+import UserCardList from '../user-card-list';
 
 // ----------------------------------------------------------------------
 
@@ -48,16 +48,7 @@ export default function UserCardsView() {
           { name: 'User', href: paths.dashboard.user.root },
           { name: 'Cards' },
         ]}
-        action={
-          <Button
-            component={RouterLink}
-            href={paths.dashboard.user.new}
-            variant="contained"
-            startIcon={<Iconify icon="mingcute:add-line" />}
-          >
-            New User
-          </Button>
-        }
+       
         sx={{ mb: { xs: 3, md: 5 } }}
       />
 

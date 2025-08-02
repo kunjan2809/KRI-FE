@@ -48,6 +48,7 @@ export const _appAuthors = [...Array(3)].map((_, index) => ({
 
 export const _appInvoices = [...Array(5)].map((_, index) => {
   const category = ['Android', 'Mac', 'Windows', 'Android', 'Mac'][index];
+  const date = ['2025-01-01', '2025-01-02', '2025-01-03', '2025-01-04', '2025-01-05'][index];
 
   const status = ['paid', 'out of date', 'progress', 'paid', 'paid'][index];
 
@@ -57,6 +58,7 @@ export const _appInvoices = [...Array(5)].map((_, index) => {
     price: _mock.number.price(index),
     category,
     status,
+    date,
   };
 });
 

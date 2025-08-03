@@ -49,16 +49,17 @@ import OrderTableFiltersResult from '../order-table-filters-result';
 
 // ----------------------------------------------------------------------
 
-const STATUS_OPTIONS = [{ value: 'all', label: 'All' }, ...ORDER_STATUS_OPTIONS];
+const STATUS_OPTIONS = [...ORDER_STATUS_OPTIONS, { value: 'all', label: 'All' }];
 
 const TABLE_HEAD = [
   { id: 'orderNumber', label: 'Order', width: 116 },
-  { id: 'name', label: 'Customer' },
+  { id: 'name', label: 'Customer', width: 140 },
   { id: 'createdAt', label: 'Date', width: 140 },
-  { id: 'totalQuantity', label: 'Items', width: 120, align: 'center' },
-  { id: 'totalAmount', label: 'Price', width: 140 },
+  { id: 'createdAt', label: 'Address', width: 200 },
+  { id: 'totalQuantity', label: 'Items', width: 80, align: 'center' },
+  { id: 'totalAmount', label: 'Price', width: 100 },
   { id: 'status', label: 'Status', width: 110 },
-  { id: '', width: 88 },
+  { id: '', label: 'Actions', width: 88 },
 ];
 
 const defaultFilters: IOrderTableFilters = {
@@ -80,6 +81,8 @@ export default function OrderListView() {
   const router = useRouter();
 
   const confirm = useBoolean();
+
+  console.log('_orders', _orders);
 
   const [tableData, setTableData] = useState<IOrderItem[]>(_orders);
 
@@ -165,17 +168,14 @@ export default function OrderListView() {
     <>
       <Container maxWidth={settings.themeStretch ? false : 'lg'}>
         <CustomBreadcrumbs
-          heading="List"
+          heading="Orders"
           links={[
             {
               name: 'Dashboard',
               href: paths.dashboard.root,
             },
             {
-              name: 'Order',
-              href: paths.dashboard.order.root,
-            },
-            { name: 'List' },
+              name: 'Order' },
           ]}
           sx={{
             mb: { xs: 3, md: 5 },
@@ -205,11 +205,12 @@ export default function OrderListView() {
                     color={
                       (tab.value === 'completed' && 'success') ||
                       (tab.value === 'pending' && 'warning') ||
-                      (tab.value === 'cancelled' && 'error') ||
+                      (tab.value === 'canceled' && 'error') ||
+                      (tab.value === 'shipped' && 'info') ||
                       'default'
                     }
                   >
-                    {['completed', 'pending', 'cancelled', 'refunded'].includes(tab.value)
+                    {['completed', 'pending', 'cancelled', 'refunded', 'shipped', 'canceled'].includes(tab.value)
                       ? tableData.filter((user) => user.status === tab.value).length
                       : tableData.length}
                   </Label>

@@ -1,6 +1,6 @@
 import { sub } from 'date-fns';
 
-import { ASSETS_API, ASSETS_IMAGE_API, ASSETS_PRODUCT_API } from 'src/config-global';
+import { ASSETS_API, ASSETS_IMAGE_API } from 'src/config-global';
 
 import {
   _id,

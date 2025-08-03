@@ -38,8 +38,8 @@ export default function AppFeatured({ list, ...other }: Props) {
   });
 
   return (
-    <Card {...other}  sx={{ maxHeight: '320px' }}>
-      <Carousel ref={carousel.carouselRef} {...carousel.carouselSettings} className='flex flex-row'>
+    <Card {...other} sx={{ maxHeight: '320px' }}>
+      <Carousel ref={carousel.carouselRef} {...carousel.carouselSettings} >
         {list.map((app, index) => (
           <CarouselItem key={app.id} item={app} active={index === carousel.currentIndex} />
         ))}

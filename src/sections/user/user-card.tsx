@@ -106,7 +106,7 @@ export default function UserCard({ user }: Props) {
 
         <div>
           <Typography variant="caption" component="div" sx={{ mb: 0.5, color: 'text.secondary' }}>
-            Pending
+            Total 
           </Typography>
 
           {fShortenNumber(totalFollowing)}

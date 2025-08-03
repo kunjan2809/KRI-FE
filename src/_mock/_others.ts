@@ -121,14 +121,14 @@ export const _socials = [
     value: 'email',
     name: 'Email',
     icon: 'eva:email-fill',
-    color: '#1877F2',
+    color: '#212B36',
     path: 'https://www.facebook.com/caitlyn.kerluke',
   },
   {
     value: 'phone',
     name: 'Phone',
-    icon: 'ant-design:phone-filled',
-    color: '#000000',
+    icon: 'material-symbols:call',
+    color: '#212B36',
     path: 'https://www.instagram.com/caitlyn.kerluke',
   },
 ];

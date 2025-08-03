@@ -20,6 +20,10 @@ import UserCardList from '../user-card-list';
 
 // ----------------------------------------------------------------------
 
+console.log('USER_CARDS', _userCards);
+
+
+
 export default function UserCardsView() {
   const settings = useSettingsContext();
   const STATUS_OPTIONS = [{ value: 'all', label: 'All' }, ...USER_STATUS_OPTIONS];
@@ -42,13 +46,12 @@ export default function UserCardsView() {
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <CustomBreadcrumbs
-        heading="User Cards"
+        heading="Users"
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },
-          { name: 'User', href: paths.dashboard.user.root },
-          { name: 'Cards' },
+          { name: 'User' },
         ]}
-       
+
         sx={{ mb: { xs: 3, md: 5 } }}
       />
 
@@ -74,12 +77,11 @@ export default function UserCardsView() {
                 }
                 color={
                   (tab.value === 'active' && 'success') ||
-                  (tab.value === 'pending' && 'warning') ||
                   (tab.value === 'banned' && 'error') ||
                   'default'
                 }
               >
-                {['active', 'pending', 'banned', 'rejected'].includes(tab.value)
+                {['active', 'banned'].includes(tab.value)
                   ? _userCards.filter((user) => user.status === tab.value).length
                   : _userCards.length}
               </Label>

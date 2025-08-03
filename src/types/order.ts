@@ -70,4 +70,5 @@ export type IOrderItem = {
   delivery: IOrderDelivery;
   items: IOrderProductItem[];
   createdAt: Date;
+  shippingAddress: IOrderShippingAddress;
 };

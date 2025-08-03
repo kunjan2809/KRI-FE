@@ -59,7 +59,7 @@ const TABLE_HEAD = [
   { id: 'createDate', label: 'Create' },
   { id: 'dueDate', label: 'Due' },
   { id: 'price', label: 'Amount' },
-  { id: 'sent', label: 'Sent', align: 'center' },
+  // { id: 'sent', label: 'Sent', align: 'center' },
   { id: 'status', label: 'Status' },
   { id: '' },
 ];
@@ -143,15 +143,9 @@ export default function InvoiceListView() {
     },
     {
       value: 'overdue',
-      label: 'Overdue',
+      label: 'Returns',
       color: 'error',
       count: getInvoiceLength('overdue'),
-    },
-    {
-      value: 'draft',
-      label: 'Draft',
-      color: 'default',
-      count: getInvoiceLength('draft'),
     },
   ] as const;
 
@@ -221,7 +215,7 @@ export default function InvoiceListView() {
     <>
       <Container maxWidth={settings.themeStretch ? false : 'lg'}>
         <CustomBreadcrumbs
-          heading="List"
+          heading="Invoices"
           links={[
             {
               name: 'Dashboard',
@@ -229,22 +223,8 @@ export default function InvoiceListView() {
             },
             {
               name: 'Invoice',
-              href: paths.dashboard.invoice.root,
-            },
-            {
-              name: 'List',
             },
           ]}
-          action={
-            <Button
-              component={RouterLink}
-              href={paths.dashboard.invoice.new}
-              variant="contained"
-              startIcon={<Iconify icon="mingcute:add-line" />}
-            >
-              New Invoice
-            </Button>
-          }
           sx={{
             mb: { xs: 3, md: 5 },
           }}

@@ -23,6 +23,15 @@ export const fetcher = async (args: string | [string, AxiosRequestConfig]) => {
   return res.data;
 };
 
+// Fetcher for Next.js API routes (same origin)
+export const apiFetcher = async (args: string | [string, AxiosRequestConfig]) => {
+  const [url, config] = Array.isArray(args) ? args : [args];
+
+  const res = await axios.get(url, { ...config });
+
+  return res.data;
+};
+
 // ----------------------------------------------------------------------
 
 export const endpoints = {

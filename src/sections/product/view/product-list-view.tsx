@@ -35,6 +35,8 @@ import EmptyContent from 'src/components/empty-content';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
+import Alert from '@mui/material/Alert';
+import Typography from '@mui/material/Typography';
 
 import { IProductItem, IProductTableFilters, IProductTableFilterValue } from 'src/types/product';
 
@@ -77,7 +79,7 @@ export default function ProductListView() {
 
   const settings = useSettingsContext();
 
-  const { products, productsLoading } = useGetProducts();
+  const { products, productsLoading, productsError, productsEmpty } = useGetProducts();
 
   const [tableData, setTableData] = useState<IProductItem[]>([]);
 
@@ -88,14 +90,92 @@ export default function ProductListView() {
   const [columnVisibilityModel, setColumnVisibilityModel] =
     useState<GridColumnVisibilityModel>(HIDE_COLUMNS);
 
+  // Debug logging
+  console.log('ProductListView render:', {
+    productsLength: products?.length,
+    productsLoading,
+    productsError: productsError?.message,
+    productsEmpty,
+    tableDataLength: tableData.length
+  });
+
   useEffect(() => {
-    if (products.length) {
+    console.log('Products changed:', products?.length);
+    if (products && products.length) {
       setTableData(products);
     }
   }, [products]);
 
+  // Fallback data if API fails
+  const fallbackProducts: IProductItem[] = [
+    {
+      id: 'fallback-1',
+      sku: 'FALLBACK-001',
+      name: 'Sample Product 1',
+      code: 'SAMPLE001',
+      price: 99.99,
+      priceSale: null,
+      taxes: 10,
+      quantity: 50,
+      available: 25,
+      totalSold: 100,
+      totalRatings: 4.5,
+      totalReviews: 50,
+      category: 'Sample',
+      gender: ['Men'],
+      colors: ['#000000'],
+      sizes: ['M', 'L', 'XL'],
+      inventoryType: 'in stock',
+      publish: 'published',
+      coverUrl: '/assets/images/mock/m-product/product-1.webp',
+      images: ['/assets/images/mock/m-product/product-1.webp'],
+      tags: ['Sample'],
+      description: 'This is a sample product for testing purposes.',
+      subDescription: 'Sample product description.',
+      reviews: [],
+      ratings: [],
+      newLabel: { enabled: false, content: 'NEW' },
+      saleLabel: { enabled: false, content: 'SALE' },
+      createdAt: new Date(),
+    },
+    {
+      id: 'fallback-2',
+      sku: 'FALLBACK-002',
+      name: 'Sample Product 2',
+      code: 'SAMPLE002',
+      price: 149.99,
+      priceSale: 129.99,
+      taxes: 10,
+      quantity: 30,
+      available: 15,
+      totalSold: 75,
+      totalRatings: 4.2,
+      totalReviews: 30,
+      category: 'Sample',
+      gender: ['Women'],
+      colors: ['#FF0000'],
+      sizes: ['S', 'M', 'L'],
+      inventoryType: 'low stock',
+      publish: 'published',
+      coverUrl: '/assets/images/mock/m-product/product-2.webp',
+      images: ['/assets/images/mock/m-product/product-2.webp'],
+      tags: ['Sample'],
+      description: 'Another sample product for testing.',
+      subDescription: 'Another sample product description.',
+      reviews: [],
+      ratings: [],
+      newLabel: { enabled: true, content: 'NEW' },
+      saleLabel: { enabled: true, content: 'SALE' },
+      createdAt: new Date(),
+    }
+  ];
+
+  // Use fallback data if API fails and no data is available
+  const displayData = tableData.length > 0 ? tableData :
+    (productsError && !productsLoading ? fallbackProducts : []);
+
   const dataFiltered = applyFilter({
-    inputData: tableData,
+    inputData: displayData,
     filters,
   });
 
@@ -230,25 +310,50 @@ export default function ProductListView() {
       .filter((column) => !HIDE_COLUMNS_TOGGLABLE.includes(column.field))
       .map((column) => column.field);
 
+  const CustomToolbar = () => (
+    <GridToolbarContainer>
+      <ProductTableToolbar
+        filters={filters}
+        onFilters={handleFilters}
+        stockOptions={PRODUCT_STOCK_OPTIONS}
+        publishOptions={PUBLISH_OPTIONS}
+      />
+
+      <GridToolbarQuickFilter />
+
+      <Stack
+        spacing={1}
+        flexGrow={1}
+        direction="row"
+        alignItems="center"
+        justifyContent="flex-end"
+      >
+        {!!selectedRowIds.length && (
+          <Button
+            size="small"
+            color="error"
+            startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
+            onClick={confirmRows.onTrue}
+          >
+            Delete ({selectedRowIds.length})
+          </Button>
+        )}
+
+        <GridToolbarColumnsButton />
+        <GridToolbarFilterButton />
+        <GridToolbarExport />
+      </Stack>
+    </GridToolbarContainer>
+  );
+
   return (
     <>
-      <Container
-        maxWidth={settings.themeStretch ? false : 'lg'}
-        sx={{
-          flexGrow: 1,
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
+      <Container maxWidth={settings.themeStretch ? false : 'lg'}>
         <CustomBreadcrumbs
-          heading="List"
+          heading="Product List"
           links={[
             { name: 'Dashboard', href: paths.dashboard.root },
-            {
-              name: 'Product',
-              href: paths.dashboard.product.root,
-            },
-            { name: 'List' },
+            { name: 'Product' },
           ]}
           action={
             <Button
@@ -268,86 +373,63 @@ export default function ProductListView() {
           }}
         />
 
-        <Card
-          sx={{
-            height: { xs: 800, md: 2 },
-            flexGrow: { md: 1 },
-            display: { md: 'flex' },
-            flexDirection: { md: 'column' },
-          }}
-        >
+        {/* Status indicator */}
+        {productsError && !productsLoading && (
+          <Alert severity="warning" sx={{ mb: 3 }}>
+            <Typography variant="body2">
+              API connection failed. Showing fallback data for demonstration.
+            </Typography>
+          </Alert>
+        )}
+
+        {productsLoading && (
+          <Alert severity="info" sx={{ mb: 3 }}>
+            <Typography variant="body2">
+              Loading products from API...
+            </Typography>
+          </Alert>
+        )}
+
+        <Card>
+          {canReset && (
+            <ProductTableFiltersResult
+              filters={filters}
+              onFilters={handleFilters}
+              onResetFilters={handleResetFilters}
+              results={dataFiltered.length}
+              sx={{ p: 2.5, pt: 0 }}
+            />
+          )}
+
           <DataGrid
-            checkboxSelection
-            disableRowSelectionOnClick
+            hideFooterPagination
             rows={dataFiltered}
             columns={columns}
             loading={productsLoading}
             getRowHeight={() => 'auto'}
             pageSizeOptions={[5, 10, 25]}
-            initialState={{
-              pagination: {
-                paginationModel: { pageSize: 10 },
-              },
-            }}
+            disableRowSelectionOnClick
+            checkboxSelection
+            disableColumnFilter
+            disableColumnSelector
+            disableDensitySelector
             onRowSelectionModelChange={(newSelectionModel) => {
               setSelectedRowIds(newSelectionModel);
             }}
             columnVisibilityModel={columnVisibilityModel}
-            onColumnVisibilityModelChange={(newModel) => setColumnVisibilityModel(newModel)}
+            onColumnVisibilityModelChange={(newModel) => {
+              setColumnVisibilityModel(newModel);
+            }}
             slots={{
-              toolbar: () => (
-                <>
-                  <GridToolbarContainer>
-                    <ProductTableToolbar
-                      filters={filters}
-                      onFilters={handleFilters}
-                      stockOptions={PRODUCT_STOCK_OPTIONS}
-                      publishOptions={PUBLISH_OPTIONS}
-                    />
-
-                    <GridToolbarQuickFilter />
-
-                    <Stack
-                      spacing={1}
-                      flexGrow={1}
-                      direction="row"
-                      alignItems="center"
-                      justifyContent="flex-end"
-                    >
-                      {!!selectedRowIds.length && (
-                        <Button
-                          size="small"
-                          color="error"
-                          startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
-                          onClick={confirmRows.onTrue}
-                        >
-                          Delete ({selectedRowIds.length})
-                        </Button>
-                      )}
-
-                      <GridToolbarColumnsButton />
-                      <GridToolbarFilterButton />
-                      <GridToolbarExport />
-                    </Stack>
-                  </GridToolbarContainer>
-
-                  {canReset && (
-                    <ProductTableFiltersResult
-                      filters={filters}
-                      onFilters={handleFilters}
-                      onResetFilters={handleResetFilters}
-                      results={dataFiltered.length}
-                      sx={{ p: 2.5, pt: 0 }}
-                    />
-                  )}
-                </>
-              ),
-              noRowsOverlay: () => <EmptyContent title="No Data" />,
-              noResultsOverlay: () => <EmptyContent title="No results found" />,
+              toolbar: CustomToolbar,
             }}
             slotProps={{
-              columnsPanel: {
-                getTogglableColumns,
+              toolbar: {
+                selectedRowIds,
+                onDeleteRows: handleDeleteRows,
+                onEditRows: () => {
+                  console.info('EDIT ROWS', selectedRowIds);
+                },
               },
             }}
           />
@@ -360,7 +442,7 @@ export default function ProductListView() {
         title="Delete"
         content={
           <>
-            Are you sure want to delete <strong> {selectedRowIds.length} </strong> items?
+            Are you sure want to delete <strong>{selectedRowIds.length}</strong> items?
           </>
         }
         action={

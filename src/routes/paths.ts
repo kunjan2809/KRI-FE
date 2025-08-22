@@ -5,7 +5,8 @@ import { _id } from 'src/_mock/assets';
 
 const ROOTS = {
   AUTH: '/auth',
-  DASHBOARD: '/dashboard',
+  ADMIN: '/admin',
+  DASHBOARD: '/admin/dashboard',
 };
 const MOCK_ID = _id[1];
 

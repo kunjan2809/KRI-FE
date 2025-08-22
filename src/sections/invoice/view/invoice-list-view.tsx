@@ -260,16 +260,7 @@ export default function InvoiceListView() {
               />
 
               <InvoiceAnalytic
-                title="Pending"
-                total={getInvoiceLength('pending')}
-                percent={getPercentByStatus('pending')}
-                price={getTotalAmount('pending')}
-                icon="solar:sort-by-time-bold-duotone"
-                color={theme.palette.warning.main}
-              />
-
-              <InvoiceAnalytic
-                title="Overdue"
+                title="Returns"
                 total={getInvoiceLength('overdue')}
                 percent={getPercentByStatus('overdue')}
                 price={getTotalAmount('overdue')}
@@ -278,10 +269,19 @@ export default function InvoiceListView() {
               />
 
               <InvoiceAnalytic
+                title="Pending"
+                total={'-'}
+                percent={getPercentByStatus('pending')}
+                price={'-'}
+                icon="solar:sort-by-time-bold-duotone"
+                color={theme.palette.warning.main}
+              />
+
+              <InvoiceAnalytic
                 title="Draft"
-                total={getInvoiceLength('draft')}
+                total={'-'}
                 percent={getPercentByStatus('draft')}
-                price={getTotalAmount('draft')}
+                price={'-'}
                 icon="solar:file-corrupted-bold-duotone"
                 color={theme.palette.text.secondary}
               />

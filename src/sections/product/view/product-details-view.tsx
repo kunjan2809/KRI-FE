@@ -37,7 +37,7 @@ const SUMMARY = [
     icon: 'solar:verified-check-bold',
   },
   {
-    title: '10 Day Replacement',
+    title: '2 Day size Replacement',
     description: 'Marshmallow biscuit donut dragée fruitcake wafer.',
     icon: 'solar:clock-circle-bold',
   },

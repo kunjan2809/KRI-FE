@@ -13,6 +13,9 @@ import TableBody from '@mui/material/TableBody';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
 
 import { fDate } from 'src/utils/format-time';
 import { fCurrency } from 'src/utils/format-number';
@@ -25,6 +28,8 @@ import Scrollbar from 'src/components/scrollbar';
 import { IInvoice } from 'src/types/invoice';
 
 import InvoiceToolbar from './invoice-toolbar';
+import Iconify from 'src/components/iconify';
+import { useBoolean } from 'src/hooks/use-boolean';
 
 // ----------------------------------------------------------------------
 
@@ -44,11 +49,17 @@ type Props = {
 };
 
 export default function InvoiceDetails({ invoice }: Props) {
+  const editNotes = useBoolean(false);
   const [currentStatus, setCurrentStatus] = useState(invoice.status);
-
+  const [notes, setNotes] = useState('We appreciate your business. Should you need us to add VAT or extra notes let us know!');
   const handleChangeStatus = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setCurrentStatus(event.target.value);
   }, []);
+
+  const handleSaveNotes = useCallback(() => {
+    console.log(notes);
+    editNotes.onFalse();
+  }, [notes, editNotes]);
 
   const renderTotal = (
     <>
@@ -98,12 +109,41 @@ export default function InvoiceDetails({ invoice }: Props) {
 
   const renderFooter = (
     <Grid container>
-      <Grid xs={12} md={9} sx={{ py: 3 }}>
-        <Typography variant="subtitle2">NOTES</Typography>
+      <Grid xs={12} md={9} sx={{ py: 3, display: 'flex', gap: 1 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, mt: 2, width: '100%' }}>
+            <Typography variant="subtitle2">NOTES</Typography>
+            {editNotes.value ? '' : (
+              <IconButton onClick={editNotes.onTrue} sx={{ color: 'text.secondary' }} >
+                <Iconify icon="solar:pen-bold" width={16} height={16} />
+              </IconButton>
+            )}
+          </Box>
 
-        <Typography variant="body2">
-          We appreciate your business. Should you need us to add VAT or extra notes let us know!
-        </Typography>
+          {editNotes.value ? (
+            <>
+              <TextField
+                multiline
+                rows={4}
+                fullWidth
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+              />
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
+                <Button onClick={editNotes.onFalse} variant="outlined" color="inherit">
+                  Cancel
+                </Button>
+                <Button variant="contained" color="primary" onClick={handleSaveNotes}>
+                  Save
+                </Button>
+              </Box>
+            </>
+          ) :
+            (
+              <Typography variant="body2">{notes}</Typography>
+            )}
+        </Box>
+        <Divider sx={{ borderStyle: 'dashed' }} orientation='vertical' />
       </Grid>
 
       <Grid xs={12} md={3} sx={{ py: 3, textAlign: 'right' }}>
@@ -184,8 +224,8 @@ export default function InvoiceDetails({ invoice }: Props) {
           <Box
             component="img"
             alt="logo"
-            src="/logo/logo_single.svg"
-            sx={{ width: 48, height: 48 }}
+            src="/assets/Logo-horizontal.svg"
+            sx={{ width: 150 }}
           />
 
           <Stack spacing={1} alignItems={{ xs: 'flex-start', md: 'flex-end' }}>

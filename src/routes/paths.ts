@@ -7,6 +7,7 @@ const ROOTS = {
   AUTH: '/auth',
   ADMIN: '/admin',
   DASHBOARD: '/admin/dashboard',
+  USER: '/',
 };
 const MOCK_ID = _id[1];
 
@@ -20,6 +21,27 @@ export const paths = {
       login: `${ROOTS.AUTH}/jwt/login`,
       register: `${ROOTS.AUTH}/jwt/register`,
     },
+  },
+  // USER SITE
+  user: {
+    root: ROOTS.USER,
+    landing: ROOTS.USER,
+    products: {
+      root: '/products',
+      details: (id: string) => `/products/${id}`,
+      demo: {
+        details: `/products/${MOCK_ID}`,
+      },
+    },
+    categories: {
+      gifts: '/gifts',
+      personalisation: '/personalisation',
+      homeFavourites: '/home-favourites',
+      fashion: '/fashion',
+      registry: '/registry',
+    },
+    cart: '/cart',
+    orderDetails: '/order-details',
   },
   // DASHBOARD
   dashboard: {

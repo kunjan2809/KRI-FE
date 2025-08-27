@@ -101,7 +101,7 @@ export default function ChatMessageInput({
             } else {
               const res = await createConversation(conversationData);
 
-              router.push(`${paths.dashboard.chat}?id=${res.conversation.id}`);
+              router.push(`${paths.dashboard.root}?id=${res.conversation.id}`);
 
               onAddRecipients([]);
             }

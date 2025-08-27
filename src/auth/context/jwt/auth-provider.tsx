@@ -136,16 +136,18 @@ export function AuthProvider({ children }: Props) {
 
     const res = await axios.post(endpoints.auth.login, data);
 
-    const { accessToken, user } = res.data;
+    const { data: responseData } = res.data;
+    const { token, user } = responseData;
 
-    setSession(accessToken);
+    setSession(token);
+    sessionStorage.setItem(STORAGE_KEY, token);
 
     dispatch({
       type: Types.LOGIN,
       payload: {
         user: {
           ...user,
-          accessToken,
+          accessToken: token,
         },
       },
     });
@@ -157,22 +159,24 @@ export function AuthProvider({ children }: Props) {
       const data = {
         email,
         password,
-        firstName,
-        lastName,
+        first_name: firstName,
+        last_name: lastName,
       };
 
-      const res = await axios.post(endpoints.auth.register, data);
+      const res = await axios.post(endpoints.auth.signup, data);
 
-      const { accessToken, user } = res.data;
+      const { data: responseData } = res.data;
+      const { token, user } = responseData;
 
-      sessionStorage.setItem(STORAGE_KEY, accessToken);
+      setSession(token);
+      sessionStorage.setItem(STORAGE_KEY, token);
 
       dispatch({
         type: Types.REGISTER,
         payload: {
           user: {
             ...user,
-            accessToken,
+            accessToken: token,
           },
         },
       });
@@ -199,11 +203,11 @@ export function AuthProvider({ children }: Props) {
       user: state.user,
       method: 'jwt',
       loading: status === 'loading',
-      authenticated: true,
+      authenticated: status === 'authenticated',
       unauthenticated: false,
       //
       login,
-      register,
+      register, 
       logout,
     }),
     [login, logout, register, state.user, status]

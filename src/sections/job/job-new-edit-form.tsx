@@ -17,6 +17,7 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import Button from '@mui/material/Button';
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
@@ -121,7 +122,7 @@ export default function JobNewEditForm({ currentJob }: Props) {
       await new Promise((resolve) => setTimeout(resolve, 500));
       reset();
       enqueueSnackbar(currentJob ? 'Update success!' : 'Create success!');
-      router.push(paths.dashboard.job.root);
+      router.push(paths.dashboard.root);
       console.info('DATA', data);
     } catch (error) {
       console.error(error);
@@ -388,7 +389,8 @@ export default function JobNewEditForm({ currentJob }: Props) {
           type="submit"
           variant="contained"
           size="large"
-          loading={isSubmitting}
+          component={Button}
+          disabled={isSubmitting}
           sx={{ ml: 2 }}
         >
           {!currentJob ? 'Create Job' : 'Save Changes'}

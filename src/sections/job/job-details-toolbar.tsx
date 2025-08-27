@@ -75,8 +75,8 @@ export default function JobDetailsToolbar({
         <LoadingButton
           color="inherit"
           variant="contained"
-          loading={!publish}
-          loadingIndicator="Loading…"
+          component={Button}
+          disabled={!publish}
           endIcon={<Iconify icon="eva:arrow-ios-downward-fill" />}
           onClick={popover.onOpen}
           sx={{ textTransform: 'capitalize' }}

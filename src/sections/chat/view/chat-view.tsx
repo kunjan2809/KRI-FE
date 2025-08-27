@@ -54,7 +54,7 @@ export default function ChatView() {
 
   useEffect(() => {
     if (conversationError || !selectedConversationId) {
-      router.push(paths.dashboard.chat);
+      router.push(paths.dashboard.root);
     }
   }, [conversationError, router, selectedConversationId]);
 

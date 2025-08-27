@@ -104,7 +104,7 @@ export default function ProductReviewNewForm({ onClose, ...other }: Props) {
             Cancel
           </Button>
 
-          <LoadingButton type="submit" variant="contained" loading={isSubmitting}>
+          <LoadingButton type="submit" variant="contained" component={Button} disabled={isSubmitting}>
             Post
           </LoadingButton>
         </DialogActions>

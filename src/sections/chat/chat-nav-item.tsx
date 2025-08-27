@@ -56,7 +56,7 @@ export default function ChatNavItem({ selected, collapse, conversation, onCloseM
 
       await clickConversation(conversation.id);
 
-      router.push(`${paths.dashboard.chat}?id=${conversation.id}`);
+      router.push(`${paths.dashboard.root}?id=${conversation.id}`);
     } catch (error) {
       console.error(error);
     }

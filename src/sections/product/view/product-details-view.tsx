@@ -15,11 +15,18 @@ import Typography from '@mui/material/Typography';
 import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
 
+import { useSnackbar } from 'src/components/snackbar';
+
+import { getProductById } from 'src/api/product';
+import { IProductAPIResponse, IProductCreateRequest } from 'src/types/product';
+
 import { PRODUCT_PUBLISH_OPTIONS } from 'src/_mock';
 
 import Iconify from 'src/components/iconify';
 import EmptyContent from 'src/components/empty-content';
 import { useSettingsContext } from 'src/components/settings';
+
+import { useAuthToken } from 'src/auth/hooks';
 
 import { ProductDetailsSkeleton } from '../product-skeleton';
 import ProductDetailsReview from '../product-details-review';
@@ -251,16 +258,44 @@ const product = {
 export default function ProductDetailsView({ id }: Props) {
 
   const settings = useSettingsContext();
-
+  const token = useAuthToken();
+  const { enqueueSnackbar } = useSnackbar();
   const [currentTab, setCurrentTab] = useState('description');
-
+  const [productById, setProductById] = useState<IProductCreateRequest | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [publish, setPublish] = useState('');
 
+
   useEffect(() => {
-    if (product) {
-      setPublish(product?.publish);
+    if (productById) {
+      setPublish(productById?.status);
     }
-  }, []);
+  }, [productById]);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      if (!token) {
+        setError('Authentication required');
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        const response = await getProductById(id, token);
+        setProductById(response.data.product);
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to fetch product';
+        setError(errorMessage);
+        enqueueSnackbar(errorMessage, { variant: 'error' });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [id, token, enqueueSnackbar]);
 
   const handleChangePublish = useCallback((newValue: string) => {
     setPublish(newValue);
@@ -290,12 +325,12 @@ export default function ProductDetailsView({ id }: Props) {
   //   />
   // );
 
-  const renderProduct = product && (
+  const renderProduct = productById && (
     <>
       <ProductDetailsToolbar
         backLink={paths.dashboard.product.root}
-        editLink={paths.dashboard.product.edit(`${product?.id}`)}
-        liveLink={paths.dashboard.product.details(`${product?.id}`)}
+        editLink={paths.dashboard.product.edit(`${productById?._id}`)}
+        liveLink={paths.dashboard.product.details(`${productById?._id}`)}
         publish={publish || ''}
         onChangePublish={handleChangePublish}
         publishOptions={PRODUCT_PUBLISH_OPTIONS}
@@ -303,11 +338,11 @@ export default function ProductDetailsView({ id }: Props) {
 
       <Grid container spacing={{ xs: 3, md: 5, lg: 8 }}>
         <Grid xs={12} md={6} lg={7}>
-          <ProductDetailsCarousel product={product} />
+          <ProductDetailsCarousel product={productById as IProductCreateRequest} />
         </Grid>
 
         <Grid xs={12} md={6} lg={5}>
-          <ProductDetailsSummary disabledActions product={product} />
+          <ProductDetailsSummary disabledActions productById={productById as IProductCreateRequest} />
         </Grid>
       </Grid>
 
@@ -335,7 +370,7 @@ export default function ProductDetailsView({ id }: Props) {
         ))}
       </Box>
 
-      <Card>
+      {/* <Card>
         <Tabs
           value={currentTab}
           onChange={handleChangeTab}
@@ -349,28 +384,30 @@ export default function ProductDetailsView({ id }: Props) {
               value: 'description',
               label: 'Description',
             },
-            {
-              value: 'reviews',
-              label: `Reviews (${product.reviews.length})`,
-            },
+            // {
+            //   value: 'reviews',
+            //   label: `Reviews (${productById?.reviews.length})`,
+            // },
           ].map((tab) => (
             <Tab key={tab.value} value={tab.value} label={tab.label} />
           ))}
         </Tabs>
 
         {currentTab === 'description' && (
-          <ProductDetailsDescription description={product?.description} />
+          <ProductDetailsDescription description={productById?.description} />
         )}
 
-        {currentTab === 'reviews' && (
+        {/* {currentTab === 'reviews' && (
           <ProductDetailsReview
-            ratings={product.ratings}
-            reviews={product.reviews}
-            totalRatings={product.totalRatings}
-            totalReviews={product.totalReviews}
+            ratings={productById?.ratings || []}
+            reviews={productById?.reviews || []}
+            totalRatings={productById?.totalRatings || 0}
+            totalReviews={productById?.totalReviews || 0}
           />
-        )}
-      </Card>
+        )} 
+      </Card> */}
+
+      
     </>
   );
 
@@ -380,7 +417,7 @@ export default function ProductDetailsView({ id }: Props) {
 
       {/* {productError && renderError} */}
 
-      {product && renderProduct}
+      {productById && renderProduct}
     </Container>
   );
 }

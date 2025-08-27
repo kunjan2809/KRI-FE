@@ -57,7 +57,6 @@ export default function InvoiceDetails({ invoice }: Props) {
   }, []);
 
   const handleSaveNotes = useCallback(() => {
-    console.log(notes);
     editNotes.onFalse();
   }, [notes, editNotes]);
 

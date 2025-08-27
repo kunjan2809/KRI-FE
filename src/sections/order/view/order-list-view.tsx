@@ -82,8 +82,6 @@ export default function OrderListView() {
 
   const confirm = useBoolean();
 
-  console.log('_orders', _orders);
-
   const [tableData, setTableData] = useState<IOrderItem[]>(_orders);
 
   const [filters, setFilters] = useState(defaultFilters);

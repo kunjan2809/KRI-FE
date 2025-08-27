@@ -23,8 +23,8 @@ export function RenderCellPrice({ params }: ParamsProps) {
 
 export function RenderCellPublish({ params }: ParamsProps) {
   return (
-    <Label variant="soft" color={(params.row.publish === 'published' && 'info') || 'default'}>
-      {params.row.publish}
+    <Label variant="soft" color={(params.row.status === 'published' && 'info') || 'default'}>
+      {params.row.status}
     </Label>
   );
 }
@@ -32,8 +32,8 @@ export function RenderCellPublish({ params }: ParamsProps) {
 export function RenderCellCreatedAt({ params }: ParamsProps) {
   return (
     <ListItemText
-      primary={fDate(params.row.createdAt)}
-      secondary={fTime(params.row.createdAt)}
+      primary={fDate(params.row.created_at)}
+      secondary={fTime(params.row.created_at)}
       primaryTypographyProps={{ typography: 'body2', noWrap: true }}
       secondaryTypographyProps={{
         mt: 0.5,
@@ -48,23 +48,23 @@ export function RenderCellStock({ params }: ParamsProps) {
   return (
     <Stack sx={{ typography: 'caption', color: 'text.secondary' }}>
       <LinearProgress
-        value={(params.row.available * 100) / params.row.quantity}
+        value={(params.row.available * 100) / params.row.stock_quantity}
         variant="determinate"
         color={
-          (params.row.inventoryType === 'out of stock' && 'error') ||
-          (params.row.inventoryType === 'low stock' && 'warning') ||
+          (params.row.stock_quantity === 'out of stock' && 'error') ||
+          (params.row.stock_quantity === 'low stock' && 'warning') ||
           'success'
         }
         sx={{ mb: 1, height: 6, maxWidth: 80 }}
       />
-      {!!params.row.available && params.row.available} {params.row.inventoryType}
+      {!!params.row.stock_quantity && params.row.stock_quantity} {params.row.stock_quantity}
     </Stack>
   );
 }
 
 export function RenderCellProduct({ params }: ParamsProps) {
   return (
-    <Stack direction="row" alignItems="center" sx={{ py: 2, width: 1 }}>
+    <Stack direction="row" alignItems="center" sx={{ py: 2, width: 1,}}>
       <Avatar
         alt={params.row.name}
         src={params.row.coverUrl}

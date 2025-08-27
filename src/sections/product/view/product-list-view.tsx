@@ -26,7 +26,7 @@ import { RouterLink } from 'src/routes/components';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
-import { useGetProducts } from 'src/api/product';
+import { deleteProduct, useGetProducts } from 'src/api/product';
 import { PRODUCT_STOCK_OPTIONS } from 'src/_mock';
 
 import Iconify from 'src/components/iconify';
@@ -39,6 +39,7 @@ import Alert from '@mui/material/Alert';
 import Typography from '@mui/material/Typography';
 
 import { IProductItem, IProductTableFilters, IProductTableFilterValue } from 'src/types/product';
+import { useAuthToken } from 'src/auth/hooks';
 
 import ProductTableToolbar from '../product-table-toolbar';
 import ProductTableFiltersResult from '../product-table-filters-result';
@@ -73,34 +74,33 @@ const HIDE_COLUMNS_TOGGLABLE = ['category', 'actions'];
 export default function ProductListView() {
   const { enqueueSnackbar } = useSnackbar();
 
+  const token = useAuthToken();
   const confirmRows = useBoolean();
 
   const router = useRouter();
 
   const settings = useSettingsContext();
 
-  const { products, productsLoading, productsError, productsEmpty } = useGetProducts();
 
-  const [tableData, setTableData] = useState<IProductItem[]>([]);
+  const [tableData, setTableData] = useState<any[]>([]);
 
   const [filters, setFilters] = useState(defaultFilters);
+
+  const { products, productsLoading, productsError, productsEmpty } = useGetProducts({
+    stock_filters: filters.stock,
+    status_filters: filters.publish,
+    search: '',
+    sort_by: 'created_at',
+    sort_order: 'desc',
+  });
 
   const [selectedRowIds, setSelectedRowIds] = useState<GridRowSelectionModel>([]);
 
   const [columnVisibilityModel, setColumnVisibilityModel] =
     useState<GridColumnVisibilityModel>(HIDE_COLUMNS);
 
-  // Debug logging
-  console.log('ProductListView render:', {
-    productsLength: products?.length,
-    productsLoading,
-    productsError: productsError?.message,
-    productsEmpty,
-    tableDataLength: tableData.length
-  });
 
   useEffect(() => {
-    console.log('Products changed:', products?.length);
     if (products && products.length) {
       setTableData(products);
     }
@@ -171,8 +171,12 @@ export default function ProductListView() {
   ];
 
   // Use fallback data if API fails and no data is available
-  const displayData = tableData.length > 0 ? tableData :
-    (productsError && !productsLoading ? fallbackProducts : []);
+  let displayData: any[] = [];
+  if (tableData.length > 0) {
+    displayData = tableData;
+  } else if (productsError && !productsLoading) {
+    displayData = fallbackProducts;
+  }
 
   const dataFiltered = applyFilter({
     inputData: displayData,
@@ -194,17 +198,18 @@ export default function ProductListView() {
 
   const handleDeleteRow = useCallback(
     (id: string) => {
-      const deleteRow = tableData.filter((row) => row.id !== id);
+      const deleteRow = tableData.filter((row) => row._id !== id);
 
       enqueueSnackbar('Delete success!');
+      deleteProduct(id, token);
 
       setTableData(deleteRow);
     },
-    [enqueueSnackbar, tableData]
+    [enqueueSnackbar, tableData, token]
   );
 
   const handleDeleteRows = useCallback(() => {
-    const deleteRows = tableData.filter((row) => !selectedRowIds.includes(row.id));
+    const deleteRows = tableData.filter((row) => !selectedRowIds.includes(row._id));
 
     enqueueSnackbar('Delete success!');
 
@@ -230,6 +235,10 @@ export default function ProductListView() {
       field: 'category',
       headerName: 'Category',
       filterable: false,
+      valueGetter: (params) => {
+        const categoryName = params.category?.name;
+        return categoryName || 'N/A';
+      },
     },
     {
       field: 'name',
@@ -240,7 +249,7 @@ export default function ProductListView() {
       renderCell: (params) => <RenderCellProduct params={params} />,
     },
     {
-      field: 'createdAt',
+      field: 'created_at',
       headerName: 'Create at',
       width: 160,
       display: 'flex',
@@ -249,7 +258,7 @@ export default function ProductListView() {
       renderCell: (params) => <RenderCellCreatedAt params={params} />,
     },
     {
-      field: 'inventoryType',
+      field: 'stock_quantity',
       headerName: 'Stock',
       width: 160,
       display: 'flex',
@@ -270,8 +279,8 @@ export default function ProductListView() {
       renderCell: (params) => <RenderCellPrice params={params} />,
     },
     {
-      field: 'publish',
-      headerName: 'Publish',
+      field: 'status',
+      headerName: 'Status',
       width: 110,
       display: 'flex',
       alignItems: 'center',
@@ -296,20 +305,20 @@ export default function ProductListView() {
           showInMenu
           icon={<Iconify icon="solar:eye-bold" />}
           label="View"
-          onClick={() => handleViewRow(params.row.id)}
+          onClick={() => handleViewRow(params.row._id)}
         />,
         <GridActionsCellItem
           showInMenu
           icon={<Iconify icon="solar:pen-bold" />}
           label="Edit"
-          onClick={() => handleEditRow(params.row.id)}
+          onClick={() => handleEditRow(params.row._id)}
         />,
         <GridActionsCellItem
           showInMenu
           icon={<Iconify icon="solar:trash-bin-trash-bold" />}
           label="Delete"
           onClick={() => {
-            handleDeleteRow(params.row.id);
+            handleDeleteRow(params.row._id);
           }}
           sx={{ color: 'error.main' }}
         />,
@@ -425,6 +434,7 @@ export default function ProductListView() {
             disableColumnFilter
             disableColumnSelector
             disableDensitySelector
+            getRowId={(row) => row._id || row.id}
             onRowSelectionModelChange={(newSelectionModel) => {
               setSelectedRowIds(newSelectionModel);
             }}
@@ -480,17 +490,17 @@ function applyFilter({
   inputData,
   filters,
 }: {
-  inputData: IProductItem[];
+  inputData: any[];
   filters: IProductTableFilters;
 }) {
   const { stock, publish } = filters;
 
   if (stock.length) {
-    inputData = inputData.filter((product) => stock.includes(product.inventoryType));
+    inputData = inputData.filter((product) => stock.includes(product.stock_quantity?.toString()));
   }
 
   if (publish.length) {
-    inputData = inputData.filter((product) => publish.includes(product.publish));
+    inputData = inputData.filter((product) => publish.includes(product.status));
   }
 
   return inputData;

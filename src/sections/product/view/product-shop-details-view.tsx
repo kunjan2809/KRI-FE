@@ -271,7 +271,7 @@ export default function ProductShopDetailsView({ id }: Props) {
   //     action={
   //       <Button
   //         component={RouterLink}
-  //         href={paths.product.root}
+  //         href={paths.dashboard.product.root}
   //         startIcon={<Iconify icon="eva:arrow-ios-back-fill" width={16} />}
   //         sx={{ mt: 3 }}
   //       >
@@ -303,7 +303,7 @@ export default function ProductShopDetailsView({ id }: Props) {
 
         <Grid xs={12} md={6} lg={5}>
           <ProductDetailsSummary
-            product={product}
+            product={product} 
             items={checkout.items}
             onAddCart={checkout.onAddToCart}
             onGotoStep={checkout.onGotoStep}

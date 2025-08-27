@@ -5,7 +5,6 @@ import { _productList } from 'src/_mock/_product';
 // ----------------------------------------------------------------------
 
 export async function GET() {
-    console.log('Product list API called');
 
     try {
         // Simulate API delay
@@ -16,9 +15,6 @@ export async function GET() {
             console.error('Mock data is empty or undefined');
             throw new Error('Mock data not available');
         }
-
-        console.log('Mock data length:', _productList.length);
-        console.log('First product:', _productList[0]?.name);
 
         // Return mock data
         return NextResponse.json({
@@ -35,8 +31,6 @@ export async function GET() {
             const productJsonPath = path.join(process.cwd(), 'Product.json');
             const productData = fs.readFileSync(productJsonPath, 'utf8');
             const products = JSON.parse(productData);
-
-            console.log('Fallback data length:', products.length);
 
             return NextResponse.json({
                 products,

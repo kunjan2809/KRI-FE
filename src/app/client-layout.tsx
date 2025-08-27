@@ -18,6 +18,7 @@ interface ClientLayoutProps {
 export default function ClientLayout({ children }: ClientLayoutProps) {
   const pathname = usePathname();
   const isAdminPage = pathname?.startsWith('/admin');
+  const isAuthPage = pathname?.startsWith('/auth');
 
   return (
     <AuthProvider>
@@ -34,7 +35,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
         <LocalizationProvider>
           <ThemeProvider>
             <SnackbarProvider>
-              {!isAdminPage && <UserHeader />}
+              {!isAdminPage && !isAuthPage && <UserHeader />}
               {children}
               <ConditionalFooter />
             </SnackbarProvider>

@@ -20,8 +20,6 @@ import UserCardList from '../user-card-list';
 
 // ----------------------------------------------------------------------
 
-console.log('USER_CARDS', _userCards);
-
 
 
 export default function UserCardsView() {

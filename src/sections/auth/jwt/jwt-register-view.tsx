@@ -12,6 +12,7 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import LoadingButton from '@mui/lab/LoadingButton';
 import InputAdornment from '@mui/material/InputAdornment';
+import Button from '@mui/material/Button';
 
 import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
@@ -19,7 +20,7 @@ import { useRouter, useSearchParams } from 'src/routes/hooks';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
-import { useAuthContext } from 'src/auth/hooks';
+import { useAuthContext } from 'src/auth/hooks/use-auth-context';
 import { PATH_AFTER_LOGIN } from 'src/config-global';
 
 import Iconify from 'src/components/iconify';
@@ -143,7 +144,8 @@ export default function JwtRegisterView() {
         size="large"
         type="submit"
         variant="contained"
-        loading={isSubmitting}
+        component={Button}
+        disabled={isSubmitting}
       >
         Create account
       </LoadingButton>

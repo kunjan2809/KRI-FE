@@ -135,7 +135,8 @@ export default function CheckoutPayment() {
             size="large"
             type="submit"
             variant="contained"
-            loading={isSubmitting}
+            component={Button}
+            disabled={isSubmitting}
           >
             Complete Order
           </LoadingButton>

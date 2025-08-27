@@ -86,7 +86,7 @@ export default function ChatNav({
     if (!mdUp) {
       onCloseMobile();
     }
-    router.push(paths.dashboard.chat);
+    router.push(paths.dashboard.root);
   }, [mdUp, onCloseMobile, router]);
 
   const handleSearchContacts = useCallback(
@@ -121,7 +121,7 @@ export default function ChatNav({
     (result: IChatParticipant) => {
       handleClickAwaySearch();
 
-      router.push(`${paths.dashboard.chat}?id=${result.id}`);
+      router.push(`${paths.dashboard.root}?id=${result.id}`);
     },
     [handleClickAwaySearch, router]
   );

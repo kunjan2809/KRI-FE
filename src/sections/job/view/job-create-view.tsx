@@ -25,7 +25,7 @@ export default function JobCreateView() {
           },
           {
             name: 'Job',
-            href: paths.dashboard.job.root,
+            href: paths.dashboard.root,
           },
           { name: 'New job' },
         ]}

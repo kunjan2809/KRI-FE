@@ -43,7 +43,7 @@ export default function ProductsPage() {
 
   // Get unique categories from the data
   const categories = useMemo(() => {
-    const uniqueCategories = [...new Set(productData.map(product => product.category))];
+    const uniqueCategories = Array.from(new Set(productData.map(product => product.category)));
     return ['All', ...uniqueCategories];
   }, []);
 
@@ -57,7 +57,7 @@ export default function ProductsPage() {
 
   // Filter and sort products
   const filteredAndSortedProducts = useMemo(() => {
-    let filtered = productData.filter(product => {
+    const filtered = productData.filter(product => {
       const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            product.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));

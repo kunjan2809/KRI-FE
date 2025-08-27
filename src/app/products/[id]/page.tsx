@@ -27,13 +27,15 @@ import { useParams, useRouter } from 'src/routes/hooks';
 import { paths } from 'src/routes/paths';
 
 // Import Product.json data
-import productData from '../../../../Product.json';
+
 import ProductDetailsDescription from 'src/sections/product/product-details-description';
 import Iconify from 'src/components/iconify';
 import ProductDetailsCarousel from 'src/sections/product/product-details-carousel';
 import { IProductItem, IProductReview } from 'src/types/product';
 import ProductDetailsReview from 'src/sections/product/product-details-review';
 import RecommendedProductsCard from 'src/app/cart/RecommendedProductsCard';
+
+import productData from '../../../../Product.json';
 
 
 // Use Product.json data for recommended products
@@ -118,7 +120,7 @@ export default function ProductDetailsPage() {
     if (!params.id) return null;
     return productData.find((p: any) => p.id === params.id) || productData[0]; // Fallback to first product
   }, [params.id]);
-  console.log('product', product);
+  
   if (!product) {
     return (
       <Container maxWidth="lg" sx={{ py: 8, textAlign: 'center' }}>
@@ -162,7 +164,6 @@ export default function ProductDetailsPage() {
 
   const handleReviewSubmit = () => {
     // Handle review submission
-    console.log('Submitting review:', reviewForm);
     setReviewSuccess(true);
     setReviewDialogOpen(false);
     setReviewForm({ rating: 5, comment: '' });
@@ -221,7 +222,7 @@ export default function ProductDetailsPage() {
         <Grid container spacing={6}>
           <Grid item xs={12} md={6}>
             <Box sx={{ position: 'relative' }}>
-              <ProductDetailsCarousel product={product as IProductItem} />
+              <ProductDetailsCarousel product={product as unknown as IProductItem} />
 
             </Box>
           </Grid>
@@ -448,7 +449,7 @@ export default function ProductDetailsPage() {
           <TabPanel value={activeTab} index={1}>
             <ProductDetailsReview
               ratings={product.ratings as any[]}
-              reviews={product.reviews as IProductReview[]}
+              reviews={product.reviews as unknown as IProductReview[]}
               totalRatings={product.totalRatings as number}
               totalReviews={product.totalReviews as number}
             />
@@ -459,9 +460,9 @@ export default function ProductDetailsPage() {
             Complete Your Look With These Gems
           </Typography>
           <Grid container spacing={3}>
-            {recommendedProducts.map((product) => (
-              <Grid item xs={12} sm={6} md={3} key={product.id}>
-                <RecommendedProductsCard product={product as IProductItem} addToCart={addToCart} />
+            {recommendedProducts.map((recommendedProduct) => (
+              <Grid item xs={12} sm={6} md={3} key={recommendedProduct.id}>
+                <RecommendedProductsCard product={recommendedProduct as unknown as IProductItem} addToCart={addToCart} />
               </Grid>
             ))}
           </Grid>

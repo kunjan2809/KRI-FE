@@ -78,3 +78,71 @@ export type IProductTableFilters = {
   stock: string[];
   publish: string[];
 };
+
+// ----------------------------------------------------------------------
+
+// New API response types based on the provided structure
+export type IProductImage = {
+  _id: string;
+  product_id: string;
+  image_url: string;
+  alt_text: string;
+  is_primary: boolean;
+  sort_order: number;
+  created_at: string;
+  edited_at: string;
+};
+
+export type IProductCategory = {
+  _id: string;
+  name: string;
+};
+
+export type IProductAPIResponse = {
+  _id: string;
+  name: string;
+  sku: string;
+  description: string;
+  price: number;
+  discount_type: string | null;
+  discount_rate: number;
+  stock_quantity: number;
+  color: string;
+  weight: number;
+  status: string;
+  category_id: IProductCategory;
+  deleted_at: string | null;
+  final_price: number;
+  discount_amount: number;
+  in_stock: boolean;
+  low_stock: boolean;
+  is_deleted: boolean;
+  created_at: string;
+  edited_at: string;
+  primary_image: IProductImage;
+};
+
+export type IProductCreateRequest = {
+  name: string;
+  sku: string;
+  description: string;
+  price: number;
+  discount_type?: string | null;
+  discount_rate?: number;
+  stock_quantity: number;
+  color: string;
+  weight: number;
+  status: string;
+  category_id: string;
+  primary_image?: {
+    image_url: string;
+    alt_text: string;
+    is_primary: boolean;
+    sort_order: number;
+  };
+};
+
+
+export type IProductQuantity = {
+  quantity: number;
+};

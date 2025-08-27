@@ -1,10 +1,10 @@
 import axios, { AxiosRequestConfig } from 'axios';
 
-import { HOST_API } from 'src/config-global';
+import { BASE_API } from 'src/config-global';
 
 // ----------------------------------------------------------------------
 
-const axiosInstance = axios.create({ baseURL: HOST_API });
+const axiosInstance = axios.create({ baseURL: BASE_API });
 
 axiosInstance.interceptors.response.use(
   (res) => res,
@@ -32,6 +32,27 @@ export const apiFetcher = async (args: string | [string, AxiosRequestConfig]) =>
   return res.data;
 };
 
+export const apiProductFetcher = async (key: { url: string; token?: string }) => {
+  const { url, token } = key;
+
+  const headers: any = {
+    'Content-Type': 'application/json',
+  };
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(url, { headers });
+
+  if (!response.ok) {
+    const errorDetails = await response.json();
+    throw new Error(errorDetails.message || 'Error fetching data');
+  }
+
+  return response.json();
+};
+
 // ----------------------------------------------------------------------
 
 export const endpoints = {
@@ -42,6 +63,7 @@ export const endpoints = {
     me: '/api/auth/me',
     login: '/api/auth/login',
     register: '/api/auth/register',
+    signup: '/api/auth/signup',
   },
   mail: {
     list: '/api/mail/list',
@@ -58,5 +80,11 @@ export const endpoints = {
     list: '/api/product/list',
     details: '/api/product/details',
     search: '/api/product/search',
+    all: '/api/products/admin/all',
+    create: '/api/products/admin/add',
+    update: '/api/products/admin/edit/',
+    delete: '/api/products/admin/delete/',
+    detailsById: '/api/products/admin/details/',
+    quantity: '/api/products/admin/quantity/',
   },
 };

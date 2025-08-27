@@ -1,4 +1,4 @@
-import { ProductCreateView } from 'src/sections/product/view';
+import { ProductCreateNewView } from 'src/sections/product/view';
 
 // ----------------------------------------------------------------------
 
@@ -6,6 +6,6 @@ export const metadata = {
   title: 'Dashboard: Create a new product',
 };
 
-export default function ProductCreatePage() {
-  return <ProductCreateView />;
+export default function ProductCreateNewPage() {
+  return <ProductCreateNewView />;
 }

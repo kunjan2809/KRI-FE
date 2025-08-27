@@ -119,7 +119,7 @@ export default function JobListView() {
         query={search.query}
         results={search.results}
         onSearch={handleSearch}
-        hrefItem={(id: string) => paths.dashboard.job.details(id)}
+        hrefItem={(id: string) => paths.dashboard.root}
       />
 
       <Stack direction="row" spacing={1} flexShrink={0}>
@@ -166,14 +166,14 @@ export default function JobListView() {
           { name: 'Dashboard', href: paths.dashboard.root },
           {
             name: 'Job',
-            href: paths.dashboard.job.root,
+            href: paths.dashboard.root,
           },
           { name: 'List' },
         ]}
         action={
           <Button
             component={RouterLink}
-            href={paths.dashboard.job.new}
+            href={paths.dashboard.root}
             variant="contained"
             startIcon={<Iconify icon="mingcute:add-line" />}
           >

@@ -206,7 +206,7 @@ export default function OverviewFileView() {
             <div>
               <FileManagerPanel
                 title="Folders"
-                link={paths.dashboard.fileManager}
+                link={paths.dashboard.root}
                 onOpen={newFolder.onTrue}
                 sx={{ mt: 5 }}
               />
@@ -230,7 +230,7 @@ export default function OverviewFileView() {
 
               <FileManagerPanel
                 title="Recent Files"
-                link={paths.dashboard.fileManager}
+                link={paths.dashboard.root}
                 onOpen={upload.onTrue}
                 sx={{ mt: 2 }}
               />

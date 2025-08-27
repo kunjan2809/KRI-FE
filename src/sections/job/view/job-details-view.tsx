@@ -69,8 +69,8 @@ export default function JobDetailsView({ id }: Props) {
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <JobDetailsToolbar
-        backLink={paths.dashboard.job.root}
-        editLink={paths.dashboard.job.edit(`${currentJob?.id}`)}
+        backLink={paths.dashboard.root}
+        editLink={paths.dashboard.root}
         liveLink="#"
         publish={publish || ''}
         onChangePublish={handleChangePublish}

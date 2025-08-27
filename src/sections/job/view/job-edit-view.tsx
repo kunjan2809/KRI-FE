@@ -33,7 +33,7 @@ export default function JobEditView({ id }: Props) {
           },
           {
             name: 'Job',
-            href: paths.dashboard.job.root,
+            href: paths.dashboard.root,
           },
           { name: currentJob?.title },
         ]}

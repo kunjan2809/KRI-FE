@@ -8,8 +8,9 @@ import UserFooter from 'src/components/user-footer';
 export default function ConditionalFooter() {
   const pathname = usePathname();
   const isAdminPage = pathname?.startsWith('/admin');
+  const isAuthPage = pathname?.startsWith('/auth');
 
-  if (isAdminPage) {
+  if (isAdminPage || isAuthPage) {
     return null;
   }
 

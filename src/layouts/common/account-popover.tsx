@@ -13,7 +13,7 @@ import { useRouter } from 'src/routes/hooks';
 
 import { useMockedUser } from 'src/hooks/use-mocked-user';
 
-import { useAuthContext } from 'src/auth/hooks';
+import { useAuthContext } from 'src/auth/hooks/use-auth-context';
 import { paths } from 'src/routes/paths';
 
 import { varHover } from 'src/components/animate';

@@ -1,4 +1,4 @@
-import { useDropzone } from 'react-dropzone';
+import { FileRejection, useDropzone } from 'react-dropzone';
 
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -144,7 +144,7 @@ export default function UploadAvatar({
 
       {helperText && helperText}
 
-      <RejectionFiles fileRejections={fileRejections} />
+      <RejectionFiles fileRejections={fileRejections as unknown as FileRejection[]} />
     </>
   );
 }

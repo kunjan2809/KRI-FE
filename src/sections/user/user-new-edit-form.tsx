@@ -254,7 +254,7 @@ export default function UserNewEditForm({ currentUser }: Props) {
             </Box>
 
             <Stack alignItems="flex-end" sx={{ mt: 3 }}>
-              <LoadingButton type="submit" variant="contained" loading={isSubmitting}>
+              <LoadingButton type="submit" variant="contained" component={Button} disabled={isSubmitting}>
                 {!currentUser ? 'Create User' : 'Save Changes'}
               </LoadingButton>
             </Stack>

@@ -149,9 +149,9 @@ export default function UserQuickEditForm({ currentUser, open, onClose }: Props)
             Cancel
           </Button>
 
-          <LoadingButton type="submit" variant="contained" loading={isSubmitting}>
+          <LoadingButton type="submit" variant="contained" component={Button} disabled={isSubmitting}>
             Update
-          </LoadingButton>
+          </LoadingButton>  
         </DialogActions>
       </FormProvider>
     </Dialog>

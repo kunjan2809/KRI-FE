@@ -188,8 +188,8 @@ export default function CalendarForm({ currentEvent, colorOptions, onClose }: Pr
         <LoadingButton
           type="submit"
           variant="contained"
-          loading={isSubmitting}
-          disabled={dateError}
+          component={Button}
+          disabled={dateError || isSubmitting}
         >
           Save Changes
         </LoadingButton>

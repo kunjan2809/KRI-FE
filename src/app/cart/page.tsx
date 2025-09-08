@@ -64,6 +64,7 @@ const recommendedProducts = [
     price: productData[3].price,
     originalPrice: productData[3].priceSale || productData[3].price,
     image: productData[3].coverUrl,
+    wishlist: productData[3].wishlist,
   },
   {
     id: productData[4].id,
@@ -72,6 +73,7 @@ const recommendedProducts = [
     price: productData[4].price,
     originalPrice: productData[4].priceSale || productData[4].price,
     image: productData[4].coverUrl,
+    wishlist: productData[4].wishlist,
   },
   {
     id: productData[5].id,
@@ -80,6 +82,7 @@ const recommendedProducts = [
     price: productData[5].price,
     originalPrice: productData[5].priceSale || productData[5].price,
     image: productData[5].coverUrl,
+    wishlist: productData[5].wishlist,
   },
   {
     id: productData[6].id,
@@ -88,6 +91,7 @@ const recommendedProducts = [
     price: productData[6].price,
     originalPrice: productData[6].priceSale || productData[6].price,
     image: productData[6].coverUrl,
+    wishlist: productData[6].wishlist,
   },
 ];
 
@@ -143,12 +147,10 @@ export default function CartPage() {
   const tax = subtotal * 0.08; // 8% tax
   const total = subtotal + shipping + tax;
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(price);
-  };
+  const formatPrice = (price: number) => new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  }).format(price);
 
   if (cartData.length === 0) {
     return (
@@ -187,7 +189,7 @@ export default function CartPage() {
             A Chapter Almost Complete
           </Typography>
           <Typography variant="h6" sx={{ opacity: 0.9, maxWidth: 800, mx: 'auto' }}>
-            The pieces you've chosen are more than just jewelry, they're moments waiting to be lived.
+            The pieces you&apos;ve chosen are more than just jewelry, they&apos;re moments waiting to be lived.
             Finalize your selection and let your story shine in lumière.
           </Typography>
         </Container>
@@ -243,7 +245,7 @@ export default function CartPage() {
                               </IconButton>
                               <TextField
                                 value={item.quantity}
-                                onChange={(e) => updateQuantity(item.id, parseInt(e.target.value) || 1)}
+                                onChange={(e) => updateQuantity(item.id, parseInt(e.target.value, 10) || 1)}
                                 size="small"
                                 sx={{ width: 60, mx: 1 }}
                                 inputProps={{ style: { textAlign: 'center' } }}
@@ -449,7 +451,7 @@ export default function CartPage() {
                     </Button>
                   </CardContent>
                 </Card> */}
-                <RecommendedProductsCard product={product} addToCart={addToCart} />
+                <RecommendedProductsCard product={product} addToCart={addToCart} addToWishlist={() => { }} />
               </Grid>
             ))}
           </Grid>

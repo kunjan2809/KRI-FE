@@ -14,6 +14,7 @@
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-7.webp",
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-8.webp"
         ],
+        "wishlist": true,
         "reviews": [
             {
                 "id": "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b1",
@@ -207,6 +208,7 @@
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-7.webp",
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-8.webp"
         ],
+        "wishlist": false,
         "reviews": [
             {
                 "id": "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b1",
@@ -401,6 +403,7 @@
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-7.webp",
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-8.webp"
         ],
+        "wishlist": false,
         "reviews": [
             {
                 "id": "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b1",
@@ -594,6 +597,7 @@
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-7.webp",
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-8.webp"
         ],
+        "wishlist": false,
         "reviews": [
             {
                 "id": "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b1",
@@ -789,6 +793,7 @@
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-7.webp",
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-8.webp"
         ],
+        "wishlist": true,
         "reviews": [
             {
                 "id": "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b1",
@@ -982,6 +987,7 @@
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-7.webp",
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-8.webp"
         ],
+        "wishlist": false,
         "reviews": [
             {
                 "id": "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b1",
@@ -1174,6 +1180,7 @@
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-7.webp",
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-8.webp"
         ],
+        "wishlist": false,
         "reviews": [
             {
                 "id": "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b1",
@@ -1367,6 +1374,7 @@
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-7.webp",
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-8.webp"
         ],
+        "wishlist": false,
         "reviews": [
             {
                 "id": "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b1",
@@ -1561,6 +1569,7 @@
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-7.webp",
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-8.webp"
         ],
+        "wishlist": false,
         "reviews": [
             {
                 "id": "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b1",
@@ -1754,6 +1763,7 @@
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-7.webp",
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-8.webp"
         ],
+        "wishlist": false,
         "reviews": [
             {
                 "id": "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b1",
@@ -1950,6 +1960,7 @@
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-7.webp",
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-8.webp"
         ],
+        "wishlist": true,
         "reviews": [
             {
                 "id": "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b1",
@@ -2144,6 +2155,7 @@
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-7.webp",
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-8.webp"
         ],
+        "wishlist": false,
         "reviews": [
             {
                 "id": "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b1",
@@ -2339,6 +2351,7 @@
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-7.webp",
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-8.webp"
         ],
+        "wishlist": false,
         "reviews": [
             {
                 "id": "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b1",
@@ -2535,6 +2548,7 @@
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-7.webp",
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-8.webp"
         ],
+        "wishlist": true,
         "reviews": [
             {
                 "id": "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b1",
@@ -2730,6 +2744,7 @@
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-7.webp",
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-8.webp"
         ],
+        "wishlist": false,
         "reviews": [
             {
                 "id": "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b1",
@@ -2923,6 +2938,7 @@
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-7.webp",
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-8.webp"
         ],
+        "wishlist": false,
         "reviews": [
             {
                 "id": "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b1",
@@ -3118,6 +3134,7 @@
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-7.webp",
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-8.webp"
         ],
+        "wishlist": false,
         "reviews": [
             {
                 "id": "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b1",
@@ -3311,6 +3328,7 @@
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-7.webp",
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-8.webp"
         ],
+        "wishlist": true,
         "reviews": [
             {
                 "id": "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b1",
@@ -3503,6 +3521,7 @@
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-7.webp",
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-8.webp"
         ],
+        "wishlist": false,
         "reviews": [
             {
                 "id": "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b1",
@@ -3696,6 +3715,7 @@
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-7.webp",
             "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-8.webp"
         ],
+        "wishlist": true,
         "reviews": [
             {
                 "id": "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b1",

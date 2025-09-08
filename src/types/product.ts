@@ -57,6 +57,7 @@ export type IProductItem = {
   priceSale: number | null;
   reviews: IProductReview[];
   createdAt: Date;
+  wishlist: boolean;
   ratings: {
     name: string;
     starCount: number;

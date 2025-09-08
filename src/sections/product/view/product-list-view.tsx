@@ -232,15 +232,6 @@ export default function ProductListView() {
 
   const columns: GridColDef[] = [
     {
-      field: 'category',
-      headerName: 'Category',
-      filterable: false,
-      valueGetter: (params) => {
-        const categoryName = params.category?.name;
-        return categoryName || 'N/A';
-      },
-    },
-    {
       field: 'name',
       headerName: 'Product',
       flex: 1,

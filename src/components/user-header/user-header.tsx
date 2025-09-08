@@ -102,7 +102,7 @@ const categoryLinks = [
   { label: 'Books, Films & Music', href: '/books-films-music' },
   { label: 'Clothing', href: '/clothing' },
   { label: 'Craft Supplies & Tools', href: '/craft-supplies-tools' },
-  { label: 'Electronics & Accessories', href: '/electronics-accessories' }, 
+  { label: 'Electronics & Accessories', href: '/electronics-accessories' },
   { label: 'Home & Living', href: '/home-living' },
   { label: 'Jewellery', href: '/jewellery' },
   { label: 'Paper & Party Supplies', href: '/paper-party-supplies' },
@@ -277,7 +277,9 @@ export default function UserHeader() {
 
             {/* Right Side - User Actions */}
             <Stack direction="row" alignItems="center" spacing={1}>
-              <IconButton size="small" sx={{ color: 'text.primary' }}>
+              <IconButton size="small" sx={{ color: 'text.primary' }} onClick={() => {
+                window.location.href = '/wishlist';
+              }}>
                 <Tooltip title="Wishlist">
                   <Iconify icon="eva:heart-outline" />
                 </Tooltip>

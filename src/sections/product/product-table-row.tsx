@@ -10,6 +10,8 @@ import { fCurrency } from 'src/utils/format-number';
 import { fTime, fDate } from 'src/utils/format-time';
 
 import Label from 'src/components/label';
+import { paths } from 'src/routes/paths';
+import { useRouter } from 'next/navigation';
 
 // ----------------------------------------------------------------------
 
@@ -63,8 +65,13 @@ export function RenderCellStock({ params }: ParamsProps) {
 }
 
 export function RenderCellProduct({ params }: ParamsProps) {
+  const router = useRouter();
+
+  const handleNavigate = () => {
+    router.push(paths.dashboard.product.details(params.row._id));
+  }
   return (
-    <Stack direction="row" alignItems="center" sx={{ py: 2, width: 1,}}>
+    <Stack direction="row" alignItems="center" sx={{ py: 2, width: 1, }}>
       <Avatar
         alt={params.row.name}
         src={params.row.coverUrl}
@@ -79,7 +86,7 @@ export function RenderCellProduct({ params }: ParamsProps) {
             noWrap
             color="inherit"
             variant="subtitle2"
-            onClick={params.row.onViewRow}
+            onClick={handleNavigate}
             sx={{ cursor: 'pointer' }}
           >
             {params.row.name}

@@ -47,6 +47,7 @@ const recommendedProducts = [
     price: productData[3].price,
     originalPrice: productData[3].priceSale || productData[3].price,
     image: productData[3].coverUrl,
+    wishlist: productData[3].wishlist,
   },
   {
     id: productData[4].id,
@@ -55,6 +56,7 @@ const recommendedProducts = [
     price: productData[4].price,
     originalPrice: productData[4].priceSale || productData[4].price,
     image: productData[4].coverUrl,
+    wishlist: productData[4].wishlist,
   },
   {
     id: productData[5].id,
@@ -63,6 +65,7 @@ const recommendedProducts = [
     price: productData[5].price,
     originalPrice: productData[5].priceSale || productData[5].price,
     image: productData[5].coverUrl,
+    wishlist: productData[5].wishlist,
   },
   {
     id: productData[6].id,
@@ -71,6 +74,7 @@ const recommendedProducts = [
     price: productData[6].price,
     originalPrice: productData[6].priceSale || productData[6].price,
     image: productData[6].coverUrl,
+    wishlist: productData[6].wishlist,
   },
 ];
 
@@ -185,7 +189,7 @@ export default function ProductDetailsPage() {
   return (
     <Box>
       {/* Hero Section */}
-      <Box
+      {/* <Box
         sx={{
           background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
           color: 'white',
@@ -201,15 +205,9 @@ export default function ProductDetailsPage() {
             Explore our curated collection of handcrafted pieces that tell your unique story.
           </Typography>
         </Container>
-      </Box>
+      </Box> */}
 
       <Container maxWidth="xl" sx={{ py: 4 }}>
-        {/* Breadcrumbs */}
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="body2" color="text.primary">
-            {product.name}
-          </Typography>
-        </Box>
 
         {/* Success Alert */}
         {reviewSuccess && (
@@ -462,7 +460,7 @@ export default function ProductDetailsPage() {
           <Grid container spacing={3}>
             {recommendedProducts.map((recommendedProduct) => (
               <Grid item xs={12} sm={6} md={3} key={recommendedProduct.id}>
-                <RecommendedProductsCard product={recommendedProduct as unknown as IProductItem} addToCart={addToCart} />
+                <RecommendedProductsCard product={recommendedProduct as unknown as IProductItem} addToCart={addToCart} addToWishlist={() => { }} />
               </Grid>
             ))}
           </Grid>

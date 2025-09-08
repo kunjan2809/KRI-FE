@@ -176,6 +176,7 @@ const product = {
     }
   ],
   "publish": "draft",
+  "wishlist": false,
   "ratings": [
     {
       "name": "1 Star",

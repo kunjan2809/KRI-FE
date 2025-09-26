@@ -165,12 +165,13 @@ export function AuthProvider({ children }: Props) {
 
   // REGISTER
   const register = useCallback(
-    async (email: string, password: string, firstName: string, lastName: string) => {
+    async (email: string, password: string, firstName: string, lastName: string, profileIcon?: string) => {
       const data = {
         email,
         password,
         first_name: firstName,
         last_name: lastName,
+        profile_icon: profileIcon || "1", // Default to first avatar if not provided
       };
 
       const res = await axios.post(endpoints.auth.signup, data);

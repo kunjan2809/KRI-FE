@@ -239,13 +239,20 @@ export default function ProductsPage() {
                 />
               </ListItemButton>
               <Collapse in={filterExpanded.find(f => f.value === 'price')?.isExpanded} timeout="auto" unmountOnExit>
-                <Box sx={{ display: 'flex', flexDirection: 'column', px: 4 }}>
+                <Box sx={{
+                  display: 'flex', flexDirection: 'column', px: 4,
+                  '.MuiSlider-colorPrimary': {
+                    color: '#212B36',
+                  }
+                }}>
                   <Slider
                     min={0}
                     max={2000}
                     step={10}
                     getAriaLabel={() => 'Price range'}
                     value={filterPriceValue}
+                    sx={{
+                    }}
                     onChange={(event, newValue) => setFilterPriceValue(newValue as number[])}
                     valueLabelDisplay="auto"
                     getAriaValueText={() => `${filterPriceValue[0]} - ${filterPriceValue[1]} $`}
@@ -290,7 +297,11 @@ export default function ProductsPage() {
               </ListItemButton>
               <Collapse in={filterExpanded.find(f => f.value === 'colours')?.isExpanded} timeout="auto" unmountOnExit>
                 <div role="group" aria-labelledby="colours-group">
-                  <List >
+                  <List sx={{
+                    '.MuiButtonBase-root, .MuiSvgIcon-fontSizeSmall ': {
+                      color: '#212B36',
+                    }
+                  }}>
                     <ListItem sx={{ py: 0 }}>
                       <Checkbox defaultChecked />
                       <ListItemText primary="Red" />
@@ -458,6 +469,7 @@ export default function ProductsPage() {
                               top: 8,
                               left: 8,
                               fontWeight: 'bold',
+                              backgroundColor: '#212B36',
                             }}
                           />
                         )}
@@ -469,7 +481,7 @@ export default function ProductsPage() {
                             sx={{
                               position: 'absolute',
                               top: 8,
-                              right: 8,
+                              left: 8,
                               fontWeight: 'bold',
                             }}
                           />
@@ -537,7 +549,6 @@ export default function ProductsPage() {
                     count={totalPages}
                     page={currentPage}
                     onChange={handlePageChange}
-                    color="primary"
                     size="large"
                     showFirstButton
                     showLastButton

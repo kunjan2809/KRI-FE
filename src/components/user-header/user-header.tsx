@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import {
   AppBar,
   Box,
+  Button,
   Container,
   IconButton,
   InputBase,
@@ -210,15 +211,15 @@ export default function UserHeader() {
               <Logo disabledLink={false} />
 
               {!isMobile && (
-                <>
-                  <Stack direction="row" alignItems="center" spacing={1} onClick={(e) => {
-                    setAnchorEl1(e.currentTarget);
-                  }}>
-                    <IconButton
-                      size="small"
-                      sx={{ color: 'text.primary' }}
-                      onClick={handleMobileMenuToggle}
-                    >
+                <Button
+                  size="small"
+                  onClick={handleMobileMenuToggle}
+                  sx={{ minWidth: 'min-content', flexShrink: 0, padding: '4px 12px' }}
+                >
+                  <>
+                    <Stack direction="row" alignItems="center" spacing={1} onClick={(e) => {
+                      setAnchorEl1(e.currentTarget);
+                    }}>
                       <Box
                         component="span"
                         sx={{
@@ -243,61 +244,59 @@ export default function UserHeader() {
                           },
                         }}
                       />
-                    </IconButton>
-                    <Typography
-                      variant="body1"
-                      sx={{
-                        color: 'text.primary',
-                        cursor: 'pointer',
-                        '&:hover': { color: 'primary.main' }
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          color: 'text.primary',
+                          cursor: 'pointer',
+                        }}
+                        onClick={handleMobileMenuToggle}
+                      >
+                        Categories
+                      </Typography>
+                    </Stack>
+                    <Menu
+                      id="basic-menu"
+                      anchorEl={anchorEl1}
+                      open={!!anchorEl1}
+                      onClose={handleCategoriesClose}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left',
                       }}
-                      onClick={handleMobileMenuToggle}
+                      transformOrigin={{
+                        vertical: 'top',
+                        horizontal: 'left',
+                      }}
+                      sx={{
+                        '& .MuiPaper-root': {
+                          maxHeight: '300px',
+                          overflowY: 'auto',
+                          padding: '8px',
+
+                          '&::-webkit-scrollbar': {
+                            width: '4px',
+                          },
+                          '&::-webkit-scrollbar-thumb': {
+                            backgroundColor: '#cccccc',
+                            borderRadius: '4px',
+                          },
+                          '&::-webkit-scrollbar-track': {
+                            backgroundColor: 'transparent',
+                            borderRadius: '4px',
+                            margin: '8px',
+                          },
+                        },
+                      }}
                     >
-                      Categories
-                    </Typography>
-
-                  </Stack>
-                  <Menu
-                    id="basic-menu"
-                    anchorEl={anchorEl1}
-                    open={!!anchorEl1}
-                    onClose={handleCategoriesClose}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left',
-                    }}
-                    transformOrigin={{
-                      vertical: 'top',
-                      horizontal: 'left',
-                    }}
-                    sx={{
-                      '& .MuiPaper-root': {
-                        maxHeight: '300px',
-                        overflowY: 'auto',
-                        padding: '8px',
-
-                        '&::-webkit-scrollbar': {
-                          width: '4px',
-                        },
-                        '&::-webkit-scrollbar-thumb': {
-                          backgroundColor: '#cccccc',
-                          borderRadius: '4px',
-                        },
-                        '&::-webkit-scrollbar-track': {
-                          backgroundColor: 'transparent',
-                          borderRadius: '4px',
-                          margin: '8px',
-                        },
-                      },
-                    }}
-                  >
-                    {categoryLinks.map((link) => (<MenuItem onClick={handleCategoriesClose} key={link.label}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        {link.label}
-                      </Box>
-                    </MenuItem>))}
-                  </Menu>
-                </>
+                      {categoryLinks.map((link) => (<MenuItem onClick={handleCategoriesClose} key={link.label}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          {link.label}
+                        </Box>
+                      </MenuItem>))}
+                    </Menu>
+                  </>
+                </Button>
               )}
             </Stack>
 

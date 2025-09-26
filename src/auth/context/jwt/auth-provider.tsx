@@ -20,6 +20,7 @@ enum Types {
   INITIAL = 'INITIAL',
   LOGIN = 'LOGIN',
   REGISTER = 'REGISTER',
+  FORGET_PASSWORD = 'FORGET_PASSWORD',
   LOGOUT = 'LOGOUT',
 }
 
@@ -31,6 +32,9 @@ type Payload = {
     user: AuthUserType;
   };
   [Types.REGISTER]: {
+    user: AuthUserType;
+  };
+  [Types.FORGET_PASSWORD]: {
     user: AuthUserType;
   };
   [Types.LOGOUT]: undefined;
@@ -59,6 +63,12 @@ const reducer = (state: AuthStateType, action: ActionsType) => {
     };
   }
   if (action.type === Types.REGISTER) {
+    return {
+      ...state,
+      user: action.payload.user,
+    };
+  }
+  if (action.type === Types.FORGET_PASSWORD) {
     return {
       ...state,
       user: action.payload.user,
@@ -184,6 +194,33 @@ export function AuthProvider({ children }: Props) {
     []
   );
 
+  // FORGET PASSWORD
+  const forgetPassword = useCallback(
+    async (email: string) => {
+      const data = {
+        email,
+      };
+
+      const res = await axios.post(endpoints.auth.forgetPassword, data);
+
+      const { data: responseData } = res.data;
+      const { token } = responseData;
+
+      setSession(token);
+      sessionStorage.setItem(STORAGE_KEY, token);
+
+      dispatch({
+        type: Types.FORGET_PASSWORD,
+        payload: {
+          user: {
+            accessToken: token,
+          },
+        },
+      });
+    },
+    []
+  );
+
   // LOGOUT
   const logout = useCallback(async () => {
     setSession(null);
@@ -207,10 +244,11 @@ export function AuthProvider({ children }: Props) {
       unauthenticated: false,
       //
       login,
-      register, 
+      register,
+      forgetPassword,
       logout,
     }),
-    [login, logout, register, state.user, status]
+    [login, logout, register, forgetPassword, state.user, status]
   );
 
   return <AuthContext.Provider value={memoizedValue}>{children}</AuthContext.Provider>;

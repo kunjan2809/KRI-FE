@@ -1,31 +1,34 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+
 import {
   AppBar,
-  Toolbar,
   Box,
-  Typography,
-  InputBase,
-  IconButton,
-  Stack,
-  Link,
   Container,
-  useTheme,
-  useMediaQuery,
-  Drawer,
-  List,
-  ListItem,
-  ListItemText,
-  Divider,
-  Tooltip,
+  IconButton,
+  InputBase,
+  Link,
   Menu,
   MenuItem,
+  Stack,
+  Toolbar,
+  Tooltip,
+  Avatar,
+  Typography,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
-import { styled, alpha } from '@mui/material/styles';
-import { RouterLink } from 'src/routes/components';
-import Logo from 'src/components/logo';
+import { alpha, styled } from '@mui/material/styles';
+
+import { useAuthContext } from 'src/auth/hooks/use-auth-context';
+import LoginPopup from 'src/app/landing/loginPopup/LoginPopup';
 import Iconify from 'src/components/iconify';
+import Logo from 'src/components/logo';
+import { RouterLink } from 'src/routes/components';
+import { useRouter } from 'src/routes/hooks';
+import { paths } from 'src/routes/paths';
+import { getDummyAvtarUrl } from 'src/utils/avtarData';
 
 // ----------------------------------------------------------------------
 
@@ -118,11 +121,15 @@ export default function UserHeader() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [anchorEl1, setAnchorEl1] = useState<null | HTMLElement>(null);
-  // const handleClose = () => {
-  //   setAnchorEl(null);
-  // };
+  const [loginPopupOpen, setLoginPopupOpen] = useState(false);
+  const router = useRouter();
+  // Get user data from auth context
+  const { user, authenticated, logout } = useAuthContext();
+  // Determine if user is admin based on user data
+  const isAdmin = authenticated && user && (
+    user.is_admin === true
+  );
 
   const handleCategoriesClose = () => {
     setAnchorEl1(null);
@@ -138,10 +145,51 @@ export default function UserHeader() {
     console.log('Search submitted');
   };
 
+  const handleLoginPopupClose = (): void => {
+    setLoginPopupOpen(false);
+  };
+
+  const handleLoginPopupOpen = () => {
+    setLoginPopupOpen(true);
+  };
+
+  const handleOrdersClick = () => {
+    router.push(paths.user.cart);
+  };
+
+  const handleProfileClick = () => {
+    router.push(paths.user.profile);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const openProfileMenu = Boolean(anchorEl);
+
+  const handleProfileMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleProfileMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  useEffect(() => {
+    if (authenticated && isAdmin) {
+      router.push(paths.dashboard.root);
+    }
+  }, [authenticated, isAdmin, router]);
+
   return (
     <>
       <AppBar
-        position="sticky"
+        position="fixed"
         sx={{
           backgroundColor: 'white',
           boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
@@ -197,7 +245,7 @@ export default function UserHeader() {
                       />
                     </IconButton>
                     <Typography
-                      variant="body2"
+                      variant="body1"
                       sx={{
                         color: 'text.primary',
                         cursor: 'pointer',
@@ -278,10 +326,10 @@ export default function UserHeader() {
             {/* Right Side - User Actions */}
             <Stack direction="row" alignItems="center" spacing={1}>
               <IconButton size="small" sx={{ color: 'text.primary' }} onClick={() => {
-                window.location.href = '/wishlist';
+                window.location.href = paths.user.wishlist;
               }}>
                 <Tooltip title="Wishlist">
-                  <Iconify icon="eva:heart-outline" />
+                  <Iconify icon="eva:heart-outline" width={24} height={24} />
                 </Tooltip>
               </IconButton>
 
@@ -290,27 +338,81 @@ export default function UserHeader() {
                 size="small"
                 sx={{ color: 'text.primary' }}
                 onClick={() => {
-                  window.location.href = '/cart';
+                  window.location.href = paths.user.cart;
                 }}
               >
                 <Tooltip title="Cart">
-                  <Iconify icon="eva:shopping-cart-outline" />
+                  <Iconify icon="eva:shopping-cart-outline" width={24} height={24} />
                 </Tooltip>
               </IconButton>
 
-              <Link
-                component={RouterLink}
-                href="/auth/jwt/login"
-                sx={{
-                  color: 'text.primary',
-                  textDecoration: 'none',
-                  typography: 'body2',
-                  '&:hover': { color: '#212B36' },
-                  display: { xs: 'none', sm: 'block' }
-                }}
-              >
-                Sign in
-              </Link>
+              {authenticated ? (
+                <Stack direction="row" alignItems="center" spacing={2}>
+                  <IconButton
+                    size="small"
+                    sx={{ color: 'text.primary' }}
+                    onClick={handleProfileMenuClick}
+                  >
+                    <Tooltip title={user?.email}>
+                      {/* <Iconify icon="eva:person-outline" width={24} height={24} /> */}
+                      <Avatar
+                        src={user?.photoURL || getDummyAvtarUrl(user?.profile_icon || '25').avatarUrl}
+                        alt={user?.displayName}
+                        sx={{ width: 24, height: 24 }}
+                      />
+                    </Tooltip>
+                  </IconButton>
+                  <Menu
+                    id="profile-menu"
+                    anchorEl={anchorEl}
+                    open={openProfileMenu}
+                    onClose={handleProfileMenuClose}
+                    MenuListProps={{
+                      'aria-labelledby': 'profile-button',
+                    }}
+                  >
+                    <MenuItem onClick={handleProfileClick}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Iconify icon="eva:person-outline" />
+                        Profile
+                      </Box>
+                    </MenuItem>
+                    <MenuItem onClick={handleOrdersClick}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Iconify icon="eva:shopping-cart-outline" />
+                        Orders
+                      </Box>
+                    </MenuItem>
+                    <MenuItem>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Iconify icon="eva:question-mark-circle-outline" />
+                        Help Center
+                      </Box>
+                    </MenuItem>
+                    <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Iconify icon="eva:log-out-outline" />
+                        Log out
+                      </Box>
+                    </MenuItem>
+                  </Menu>
+                </Stack>
+              ) : (
+                <Link
+                  component={RouterLink}
+                  href="#"
+                  onClick={handleLoginPopupOpen}
+                  sx={{
+                    color: 'text.primary',
+                    textDecoration: 'none',
+                    typography: 'body1',
+                    '&:hover': { color: '#212B36' },
+                    display: { xs: 'none', sm: 'block' }
+                  }}
+                >
+                  Sign in
+                </Link>
+              )}
 
               {/* user Icon */}
               {/* <IconButton
@@ -409,6 +511,8 @@ export default function UserHeader() {
           </Container>
         </Box> */}
       </AppBar>
+
+      <LoginPopup open={loginPopupOpen} onClose={handleLoginPopupClose} />
 
       {/* Mobile Menu Drawer */}
       {/* <Drawer

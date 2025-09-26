@@ -3,7 +3,7 @@ import { MailView } from 'src/sections/mail/view';
 // ----------------------------------------------------------------------
 
 export const metadata = {
-  title: 'Dashboard: Mail',
+  title: 'KRI: Mail',
 };
 
 export default function MailPage() {

@@ -3,7 +3,7 @@ import { AccountView } from 'src/sections/account/view';
 // ----------------------------------------------------------------------
 
 export const metadata = {
-  title: 'Dashboard: Account Settings',
+  title: 'KRI: Account Settings',
 };
 
 export default function AccountPage() {

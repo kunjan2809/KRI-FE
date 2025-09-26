@@ -377,7 +377,7 @@ export default function ProductDetailsPage() {
                 </Button>
               </Stack>
 
-              <Card sx={{ p: 3, bgcolor: alpha(theme.palette.primary.main, 0.05) }}>
+              <Card sx={{ p: 3, bgcolor: alpha(theme.palette.primary.main, 0.05), boxShadow: 'none'}}>
                 <Typography variant="h6" sx={{ mb: 2 }}>
                   Product Highlights
                 </Typography>
@@ -397,7 +397,7 @@ export default function ProductDetailsPage() {
                 </Stack>
               </Card>
 
-              <Card sx={{ p: 3 }}>
+              <Card sx={{ p: 3, boxShadow: 'none', border: '1px solid #E0E0E0' }}>
                 <Typography variant="h6" sx={{ mb: 2 }}>
                   Delivery & Returns
                 </Typography>
@@ -420,7 +420,7 @@ export default function ProductDetailsPage() {
                 </Stack>
               </Card>
 
-              <Card sx={{ p: 3, bgcolor: alpha(theme.palette.success.main, 0.05) }}>
+              <Card sx={{ p: 3, bgcolor: alpha(theme.palette.success.main, 0.05), boxShadow: 'none'}}>
                 <Typography variant="h6" sx={{ mb: 2 }}>
                   Etsy Protection
                 </Typography>

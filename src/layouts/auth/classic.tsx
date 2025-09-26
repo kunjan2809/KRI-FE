@@ -23,13 +23,15 @@ export default function AuthClassicLayout({ children, image, title }: Props) {
   const mdUp = useResponsive('up', 'md');
 
   const renderLogo = (
-    <Logo
-      sx={{
-        zIndex: 9,
-        position: 'absolute',
-        m: { xs: 2, md: 5 },
-      }}
-    />
+    <Box sx={{ zIndex: 9, position: 'absolute', m: { xs: 2, md: 5 } }}>
+      <Logo
+        sx={{
+          zIndex: 9,
+          position: 'absolute',
+          m: { xs: 2, md: 5 },
+        }}
+      />
+    </Box>
   );
 
   const renderContent = (
@@ -37,7 +39,7 @@ export default function AuthClassicLayout({ children, image, title }: Props) {
       sx={{
         width: 1,
         mx: 'auto',
-        maxWidth: 480,
+        maxWidth: 580,
         px: { xs: 2, md: 8 },
         pt: { xs: 15, md: 20 },
         pb: { xs: 15, md: 0 },

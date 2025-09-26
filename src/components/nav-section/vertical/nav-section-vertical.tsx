@@ -3,9 +3,12 @@ import { memo, useState, useCallback } from 'react';
 import Stack from '@mui/material/Stack';
 import Collapse from '@mui/material/Collapse';
 import ListSubheader from '@mui/material/ListSubheader';
+import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
 
 import NavList from './nav-list';
 import { NavProps, NavGroupProps } from '../types';
+import Iconify from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
@@ -65,7 +68,14 @@ function Group({ subheader, items, slotProps }: NavGroupProps) {
               ...slotProps?.subheader,
             }}
           >
-            {subheader}
+            <Stack direction="row" alignItems="center" justifyContent="space-between" width="100%">
+              <Typography variant="subtitle2" noWrap sx={slotProps?.subheader}>
+                {subheader}
+              </Typography>
+              <IconButton>
+                <Iconify icon={open ? 'eva:arrow-ios-downward-fill' : 'eva:arrow-ios-upward-fill'} />
+              </IconButton>
+            </Stack>
           </ListSubheader>
 
           <Collapse in={open}>{renderContent}</Collapse>

@@ -32,8 +32,8 @@ import FormProvider, {
     RHFAutocomplete,
 } from 'src/components/hook-form';
 
-import { IProductCreateRequest, IProductAPIResponse } from 'src/types/product';
-import { updateProduct } from 'src/api/product';
+import { IProductCreateRequest, IProductAPIResponse, IUploadProductImage } from 'src/types/product';
+import { updateProduct, uploadProductImage } from 'src/api/product';
 
 // ----------------------------------------------------------------------
 
@@ -45,11 +45,12 @@ const PRODUCT_STATUS_OPTIONS = [
 
 const PRODUCT_DISCOUNT_TYPE_OPTIONS = [
     { value: 'percentage', label: 'Percentage' },
-    { value: 'fixed', label: 'Fixed Amount' },
+    { value: 'price', label: 'Fixed Amount' },
 ];
 
 const PRODUCT_CATEGORY_OPTIONS = [
-    { value: '68ac57e6369f49730a420078', label: 'Clothing' }
+    { value: '68ac57e6369f49730a420078', label: 'Clothing' },
+    { value: '68c254ab71de36f4af862a6e', label: 'Rings' }
 ];
 
 type Props = {
@@ -66,6 +67,7 @@ export default function ProductUpdateForm({ productId, currentProduct }: Props) 
     const [hasDiscount, setHasDiscount] = useState(false);
     const [isPublishing, setIsPublishing] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
     const ProductSchema = Yup.object().shape({
         name: Yup.string().required('Product name is required'),
@@ -106,7 +108,7 @@ export default function ProductUpdateForm({ productId, currentProduct }: Props) 
                 alt_text: currentProduct?.primary_image?.alt_text || '',
                 is_primary: true,
                 sort_order: 1,
-            }    
+            }
         }),
         [currentProduct]
     );
@@ -146,6 +148,7 @@ export default function ProductUpdateForm({ productId, currentProduct }: Props) 
     const handleRemoveFile = useCallback(() => {
         setValue('primary_image.image_url', '');
         setValue('primary_image.alt_text', '');
+        setSelectedFile(null);
     }, [setValue]);
 
     const handleDrop = useCallback(
@@ -155,6 +158,7 @@ export default function ProductUpdateForm({ productId, currentProduct }: Props) 
                 const imageUrl = URL.createObjectURL(file);
                 setValue('primary_image.image_url', imageUrl);
                 setValue('primary_image.alt_text', file.name);
+                setSelectedFile(file);
             }
         },
         [setValue]
@@ -182,14 +186,19 @@ export default function ProductUpdateForm({ productId, currentProduct }: Props) 
                 price: data.price || 0,
                 stock_quantity: data.stock_quantity || 0,
                 weight: data.weight || 0,
-                primary_image: {
-                    image_url: data.primary_image?.image_url || '',
-                    alt_text: data.primary_image?.alt_text || '',
-                    is_primary: true,
-                    sort_order: 1,
-                }
             };
 
+            const productImageData: IUploadProductImage = {
+                product_id: productId,
+                image_url: data.primary_image?.image_url || '',
+                is_primary: true,
+                file: selectedFile || undefined,
+            };
+
+            // Only upload image if a new file is selected
+            if (selectedFile) {
+                await uploadProductImage(productId, productImageData, token);
+            }
             await updateProduct(productId, productData, token);
 
             enqueueSnackbar('Product updated successfully!', { variant: 'success' });
@@ -278,11 +287,11 @@ export default function ProductUpdateForm({ productId, currentProduct }: Props) 
                             onUpload={() => console.info('ON UPLOAD')}
                         />
 
-                        <RHFTextField
+                        {/* <RHFTextField
                             name="primary_image.alt_text"
                             label="Alt Text"
                             placeholder="Describe the image for accessibility"
-                        />
+                        /> */}
                     </Stack>
                 </Card>
             </Grid>

@@ -4,7 +4,7 @@ export type IProductFilterValue = string | string[] | number | number[];
 
 export type IProductFilters = {
   rating: string;
-  gender: string[];
+  gender: string;
   category: string;
   colors: string[];
   priceRange: number[];
@@ -14,9 +14,9 @@ export type IProductFilters = {
 
 export type IProductReviewNewForm = {
   rating: number | null;
-  review: string;
-  name: string;
-  email: string;
+  rating_description: string;
+  user_id: string;
+  product_id: string;
 };
 
 export type IProductReview = {
@@ -94,6 +94,19 @@ export type IProductImage = {
   edited_at: string;
 };
 
+export type IUploadProductImage = {
+  product_id?: string;
+  image_url?: string;
+  is_primary: boolean;
+  file?: File;
+};
+
+export type IUploadReviewImage = {
+  review_id?: string;
+  image_url?: string;
+  file?: File;
+};
+
 export type IProductCategory = {
   _id: string;
   name: string;
@@ -135,15 +148,13 @@ export type IProductCreateRequest = {
   weight: number;
   status: string;
   category_id: string;
-  primary_image?: {
-    image_url: string;
-    alt_text: string;
-    is_primary: boolean;
-    sort_order: number;
-  };
 };
 
 
 export type IProductQuantity = {
   quantity: number;
+};
+
+export type IProductStatus = {
+  status: string;
 };

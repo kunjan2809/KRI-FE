@@ -5,7 +5,7 @@ import { TourEditView } from 'src/sections/tour/view';
 // ----------------------------------------------------------------------
 
 export const metadata = {
-  title: 'Dashboard: Tour Edit',
+  title: 'KRI: Tour Edit',
 };
 
 type Props = {

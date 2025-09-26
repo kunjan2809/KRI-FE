@@ -5,7 +5,7 @@ import { ProductEditView } from 'src/sections/product/view';
 // ----------------------------------------------------------------------
 
 export const metadata = {
-  title: 'Dashboard: Product Edit',
+  title: 'KRI: Product Edit',
 };
 
 type Props = {

@@ -23,6 +23,7 @@ import Iconify from 'src/components/iconify';
 // Import Product.json data
 import productData from '../../../Product.json';
 import RecommendedProductsCard from './RecommendedProductsCard';
+import CheckoutPopup from './CheckoutPopup';
 
 // Convert Product.json data to cart items format
 const cartItems = [
@@ -101,6 +102,7 @@ export default function CartPage() {
   const router = useRouter();
   const [cartData, setCartData] = useState(cartItems);
   const [promoCode, setPromoCode] = useState('');
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
 
   const updateQuantity = (itemId: string, newQuantity: number) => {
     if (newQuantity < 1) return;
@@ -132,8 +134,13 @@ export default function CartPage() {
   };
 
   const handleCheckout = () => {
-    // Handle checkout process
-    router.push('/checkout');
+    setCheckoutOpen(true);
+  };
+
+  const handleCheckoutComplete = (orderData: any) => {
+    console.log('Order completed:', orderData);
+    // Handle successful checkout - could redirect to order confirmation page
+    router.push('/order-details');
   };
 
   const addToCart = (productId: string) => {
@@ -176,7 +183,7 @@ export default function CartPage() {
   return (
     <Box>
       {/* Promotional Banner */}
-      <Box
+      {/* <Box
         sx={{
           background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
           color: 'white',
@@ -193,7 +200,7 @@ export default function CartPage() {
             Finalize your selection and let your story shine in lumière.
           </Typography>
         </Container>
-      </Box>
+      </Box> */}
 
       <Container maxWidth="lg" sx={{ py: 6 }}>
         {/* Shopping Cart Section */}
@@ -210,7 +217,7 @@ export default function CartPage() {
             <Grid item xs={12} lg={8}>
               <Stack spacing={3}>
                 {cartData.map((item) => (
-                  <Card key={item.id} sx={{ p: 3 }}>
+                  <Card key={item.id} sx={{ p: 3, border: '1px solid #e0e0e0', boxShadow: 'none' }}>
                     <Grid container spacing={3}>
                       <Grid item xs={12} sm={3}>
                         <CardMedia
@@ -304,7 +311,7 @@ export default function CartPage() {
                 ))}
 
                 {/* Promo Code */}
-                <Card sx={{ p: 3 }}>
+                <Card sx={{ p: 3, border: '1px solid #e0e0e0', boxShadow: 'none' }}>
                   <Typography variant="h6" sx={{ mb: 2 }}>
                     Have a promo code?
                   </Typography>
@@ -330,7 +337,7 @@ export default function CartPage() {
 
             {/* Right Column - Order Summary */}
             <Grid item xs={12} lg={4}>
-              <Card sx={{ p: 3, position: 'sticky', top: 20 }}>
+              <Card sx={{ p: 3, position: 'sticky', top: 20, border: '1px solid #e0e0e0', boxShadow: 'none' }}>
                 <Typography variant="h5" component="h3" sx={{ mb: 3, fontWeight: 'bold' }}>
                   Order Summary
                 </Typography>
@@ -457,6 +464,15 @@ export default function CartPage() {
           </Grid>
         </Box>
       </Container>
+
+      {/* Checkout Popup */}
+      <CheckoutPopup
+        open={checkoutOpen}
+        onClose={() => setCheckoutOpen(false)}
+        cartData={cartData}
+        onUpdateCart={setCartData}
+        onCheckoutComplete={handleCheckoutComplete}
+      />
     </Box>
   );
 }

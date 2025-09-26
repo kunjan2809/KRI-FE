@@ -6,7 +6,7 @@ import { PostDetailsView } from 'src/sections/blog/view';
 // ----------------------------------------------------------------------
 
 export const metadata = {
-  title: 'Dashboard: Post Details',
+  title: 'KRI: Post Details',
 };
 
 type Props = {

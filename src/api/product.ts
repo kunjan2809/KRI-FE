@@ -1,16 +1,16 @@
 import useSWR from 'swr';
 import { useMemo } from 'react';
 
-import { apiFetcher, apiProductFetcher, endpoints } from 'src/utils/axios';
+import { BASE_API } from 'src/config-global';
+import { apiFetcher, endpoints, apiProductFetcher } from 'src/utils/axios';
 import { useAuthToken } from 'src/auth/hooks';
 
-import { IProductCreateRequest, IProductItem, IProductQuantity } from 'src/types/product';
-import { BASE_API } from 'src/config-global';
+import { IProductItem, IProductCreateRequest, IProductQuantity, IUploadProductImage, IUploadReviewImage, IProductStatus } from 'src/types/product';
 
 // ----------------------------------------------------------------------
 
 interface GetProductsParams {
-  page?: number;  
+  page?: number;
   limit?: number;
   stock_filters?: string[];
   status_filters?: string[];
@@ -65,9 +65,6 @@ export function useGetProducts(params: GetProductsParams = {}) {
       onError: (err) => {
         console.error('useGetProducts error:', err);
       },
-      onSuccess: (responseData) => {
-        console.log('useGetProducts success:', responseData);
-      }
     });
 
   const memoizedValue = useMemo(
@@ -98,9 +95,6 @@ export function useGetProducts(params: GetProductsParams = {}) {
 //     errorRetryCount: 3,
 //     onError: (err) => {
 //       console.error('useGetProduct error:', err);
-//     },
-//     onSuccess: (data) => {
-//       console.log('useGetProduct success:', data);
 //     }
 //   });
 
@@ -129,9 +123,6 @@ export function useSearchProducts(query: string) {
     errorRetryCount: 3,
     onError: (err) => {
       console.error('useSearchProducts error:', err);
-    },
-    onSuccess: (responseData) => {
-      console.log('useSearchProducts success:', responseData);
     }
   });
 
@@ -190,7 +181,6 @@ export async function deleteProduct(productId: string, token: string) {
   return response.json();
 }
 
-
 export async function updateProduct(productId: string, productData: IProductCreateRequest, token: string) {
   const baseUrl = BASE_API;
   const URL = `${baseUrl}${endpoints.product.update}${productId}`;
@@ -239,15 +229,102 @@ export async function updateProductQuantity(productId: string, productQuantity: 
   const response = await fetch(URL, {
     method: 'PATCH',
     headers: {
-      'Content-Type': 'application/json', 
+      'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify(productQuantity),  
+    body: JSON.stringify(productQuantity),
   });
 
   if (!response.ok) {
     const errorDetails = await response.json();
     throw new Error(errorDetails.message || 'Error updating product quantity');
+  }
+
+  return response.json();
+}
+
+export async function updateProductStatus(productId: string, productStatus: IProductStatus, token: string) {
+  const baseUrl = BASE_API;
+  const URL = `${baseUrl}${endpoints.product.status}${productId}`;
+
+  const response = await fetch(URL, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json', 
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(productStatus),
+  });
+
+  if (!response.ok) {
+    const errorDetails = await response.json();
+    throw new Error(errorDetails.message || 'Error updating product status');
+  }
+
+  return response.json();
+}
+
+export async function uploadProductImage(productId: string, productImage: IUploadProductImage, token: string) {
+  const baseUrl = BASE_API;
+  const URL = `${baseUrl}${endpoints.image.product}${productId}`;
+
+  const formData = new FormData();
+
+  // If file is provided, append it; otherwise use image_url
+  if (productImage.file) {
+    formData.append('image', productImage.file);
+  } else if (productImage.image_url) {
+    formData.append('image_url', productImage.image_url);
+  } else {
+    throw new Error('Either file or image_url must be provided');
+  }
+
+  formData.append('is_primary', productImage.is_primary.toString());
+
+  const response = await fetch(URL, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const errorDetails = await response.json();
+    throw new Error(errorDetails.message || 'Error uploading product image');
+  }
+
+  return response.json();
+}
+
+export async function uploadReviewImage(reviewId: string, reviewImage: IUploadReviewImage, token: string) {
+  const baseUrl = BASE_API;
+  const URL = `${baseUrl}${endpoints.image.review}`;
+
+  const formData = new FormData();
+
+  // If file is provided, append it; otherwise use image_url
+  if (reviewImage.file) {
+    formData.append('image', reviewImage.file);
+  } else if (reviewImage.image_url) {
+    formData.append('image_url', reviewImage.image_url);
+  } else {
+    throw new Error('Either file or image_url must be provided');
+  }
+
+  formData.append('review_id', reviewId);
+
+  const response = await fetch(URL, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const errorDetails = await response.json();
+    throw new Error(errorDetails.message || 'Error uploading review image');
   }
 
   return response.json();

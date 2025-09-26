@@ -17,8 +17,8 @@ import { RouterLink } from 'src/routes/components';
 
 import { useSnackbar } from 'src/components/snackbar';
 
-import { getProductById } from 'src/api/product';
-import { IProductAPIResponse, IProductCreateRequest } from 'src/types/product';
+import { getProductById, updateProductStatus } from 'src/api/product';
+import { IProductAPIResponse, IProductCreateRequest, IProductStatus  } from 'src/types/product';
 
 import { PRODUCT_PUBLISH_OPTIONS } from 'src/_mock';
 
@@ -300,7 +300,16 @@ export default function ProductDetailsView({ id }: Props) {
 
   const handleChangePublish = useCallback((newValue: string) => {
     setPublish(newValue);
-  }, []);
+    try { 
+      const productId = productById?._id
+      const productStatus: IProductStatus = {
+        status: newValue,
+      };
+      updateProductStatus(productId, productStatus, token);
+    } catch (err) {
+      console.error(err);
+    }
+  }, [productById, token]);
 
   const handleChangeTab = useCallback((event: React.SyntheticEvent, newValue: string) => {
     setCurrentTab(newValue);
@@ -343,7 +352,7 @@ export default function ProductDetailsView({ id }: Props) {
         </Grid>
 
         <Grid xs={12} md={6} lg={5}>
-          <ProductDetailsSummary disabledActions productById={productById as IProductCreateRequest} />
+          <ProductDetailsSummary productById={productById as IProductCreateRequest} />
         </Grid>
       </Grid>
 
@@ -371,8 +380,8 @@ export default function ProductDetailsView({ id }: Props) {
         ))}
       </Box>
 
-      {/* <Card>
-        <Tabs
+      <Card>
+        {/* <Tabs
           value={currentTab}
           onChange={handleChangeTab}
           sx={{
@@ -396,17 +405,15 @@ export default function ProductDetailsView({ id }: Props) {
 
         {currentTab === 'description' && (
           <ProductDetailsDescription description={productById?.description} />
-        )}
+        )} */}
 
-        {/* {currentTab === 'reviews' && (
-          <ProductDetailsReview
-            ratings={productById?.ratings || []}
+         <ProductDetailsReview
+            ratings={productById?.ratings || []}  
             reviews={productById?.reviews || []}
             totalRatings={productById?.totalRatings || 0}
             totalReviews={productById?.totalReviews || 0}
           />
-        )} 
-      </Card> */}
+      </Card>
 
       
     </>

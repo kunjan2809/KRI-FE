@@ -42,6 +42,10 @@ export const paths = {
     },
     cart: '/cart',
     orderDetails: '/order-details',
+    profile: '/profile',
+    orders: '/orders',
+    helpCenter: '/help-center',
+    wishlist: '/wishlist',
   },
   // DASHBOARD
   dashboard: {

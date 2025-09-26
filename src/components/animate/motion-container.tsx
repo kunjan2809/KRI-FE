@@ -9,17 +9,16 @@ import { varContainer } from './variants';
 type IProps = BoxProps & MotionProps;
 
 export interface Props extends IProps {
-  animate?: boolean;
   action?: boolean;
 }
 
-export default function MotionContainer({ animate, action = false, children, ...other }: Props) {
+export default function MotionContainer({ action = false, children, ...other }: Props) {
   if (action) {
     return (
       <Box
         component={m.div}
         initial={false}
-        animate={animate ? 'animate' : 'exit'}
+        animate="animate"
         variants={varContainer()}
         {...other}
       >

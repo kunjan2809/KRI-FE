@@ -3,7 +3,7 @@ import { ChatView } from 'src/sections/chat/view';
 // ----------------------------------------------------------------------
 
 export const metadata = {
-  title: 'Dashboard: Chat',
+  title: 'KRI: Chat',
 };
 
 export default function ChatPage() {

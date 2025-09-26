@@ -5,7 +5,7 @@ import { JobEditView } from 'src/sections/job/view';
 // ----------------------------------------------------------------------
 
 export const metadata = {
-  title: 'Dashboard: Job Edit',
+  title: 'KRI: Job Edit',
 };
 
 type Props = {

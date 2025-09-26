@@ -3,7 +3,7 @@ import { JobListView } from 'src/sections/job/view';
 // ----------------------------------------------------------------------
 
 export const metadata = {
-  title: 'Dashboard: Job List',
+  title: 'KRI: Job List',
 };
 
 export default function JobListPage() {

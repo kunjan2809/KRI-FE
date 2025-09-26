@@ -45,12 +45,13 @@ const PRODUCT_STATUS_OPTIONS = [
 
 const PRODUCT_DISCOUNT_TYPE_OPTIONS = [
     { value: 'percentage', label: 'Percentage' },
-    { value: 'fixed', label: 'Fixed Amount' },
+    { value: 'price', label: 'Fixed Amount' },
 ];
 
 const PRODUCT_CATEGORY_OPTIONS = [
-    { value: '68ac57e6369f49730a420078', label: 'Clothing' }
-];  
+    { value: '68ac57e6369f49730a420078', label: 'Clothing' },
+    { value: '68c254ab71de36f4af862a6e', label: 'Rings' }
+];
 
 export default function ProductCreateForm() {
     const router = useRouter();
@@ -378,11 +379,11 @@ export default function ProductCreateForm() {
                             onUpload={() => console.info('ON UPLOAD')}
                         />
 
-                        <RHFTextField
+                        {/* <RHFTextField
                             name="primary_image.alt_text"
                             label="Alt Text"
                             placeholder="Describe the image for accessibility"
-                        />
+                        /> */}
                     </Stack>
                 </Card>
             </Grid>

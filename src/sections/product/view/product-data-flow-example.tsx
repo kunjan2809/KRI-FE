@@ -249,12 +249,12 @@ export default function ProductDataFlowExample() {
                         Product List (API Data Flow)
                     </Typography>
 
-                    {productsLoading && (
+                    {/* {productsLoading && (
                         <Stack alignItems="center" spacing={2}>
                             <CircularProgress />
                             <Typography>Loading products from API...</Typography>
                         </Stack>
-                    )}
+                    )} */}
 
                     {productsError && (
                         <Alert severity="error" sx={{ mb: 2 }}>

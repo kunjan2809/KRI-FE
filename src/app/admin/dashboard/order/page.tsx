@@ -3,7 +3,7 @@ import { OrderListView } from 'src/sections/order/view';
 // ----------------------------------------------------------------------
 
 export const metadata = {
-  title: 'Dashboard: Order List',
+  title: 'KRI: Order List',
 };
 
 export default function OrderListPage() {

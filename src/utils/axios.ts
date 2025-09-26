@@ -64,6 +64,15 @@ export const endpoints = {
     login: '/api/auth/login',
     register: '/api/auth/register',
     signup: '/api/auth/signup',
+    forgetPassword: '/api/auth/forget-password',    
+  },
+  analytics: {
+    dashboard: '/api/analytics/dashboard/',
+    orders: '/api/analytics/orders/',
+    users: '/api/analytics/users/',
+    categories: '/api/analytics/categories/',
+    revenue: '/api/analytics/revenue/',
+    yearlyOrders: '/api/analytics/yearly/',
   },
   mail: {
     list: '/api/mail/list',
@@ -86,5 +95,24 @@ export const endpoints = {
     delete: '/api/products/admin/delete/',
     detailsById: '/api/products/admin/details/',
     quantity: '/api/products/admin/quantity/',
+    status: '/api/products/admin/status/',
+  },
+  image: {
+    product: '/api/images/product/',
+    review: '/api/images/review/',
+  },
+  order: {
+    all: '/api/orders/admin/all',
+    details: '/api/orders/admin/details/',
+    delivery: '/api/orders/admin/delivery/',
+    create: '/api/orders/admin/create/',
+    update: '/api/orders/admin/update/',
+    delete: '/api/orders/admin/delete/',
+    statistics: '/api/orders/admin/statistics',
+    export: '/api/orders/admin/export',
+  },
+  user: {
+    all: '/api/users/admin/all',
+    status: '/api/users/admin/status/',
   },
 };

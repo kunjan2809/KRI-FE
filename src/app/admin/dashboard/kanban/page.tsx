@@ -3,7 +3,7 @@ import { KanbanView } from 'src/sections/kanban/view';
 // ----------------------------------------------------------------------
 
 export const metadata = {
-  title: 'Dashboard: Kanban',
+  title: 'KRI: Kanban',
 };
 
 export default function KanbanPage() {

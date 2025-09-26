@@ -1,11 +1,16 @@
 {
-  "name": "Minimal UI",
-  "short_name": "Minimal UI",
+  "name": "KRI Platform",
+  "short_name": "KRI",
   "display": "standalone",
   "start_url": "/",
   "theme_color": "#000000",
   "background_color": "#ffffff",
   "icons": [
+    {
+      "src": "assets/mini-logo.svg",
+      "sizes": "48x48",
+      "type": "image/svg+xml"
+    },
     {
       "src": "favicon/android-chrome-192x192.png",
       "sizes": "192x192",

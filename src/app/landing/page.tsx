@@ -322,7 +322,7 @@ export default function LandingPage() {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 1,
-                    color: 'rgba(100, 116, 139, 0.5)',
+                    color: '#212B36',
                   }}
                 >
                   <Iconify icon="mdi:sparkles" width={20} />
@@ -418,10 +418,8 @@ export default function LandingPage() {
                             <Button
                               type="submit"
                               variant="contained"
-                              disabled={isSubmitted}
                               onMouseEnter={() => setIsHovered(true)}
                               onMouseLeave={() => setIsHovered(false)}
-                              // color="primary"
                               sx={{
                                 position: 'absolute',
                                 right: 0,

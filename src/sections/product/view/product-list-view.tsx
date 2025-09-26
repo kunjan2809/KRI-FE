@@ -18,6 +18,7 @@ import {
   GridToolbarFilterButton,
   GridToolbarColumnsButton,
   GridColumnVisibilityModel,
+  GridSortModel,
 } from '@mui/x-data-grid';
 
 import { paths } from 'src/routes/paths';
@@ -69,6 +70,11 @@ const HIDE_COLUMNS = {
 
 const HIDE_COLUMNS_TOGGLABLE = ['category', 'actions'];
 
+const SORT_MODEL = {
+  field: 'created_at',
+  sort: 'desc',
+};
+
 // ----------------------------------------------------------------------
 
 export default function ProductListView() {
@@ -85,13 +91,18 @@ export default function ProductListView() {
   const [tableData, setTableData] = useState<any[]>([]);
 
   const [filters, setFilters] = useState(defaultFilters);
+  const [sortModel, setSortModel] = useState<GridSortModel[0]>(SORT_MODEL);
+  const [page, setPage] = useState<number>(1);
+  const [limit, setLimit] = useState<number>(10);
 
-  const { products, productsLoading, productsError, productsEmpty } = useGetProducts({
+  const { products, productsLoading, productsError, productsEmpty, pagination } = useGetProducts({
     stock_filters: filters.stock,
     status_filters: filters.publish,
     search: '',
-    sort_by: 'created_at',
-    sort_order: 'desc',
+    sort_by: sortModel.field,
+    sort_order: sortModel.sort,
+    page,
+    limit,
   });
 
   const [selectedRowIds, setSelectedRowIds] = useState<GridRowSelectionModel>([]);
@@ -122,7 +133,7 @@ export default function ProductListView() {
       totalRatings: 4.5,
       totalReviews: 50,
       category: 'Sample',
-      gender: ['Men'],
+      gender: 'Men',
       colors: ['#000000'],
       sizes: ['M', 'L', 'XL'],
       inventoryType: 'in stock',
@@ -152,7 +163,7 @@ export default function ProductListView() {
       totalRatings: 4.2,
       totalReviews: 30,
       category: 'Sample',
-      gender: ['Women'],
+      gender: 'Women',
       colors: ['#FF0000'],
       sizes: ['S', 'M', 'L'],
       inventoryType: 'low stock',
@@ -394,13 +405,13 @@ export default function ProductListView() {
           </Alert>
         )}
 
-        {productsLoading && (
+        {/* {productsLoading && (
           <Alert severity="info" sx={{ mb: 3 }}>
             <Typography variant="body2">
               Loading products from API...
             </Typography>
           </Alert>
-        )}
+        )} */}
 
         <Card>
           {canReset && (
@@ -414,13 +425,24 @@ export default function ProductListView() {
           )}
 
           <DataGrid
-            hideFooterPagination
             rows={dataFiltered}
             columns={columns}
-            loading={productsLoading}
             getRowHeight={() => 'auto'}
-            pageSizeOptions={[5, 10, 25]}
+            rowCount={pagination?.total_products || 0}
+            paginationMode="server"
+            paginationModel={{
+              page: page - 1,
+              pageSize: limit,
+            }}
+            onPaginationModelChange={({ page: newPage, pageSize: newPageSize }) => {
+              setPage(newPage + 1);
+              setLimit(newPageSize);
+            }}
+            pageSizeOptions={[2, 10, 20]}
             disableRowSelectionOnClick
+            onSortModelChange={(model) => {
+              setSortModel(model[0]);
+            }}
             checkboxSelection
             disableColumnFilter
             disableColumnSelector
@@ -435,6 +457,11 @@ export default function ProductListView() {
             }}
             slots={{
               toolbar: CustomToolbar,
+            }}
+            sx={{
+              '& .MuiDataGrid-cell': {
+                borderBottom: '1px dashed #919eab33',
+              },
             }}
             slotProps={{
               toolbar: {

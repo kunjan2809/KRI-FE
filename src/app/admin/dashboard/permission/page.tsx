@@ -3,7 +3,7 @@ import PermissionDeniedView from 'src/sections/permission/view';
 // ----------------------------------------------------------------------
 
 export const metadata = {
-  title: 'Dashboard: Permission Denied',
+  title: 'KRI: Permission Denied',
 };
 
 export default function PermissionDeniedPage() {

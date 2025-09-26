@@ -53,9 +53,7 @@ const SUMMARY = [
 
 const product = {
   "id": "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b1",
-  "gender": [
-    "Kids"
-  ],
+  "gender": "Kids",
   "images": [
     "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-1.webp",
     "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-2.webp",
@@ -66,6 +64,7 @@ const product = {
     "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-7.webp",
     "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-8.webp"
   ],
+  "wishlist": false,
   "reviews": [
     {
       "id": "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b1",
@@ -303,7 +302,7 @@ export default function ProductShopDetailsView({ id }: Props) {
 
         <Grid xs={12} md={6} lg={5}>
           <ProductDetailsSummary
-            product={product} 
+            product={product}
             items={checkout.items}
             onAddCart={checkout.onAddToCart}
             onGotoStep={checkout.onGotoStep}
@@ -365,7 +364,7 @@ export default function ProductShopDetailsView({ id }: Props) {
         {currentTab === 'reviews' && (
           <ProductDetailsReview
             ratings={product.ratings}
-            reviews={product.reviews} 
+            reviews={product.reviews}
             totalRatings={product.totalRatings}
             totalReviews={product.totalReviews}
           />

@@ -53,13 +53,13 @@ export function RenderCellStock({ params }: ParamsProps) {
         value={(params.row.available * 100) / params.row.stock_quantity}
         variant="determinate"
         color={
-          (params.row.stock_quantity === 'out of stock' && 'error') ||
-          (params.row.stock_quantity === 'low stock' && 'warning') ||
+          (params.row.stock_quantity <= 15 && 'error') ||
+          (params.row.stock_quantity <= 50 && 'warning') ||
           'success'
         }
         sx={{ mb: 1, height: 6, maxWidth: 80 }}
       />
-      {!!params.row.stock_quantity && params.row.stock_quantity} {params.row.stock_quantity}
+      {!!params.row.stock_quantity && params.row.stock_quantity} / 100
     </Stack>
   );
 }

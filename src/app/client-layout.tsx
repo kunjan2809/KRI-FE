@@ -8,7 +8,7 @@ import { SettingsProvider } from 'src/components/settings';
 import { LocalizationProvider } from 'src/locales';
 import UserHeader from 'src/components/user-header';
 import ConditionalFooter from 'src/components/conditional-footer';
-
+import { Box } from '@mui/material';
 // ----------------------------------------------------------------------
 
 interface ClientLayoutProps {
@@ -36,7 +36,9 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
           <ThemeProvider>
             <SnackbarProvider>
               {!isAdminPage && !isAuthPage && <UserHeader />}
-              {children}
+              <Box sx={{ paddingTop: !isAdminPage && !isAuthPage ? '80px' : '0px' }}>
+                {children}
+              </Box>
               <ConditionalFooter />
             </SnackbarProvider>
           </ThemeProvider>

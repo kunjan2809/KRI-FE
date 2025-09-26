@@ -5,7 +5,7 @@ import { InvoiceEditView } from 'src/sections/invoice/view';
 // ----------------------------------------------------------------------
 
 export const metadata = {
-  title: 'Dashboard: Invoice Edit',
+  title: 'KRI: Invoice Edit',
 };
 
 type Props = {

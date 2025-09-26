@@ -5,7 +5,7 @@ import { TourDetailsView } from 'src/sections/tour/view';
 // ----------------------------------------------------------------------
 
 export const metadata = {
-  title: 'Dashboard: Tour Details',
+  title: 'KRI: Tour Details',
 };
 
 type Props = {

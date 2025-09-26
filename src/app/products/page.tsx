@@ -363,15 +363,15 @@ export default function ProductsPage() {
             <>
               <Grid container spacing={3} sx={{ mb: 4 }}>
                 {currentProducts.map((product) => (
-                  <Grid item xs={12} sm={6} md={4} lg={3} key={product.id}>
+                  <Grid item xs={12} sm={showFilters ? 12 : 6} md={showFilters ? 6 : 4} lg={showFilters ? 4 : 3} key={product.id}>
                     <Card
                       sx={{
                         height: '100%',
                         cursor: 'pointer',
+                        border: '1px solid #E0E0E0',
                         transition: 'transform 0.2s, box-shadow 0.2s',
                         '&:hover': {
                           transform: 'translateY(-4px)',
-                          boxShadow: theme.shadows[8],
                         },
                         '.add-wishlist-btn': {
                           ...(product.wishlist ? {

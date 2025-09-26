@@ -163,9 +163,10 @@ export default function ProductsPage() {
                         height: '100%',
                         cursor: 'pointer',
                         transition: 'transform 0.2s, box-shadow 0.2s',
+                        boxShadow: 'none',
+                        border: '1px solid #E0E0E0',
                         '&:hover': {
                           transform: 'translateY(-4px)',
-                          boxShadow: theme.shadows[8],
                         },
                         '.add-wishlist-btn': {
                           ...(product.wishlist ? {

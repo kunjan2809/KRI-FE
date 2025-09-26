@@ -3,7 +3,7 @@ import { InvoiceListView } from 'src/sections/invoice/view';
 // ----------------------------------------------------------------------
 
 export const metadata = {
-  title: 'Dashboard: Invoice List',
+  title: 'KRI: Invoice List',
 };
 
 export default function InvoiceListPage() {

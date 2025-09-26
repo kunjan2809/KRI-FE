@@ -1,74 +1,151 @@
 // ----------------------------------------------------------------------
 
-export type IOrderTableFilterValue = string | Date | null;
+export type IOrderFilterValue = string | string[] | number | number[];
 
-export type IOrderTableFilters = {
-  name: string;
-  status: string;
-  startDate: Date | null;
-  endDate: Date | null;
+export type IOrderFilters = {
+  status: string[];
+  payment_status: string[];
+  dateRange: string[];
+  search: string;
 };
 
 // ----------------------------------------------------------------------
 
-export type IOrderHistory = {
-  orderTime: Date;
-  paymentTime: Date;
-  deliveryTime: Date;
-  completionTime: Date;
-  timeline: {
-    title: string;
-    time: Date;
-  }[];
+export type IOrderItem = {
+  id: string;
+  order_id: string;
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  total_amount: number;
+  order_status: 'pending' | 'shipped' | 'cancelled' | 'delivered' | 'return';
+  payment_status: 'paid' | 'cod' | 'unpaid' | 'refunded';
+  shipping_address: IOrderAddress;
+  billing_address: IOrderAddress;
+  products: IOrderProduct[];
+  delivery_info?: IOrderDelivery;
+  created_at: string;
+  updated_at: string;
+  notes?: string;
+  tracking_number?: string;
 };
 
-export type IOrderShippingAddress = {
-  fullAddress: string;
-  phoneNumber: string;
+export type IOrderAddress = {
+  street: string;
+  city: string;
+  state: string;
+  postal_code: string;
+  country: string;
+  landmark?: string;
 };
 
-export type IOrderPayment = {
-  cardType: string;
-  cardNumber: string;
+export type IOrderProduct = {
+  product_id: string;
+  product_name: string;
+  product_sku: string;
+  quantity: number;
+  unit_price: number;
+  total_price: number;
+  product_image?: string;
+  variant?: string;
 };
 
 export type IOrderDelivery = {
-  shipBy: string;
-  speedy: string;
-  trackingNumber: string;
+  delivery_date?: string;
+  delivery_time?: string;
+  delivery_person?: string;
+  delivery_notes?: string;
+  delivery_status?: 'pending' | 'in_transit' | 'delivered' | 'failed';
 };
 
-export type IOrderCustomer = {
-  id: string;
-  name: string;
-  email: string;
-  avatarUrl: string;
-  ipAddress: string;
+export type IOrderTableFilterValue = string | string[];
+
+export type IOrderTableFilters = {
+  status: string[];
+  payment_status: string[];
 };
 
-export type IOrderProductItem = {
-  id: string;
-  sku: string;
-  name: string;
-  price: number;
-  coverUrl: string;
-  quantity: number;
+// ----------------------------------------------------------------------
+
+// API response types based on the order API documentation
+export type IOrderAPIResponse = {
+  _id: string;
+  order_id: string;
+  customer_id: string;
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  total_amount: number;
+  order_status: string;
+  payment_status: string;
+  shipping_address: IOrderAddress;
+  billing_address: IOrderAddress;
+  products: IOrderProduct[];
+  delivery_info?: IOrderDelivery;
+  created_at: string;
+  updated_at: string;
+  notes?: string;
+  tracking_number?: string;
 };
 
-export type IOrderItem = {
-  id: string;
-  taxes: number;
-  status: string;
-  shipping: number;
-  discount: number;
-  subTotal: number;
-  orderNumber: string;
-  totalAmount: number;
-  totalQuantity: number;
-  history: IOrderHistory;
-  customer: IOrderCustomer;
-  delivery: IOrderDelivery;
-  items: IOrderProductItem[];
-  createdAt: Date;
-  shippingAddress: IOrderShippingAddress;
+export type IOrderCreateRequest = {
+  customer_id: string;
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  shipping_address: IOrderAddress;
+  billing_address: IOrderAddress;
+  products: IOrderProduct[];
+  notes?: string;
+  payment_method: string;
+};
+
+export type IOrderUpdateRequest = {
+  order_status?: string;
+  payment_status?: string;
+  tracking_number?: string;
+  notes?: string;
+  delivery_info?: IOrderDelivery;
+};
+
+export type IOrderStatus = {
+  order_status: string;
+};
+
+export type IOrderPaymentStatus = {
+  payment_status: string;
+};
+
+export type IOrderDeliveryUpdate = {
+  delivery_date?: string;
+  delivery_time?: string;
+  delivery_person?: string;
+  delivery_notes?: string;
+  delivery_status?: string;
+};
+
+// ----------------------------------------------------------------------
+
+// Pagination and filtering types
+export type IOrderPagination = {
+  current_page: number;
+  total_pages: number;
+  total_orders: number;
+  per_page: number;
+  has_next_page: boolean;
+  has_prev_page: boolean;
+};
+
+export type IOrderSorting = {
+  sort_by: string;
+  sort_order: 'asc' | 'desc';
+};
+
+export type IOrderFiltersResponse = {
+  status_options: string[];
+  payment_status_options: string[];
+  date_range: {
+    min_date: string;
+    max_date: string;
+  };
 };

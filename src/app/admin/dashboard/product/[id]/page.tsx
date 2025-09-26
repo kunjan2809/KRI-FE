@@ -5,7 +5,7 @@ import { ProductDetailsView } from 'src/sections/product/view';
 // ----------------------------------------------------------------------
 
 export const metadata = {
-  title: 'Dashboard: Product Details',
+  title: 'KRI: Product Details',
 };
 
 type Props = {

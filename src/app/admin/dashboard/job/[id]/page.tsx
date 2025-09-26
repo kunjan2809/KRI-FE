@@ -5,7 +5,7 @@ import { JobDetailsView } from 'src/sections/job/view';
 // ----------------------------------------------------------------------
 
 export const metadata = {
-  title: 'Dashboard: Job Details',
+  title: 'KRI: Job Details',
 };
 
 type Props = {

@@ -1,30 +1,29 @@
-import { useEffect, useCallback } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useCallback, useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as Yup from 'yup';
 
 import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
-import Stack from '@mui/material/Stack';
-import Rating from '@mui/material/Rating';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
+import IconButton from '@mui/material/IconButton';
+import Link from '@mui/material/Link';
 import MenuItem from '@mui/material/MenuItem';
+import Rating from '@mui/material/Rating';
+import Stack from '@mui/material/Stack';
+import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { formHelperTextClasses } from '@mui/material/FormHelperText';
 
-import { paths } from 'src/routes/paths';
-import { useRouter } from 'src/routes/hooks';
-
-import { discountPrice, fCurrency, fShortenNumber } from 'src/utils/format-number';
-
-import Label from 'src/components/label';
-import Iconify from 'src/components/iconify';
+import { useAuthToken } from 'src/auth/hooks';
+import { updateProductQuantity } from 'src/api/product';
 import { ColorPicker } from 'src/components/color-utils';
-import FormProvider, { RHFSelect } from 'src/components/hook-form';
-
-import { IProductCreateRequest } from 'src/types/product';
+import FormProvider, { RHFSelect, RHFTextField } from 'src/components/hook-form';
+import Iconify from 'src/components/iconify';
+import Label from 'src/components/label';
 import { ICheckoutItem } from 'src/types/checkout';
-
-import IncrementerButton from './common/incrementer-button';
+import { IProductAPIResponse, IProductQuantity } from 'src/types/product';
+import { discountPrice, fCurrency, fShortenNumber } from 'src/utils/format-number';
 
 // ----------------------------------------------------------------------
 const product = {
@@ -221,7 +220,7 @@ const product = {
   "subDescription": "Featuring the original ripple design inspired by Japanese bullet trains, the Nike Air Max 97 lets you push your style full-speed ahead."
 }
 type Props = {
-  productById: IProductCreateRequest;
+  productById: IProductAPIResponse;
   items?: ICheckoutItem[];
   disabledActions?: boolean;
   onGotoStep?: (step: number) => void;
@@ -236,8 +235,16 @@ export default function ProductDetailsSummary({
   productById,
   ...other
 }: Props) {
-  const router = useRouter();
+  const userToken = useAuthToken();
+  const [isEditQuantity, setIsEditQuantity] = useState(false);
 
+  const QuantitySchema = Yup.object().shape({
+    quantity: Yup.number()
+      .required('Quantity is required')
+      .min(1, 'Quantity must be at least 1')
+      .integer('Quantity must be a whole number')
+      .positive('Quantity must be positive'),
+  });
   const {
     id,
     name,
@@ -271,9 +278,10 @@ export default function ProductDetailsSummary({
     size: sizes[4],
     quantity: available < 1 ? 0 : 1,
   };
-  
+
 
   const methods = useForm({
+    resolver: yupResolver(QuantitySchema),
     defaultValues,
   });
 
@@ -306,16 +314,48 @@ export default function ProductDetailsSummary({
 
   const handleAddCart = useCallback(() => {
     try {
+      const quantityValue = methods.getValues('quantity');
       onAddCart?.({
-        ...values,
+        ...data,
         colors: [values.colors],
-        subTotal: values.price * values.quantity,
+        quantity: quantityValue,
+        subTotal: data.price * quantityValue,
       });
     } catch (error) {
       console.error(error);
     }
   }, [onAddCart, values]);
 
+  const handleUpdateQuantity = useCallback(async () => {
+    try {
+      // Validate only the quantity field
+      const isValid = await methods.trigger('quantity');
+
+      if (!isValid) {
+        console.error('Form validation failed');
+        return;
+      }
+
+      // Get the current quantity value from the form
+      const quantityValue = methods.getValues('quantity');
+
+      // Additional validation check
+      if (!quantityValue || quantityValue < 1) {
+        console.error('Invalid quantity value');
+        return;
+      }
+
+      const productQuantity: IProductQuantity = {
+        quantity: quantityValue,
+      };
+      const productId = productById?._id;
+
+      await updateProductQuantity(productId, productQuantity, userToken);
+      setIsEditQuantity(false);
+    } catch (error) {
+      console.error('Error updating quantity:', error);
+    }
+  }, [productById, userToken, methods]);
   const renderPrice = (
     <Box sx={{ typography: 'h5' }}>
       {productById?.price && (
@@ -434,19 +474,36 @@ export default function ProductDetailsSummary({
 
   const renderQuantity = (
     <Stack direction="row">
-      <Typography variant="subtitle2" sx={{ flexGrow: 1 }}>
+      <Typography variant="subtitle2" sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
         Quantity
+
+        <Tooltip title="Edit">
+          <IconButton onClick={() => setIsEditQuantity(!isEditQuantity)}>
+            <Iconify icon="solar:pen-bold" width={14} />
+          </IconButton>
+        </Tooltip>
       </Typography>
 
       <Stack spacing={1}>
-        <IncrementerButton
+        {/* <IncrementerButton
           name="quantity"
           quantity={values.quantity}
           disabledDecrease={values.quantity <= 1}
-          disabledIncrease={values.quantity >= productById.stock_quantity}
           onIncrease={() => setValue('quantity', values.quantity + 1)}
           onDecrease={() => setValue('quantity', values.quantity - 1)}
-        />
+        /> */}
+
+        {isEditQuantity && <RHFTextField
+          type="number"
+          variant="outlined"
+          name="quantity"
+          size="small"
+          sx={{ width: 80 }}
+          placeholder={defaultValues.quantity.toString()}
+          inputProps={{
+            min: 1
+          }}
+        />}
 
         <Typography variant="caption" component="div" sx={{ textAlign: 'right' }}>
           Available: {productById.stock_quantity}
@@ -459,17 +516,16 @@ export default function ProductDetailsSummary({
     <Stack direction="row" spacing={2}>
       <Button
         fullWidth
-        disabled={isMaxQuantity || disabledActions}
         size="large"
-        color="warning"
-        variant="contained"
-        onClick={handleAddCart}
-        sx={{ whiteSpace: 'nowrap' }}
+        variant="outlined"
+        onClick={() => setIsEditQuantity(false)}
       >
         Cancel
       </Button>
 
-      <Button fullWidth size="large" type="submit" variant="contained" disabled={disabledActions}>
+      <Button fullWidth size="large" type="submit" variant="contained"
+        onClick={handleUpdateQuantity}
+        sx={{ whiteSpace: 'nowrap' }}>
         Save
       </Button>
     </Stack>

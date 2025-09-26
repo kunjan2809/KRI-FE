@@ -15,8 +15,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { alpha, useTheme } from '@mui/material/styles';
-import LoadingButton from '@mui/lab/LoadingButton';
+import { useTheme } from '@mui/material/styles';
 
 import { useAuthContext } from 'src/auth/hooks/use-auth-context';
 import { useBoolean } from 'src/hooks/use-boolean';
@@ -24,7 +23,6 @@ import { useRouter } from 'src/routes/hooks';
 
 import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
-import { bgGradient } from 'src/theme/css';
 
 // OTP Input Component
 const OTPInput = ({ value, onChange, error, theme }: { value: string; onChange: (value: string) => void; error?: boolean; theme: any }) => {
@@ -409,20 +407,26 @@ const LoginPopup = ({ open, onClose }: LoginPopupProps) => {
                 </>
             )}
 
-            <LoadingButton
+            <Button
                 fullWidth
                 color="inherit"
                 type="submit"
                 variant="contained"
-                component={Button}
                 disabled={isSubmitting}
+                startIcon={isSubmitting ? <Iconify icon="eos-icons:loading" /> : null}
             >
                 {(() => {
+                    if (isSubmitting) {
+                        if (isEmailVerification) return 'Verifying...';
+                        if (isSignup) return 'Creating account...';
+                        return 'Logging in...';
+                    }
                     if (isEmailVerification) return 'Verify Email';
                     if (isSignup) return 'Create account';
                     return 'Login';
                 })()}
-            </LoadingButton>
+            </Button>
+
 
             {!isEmailVerification && (
                 <>
@@ -497,7 +501,7 @@ const LoginPopup = ({ open, onClose }: LoginPopupProps) => {
                         component="button"
                         variant="subtitle2"
                         onClick={handleToggleMode}
-                        sx={{ textDecoration: 'none', cursor: 'pointer' }}
+                        sx={{ textDecoration: 'none', cursor: 'pointer', color: "#212B36" }}
                     >
                         {isSignup ? 'Sign in' : 'Create an account'}
                     </Link>
@@ -549,24 +553,6 @@ const LoginPopup = ({ open, onClose }: LoginPopupProps) => {
                     </FormProvider>
                 </Box>
             </DialogContent>
-
-            {/* <DialogActions>
-                    <LoadingButton
-                        fullWidth
-                        color="inherit"
-                        size="large"
-                        type="submit"
-                        variant="contained"
-                        disabled={isSubmitting}
-                        onClick={onSubmit}
-                    >
-                        Login
-                    </LoadingButton>
-
-                    <Button variant="outlined" color="inherit" onClick={handleClose}>
-                        Cancel
-                    </Button>
-                </DialogActions> */}
         </Dialog>
     );
 };

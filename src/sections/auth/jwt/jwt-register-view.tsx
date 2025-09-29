@@ -25,6 +25,7 @@ import { PATH_AFTER_LOGIN } from 'src/config-global';
 
 import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
+import { getRandomStringNumber } from 'src/utils/avtarData';
 
 // ----------------------------------------------------------------------
 
@@ -66,9 +67,11 @@ export default function JwtRegisterView() {
     formState: { isSubmitting },
   } = methods;
 
+  const selectedProfileIcon = getRandomStringNumber();
+
   const onSubmit = handleSubmit(async (data) => {
     try {
-      await register?.(data.email, data.password, data.firstName, data.lastName);
+      await register?.(data.email, data.password, data.firstName, data.lastName, selectedProfileIcon);
 
       router.push(returnTo || PATH_AFTER_LOGIN);
     } catch (error) {

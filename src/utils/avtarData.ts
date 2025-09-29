@@ -1,5 +1,3 @@
-
-export const getDummyAvtarUrl = (profile_icon: string) => {
     const dummyAvtar = [
         {
             avtarId: "1",
@@ -129,5 +127,9 @@ export const getDummyAvtarUrl = (profile_icon: string) => {
             avatarUrl: "https://pub-c5e31b5cdafb419fb247a8ac2e78df7a.r2.dev/public/assets/images/mock/avatar/avatar-25.webp",
         }
     ]
-    return dummyAvtar.find((item) => item.avtarId === profile_icon) || dummyAvtar[0];
-}
+export const getDummyAvtarUrl = (profile_icon: string) =>  dummyAvtar.find((item) => item.avtarId === profile_icon) || dummyAvtar[0];
+
+export function getRandomStringNumber() {
+    const randomNumber = Math.floor(Math.random() * dummyAvtar.length) + 1;
+    return randomNumber.toString();
+  }

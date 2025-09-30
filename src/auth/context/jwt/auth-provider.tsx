@@ -106,9 +106,9 @@ export function AuthProvider({ children }: Props) {
 
         const userData = localStorage.getItem(SESSION_USER_DATA);
         const dataRenewalToken = localStorage.getItem(SESSION_DATA_RENEWAL_TOKEN);
-        const isTimeMoreThan10Minutes = dataRenewalToken && new Date(dataRenewalToken).getTime() > Date.now() - 10 * 60 * 1000;
+        const isTimeMoreThanTwoMinutes = dataRenewalToken && new Date(dataRenewalToken).getTime() > Date.now() - 2 * 60 * 1000;
         
-        if (userData && !isTimeMoreThan10Minutes) {
+        if (userData && !isTimeMoreThanTwoMinutes) {
           dispatch({
             type: Types.INITIAL,
             payload: {

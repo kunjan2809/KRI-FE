@@ -1,7 +1,7 @@
 import * as Yup from 'yup';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState, useCallback, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -33,25 +33,17 @@ import FormProvider, {
 
 import { IProductCreateRequest } from 'src/types/product';
 import { createProduct } from 'src/api/product';
+import { useGetCategories } from 'src/api/category';
 import Button from '@mui/material/Button';
+import { PRODUCT_STATUSES } from 'src/utils/constants';
 
 // ----------------------------------------------------------------------
-
-const PRODUCT_STATUS_OPTIONS = [
-    { value: 'published', label: 'Published' },
-    { value: 'draft', label: 'Draft' },
-    { value: 'archived', label: 'Archived' },
-];
 
 const PRODUCT_DISCOUNT_TYPE_OPTIONS = [
     { value: 'percentage', label: 'Percentage' },
     { value: 'price', label: 'Fixed Amount' },
 ];
 
-const PRODUCT_CATEGORY_OPTIONS = [
-    { value: '68ac57e6369f49730a420078', label: 'Clothing' },
-    { value: '68c254ab71de36f4af862a6e', label: 'Rings' }
-];
 
 export default function ProductCreateForm() {
     const router = useRouter();
@@ -61,6 +53,26 @@ export default function ProductCreateForm() {
 
     const [hasDiscount, setHasDiscount] = useState(false);
     const [isPublishing, setIsPublishing] = useState(false);
+
+    // Fetch categories from API
+    const { categories, categoriesLoading, categoriesError } = useGetCategories();
+
+    // Transform categories for select options
+    const categoryOptions = useMemo(() => 
+        categories.map(category => ({
+            value: category._id,
+            label: category.name
+        })), [categories]
+    );
+
+    // Show error notification if categories fail to load
+    useEffect(() => {
+        if (categoriesError) {
+            enqueueSnackbar('Failed to load categories. Please refresh the page.', { 
+                variant: 'error' 
+            });
+        }
+    }, [categoriesError, enqueueSnackbar]);
 
     const ProductSchema = Yup.object().shape({
         name: Yup.string().required('Product name is required'),
@@ -102,7 +114,7 @@ export default function ProductCreateForm() {
             stock_quantity: 0,
             color: '',
             weight: 0,
-            status: 'draft',
+            status: 'published',
             category_id: '',
         }),
         []
@@ -206,17 +218,29 @@ export default function ProductCreateForm() {
 
                         <RHFTextField name="description" label="Description" multiline rows={4} />
 
-                        <RHFSelect native name="category_id" label="Category" InputLabelProps={{ shrink: true }}>
-                            <option value="" />
-                            {PRODUCT_CATEGORY_OPTIONS.map((category) => (
-                                <option key={category.value} value={category.value}>
-                                    {category.label}
-                                </option>
-                            ))}
+                        <RHFSelect 
+                            native 
+                            name="category_id" 
+                            label="Category" 
+                            InputLabelProps={{ shrink: true }}
+                            disabled={categoriesLoading}
+                            placeholder="Select a category"
+                        >
+                            {categoriesLoading ? (
+                                <option value="" disabled>Loading categories...</option>
+                            ) : categoriesError ? (
+                                <option value="" disabled>Error loading categories</option>
+                            ) : (
+                                categoryOptions.map((category) => (
+                                    <option key={category.value} value={category.value}>
+                                        {category.label}
+                                    </option>
+                                ))
+                            )}
                         </RHFSelect>
 
                         <RHFSelect native name="status" label="Status" InputLabelProps={{ shrink: true }}>
-                            {PRODUCT_STATUS_OPTIONS.map((status) => (
+                            {PRODUCT_STATUSES.map((status) => (
                                 <option key={status.value} value={status.value}>
                                     {status.label}
                                 </option>

@@ -127,6 +127,7 @@ export default function UserHeader() {
   const router = useRouter();
   // Get user data from auth context
   const { user, authenticated, logout } = useAuthContext();
+
   // Determine if user is admin based on user data
   const isAdmin = authenticated && user && (
     user.is_admin === true
@@ -181,11 +182,6 @@ export default function UserHeader() {
     setAnchorEl(null);
   };
 
-  useEffect(() => {
-    if (authenticated && isAdmin) {
-      router.push(paths.dashboard.root);
-    }
-  }, [authenticated, isAdmin, router]);
 
   return (
     <>

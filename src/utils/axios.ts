@@ -1,6 +1,7 @@
 import axios, { AxiosRequestConfig } from 'axios';
 
 import { BASE_API } from 'src/config-global';
+import { SESSION_ACCESS_TOKEN, SESSION_USER_DATA } from './constants';
 
 // ----------------------------------------------------------------------
 
@@ -8,7 +9,15 @@ const axiosInstance = axios.create({ baseURL: BASE_API });
 
 axiosInstance.interceptors.response.use(
   (res) => res,
-  (error) => Promise.reject((error.response && error.response.data) || 'Something went wrong')
+  (error) => {
+    console.error("error", error);
+    if (error.response.status === 401 && error.response.data.code === 'UNAUTHORIZED') {
+      localStorage.removeItem(SESSION_ACCESS_TOKEN);
+      localStorage.removeItem(SESSION_USER_DATA);
+      window.location.href = '/login';
+    }
+    return Promise.reject((error.response && error.response.data) || 'Something went wrong')
+  }
 );
 
 export default axiosInstance;
@@ -114,5 +123,8 @@ export const endpoints = {
   user: {
     all: '/api/users/admin/all',
     status: '/api/users/admin/status/',
+  },
+  category: {
+    all: '/api/category/all',
   },
 };

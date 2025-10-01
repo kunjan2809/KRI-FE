@@ -90,5 +90,8 @@ export const paths = {
         edit: `${ROOTS.DASHBOARD}/invoice/${MOCK_ID}/edit`,
       },
     },
+    category: {
+      root: `${ROOTS.DASHBOARD}/category`,
+    },
   },
 };

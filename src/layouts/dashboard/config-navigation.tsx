@@ -72,6 +72,13 @@ export function useNavData() {
             title: 'Products',
             path: paths.dashboard.product.root,
             icon: ICONS.product,
+            children: [
+              { title: 'All', path: paths.dashboard.product.root },
+              {
+                title: 'New', path: paths.dashboard.product.new,
+              },
+              { title: 'Categories', path: paths.dashboard.category.root },
+            ],
           },
 
           // INVOICE

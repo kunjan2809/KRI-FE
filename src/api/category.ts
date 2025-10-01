@@ -1,8 +1,8 @@
 import useSWR from 'swr';
 import { useMemo } from 'react';
 
+import { endpoints, apiFetcher } from 'src/utils/axios';
 import { BASE_API } from 'src/config-global';
-import { apiFetcher, endpoints } from 'src/utils/axios';
 
 // ----------------------------------------------------------------------
 
@@ -47,4 +47,67 @@ export function useGetCategories() {
   );
 
   return memoizedValue;
+}
+
+export async function addCategory(category: { name: string; description?: string }, token: string) {
+  const baseUrl = BASE_API;
+  const URL = `${baseUrl}${endpoints.category.add}`;
+
+  const response = await fetch(URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(category),
+  });
+
+  if (!response.ok) {
+    const errorDetails = await response.json();
+    throw new Error(errorDetails.message || 'Error creating category');
+  }
+
+  return response.json();
+}
+
+
+export async function deleteCategory(categoryId: string, token: string) {
+  const baseUrl = BASE_API;
+  const URL = `${baseUrl}${endpoints.category.delete}/${categoryId}`;
+
+  const response = await fetch(URL, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorDetails = await response.json();
+    throw new Error(errorDetails.message || 'Error deleting category');
+  }
+
+  return response.json();
+}
+
+export async function updateCategory(categoryId: string, category: { name: string; description?: string }, token: string) {
+  const baseUrl = BASE_API;
+  const URL = `${baseUrl}${endpoints.category.edit}/${categoryId}`;
+
+  const response = await fetch(URL, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(category),
+  });
+
+  if (!response.ok) {
+    const errorDetails = await response.json();
+    throw new Error(errorDetails.message || 'Error updating category');
+  }
+
+  return response.json();
 }

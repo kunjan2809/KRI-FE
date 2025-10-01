@@ -21,8 +21,6 @@ import {
 } from '@mui/x-data-grid';
 
 import { paths } from 'src/routes/paths';
-import { useRouter } from 'src/routes/hooks';
-import { RouterLink } from 'src/routes/components';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
@@ -30,7 +28,6 @@ import { deleteCategory, useGetCategories, updateCategory, addCategory } from 's
 
 import Iconify from 'src/components/iconify';
 import { useSnackbar } from 'src/components/snackbar';
-import EmptyContent from 'src/components/empty-content';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
@@ -68,14 +65,53 @@ const SORT_MODEL = {
 
 // ----------------------------------------------------------------------
 
+const CustomToolbar = ({ filters, onFilters, selectedRowIds, onConfirmRows }: {
+  filters: ICategoryTableFilters;
+  onFilters: (name: string, value: ICategoryTableFilterValue) => void;
+  selectedRowIds: GridRowSelectionModel;
+  onConfirmRows: () => void;
+}) => (
+  <GridToolbarContainer>
+    <CategoryTableToolbar
+      filters={filters}
+      onFilters={onFilters}
+    />
+
+    <GridToolbarQuickFilter />
+
+    <Stack
+      spacing={1}
+      flexGrow={1}
+      direction="row"
+      alignItems="center"
+      justifyContent="flex-end"
+    >
+      {!!(selectedRowIds as unknown as string[]).length && (
+        <Button
+          size="small"
+          color="error"
+          startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
+          onClick={onConfirmRows}
+        >
+          Delete ({(selectedRowIds as unknown as string[]).length})
+        </Button>
+      )}
+
+      <GridToolbarColumnsButton />
+      <GridToolbarFilterButton />
+      <GridToolbarExport />
+    </Stack>
+  </GridToolbarContainer>
+);
+
 export default function CategoryListView() {
   const { enqueueSnackbar } = useSnackbar();
 
   const token = useAuthToken();
   const confirmRows = useBoolean();
+  const confirmSingleRow = useBoolean();
   const categoryModal = useBoolean();
 
-  const router = useRouter();
 
   const settings = useSettingsContext();
 
@@ -83,13 +119,14 @@ export default function CategoryListView() {
   const [editingCategory, setEditingCategory] = useState<ICategory | null>(null);
 
   const [filters, setFilters] = useState(defaultFilters);
-  const [sortModel, setSortModel] = useState<GridSortModel[0]>(SORT_MODEL as GridSortModel[0]);
+  const [, setSortModel] = useState<GridSortModel[0]>(SORT_MODEL as GridSortModel[0]);
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(10);
 
-  const { categories, categoriesLoading, categoriesError, categoriesEmpty, totalCategories } = useGetCategories();
+  const { categories, categoriesLoading, categoriesError, totalCategories } = useGetCategories();
 
   const [selectedRowIds, setSelectedRowIds] = useState<GridRowSelectionModel>([] as unknown as GridRowSelectionModel);
+  const [singleRowToDelete, setSingleRowToDelete] = useState<string | null>(null);
 
   const [columnVisibilityModel, setColumnVisibilityModel] =
     useState<GridColumnVisibilityModel>(HIDE_COLUMNS);
@@ -177,8 +214,16 @@ export default function CategoryListView() {
     [enqueueSnackbar, tableData, token]
   );
 
+  const handleConfirmSingleDelete = useCallback(() => {
+    if (singleRowToDelete) {
+      handleDeleteRow(singleRowToDelete);
+      setSingleRowToDelete(null);
+      confirmSingleRow.onFalse();
+    }
+  }, [singleRowToDelete, handleDeleteRow, confirmSingleRow]);
+
   const handleDeleteRows = useCallback(() => {
-    const deleteRows = tableData.filter((row) => !(selectedRowIds as string[]).includes(row._id));
+    const deleteRows = tableData.filter((row) => !(selectedRowIds as unknown as string[]).includes(row._id));
     setTableData(deleteRows);
     enqueueSnackbar('Categories deleted successfully!');
   }, [enqueueSnackbar, selectedRowIds, tableData]);
@@ -241,7 +286,6 @@ export default function CategoryListView() {
       minWidth: 200,
       hideable: false,
       display: 'flex',
-      alignItems: 'center',
       renderCell: (params) => <RenderCellCategory params={params} />,
     },
     {
@@ -250,7 +294,6 @@ export default function CategoryListView() {
       flex: 1,
       minWidth: 300,
       display: 'flex',
-      alignItems: 'center',
       renderCell: (params) => (
         <Typography variant="body2" color="text.secondary">
           {params.value || 'No description'}
@@ -262,7 +305,6 @@ export default function CategoryListView() {
       headerName: 'Products',
       width: 120,
       display: 'flex',
-      alignItems: 'center',
       align: 'center',
       headerAlign: 'center',
       renderCell: (params) => <RenderCellProductCount params={params} />,
@@ -272,7 +314,6 @@ export default function CategoryListView() {
       headerName: 'Created At',
       width: 160,
       display: 'flex',
-      alignItems: 'center',
       renderCell: (params) => <RenderCellCreatedAt params={params} />,
     },
     {
@@ -296,52 +337,17 @@ export default function CategoryListView() {
           showInMenu
           icon={<Iconify icon="solar:trash-bin-trash-bold" />}
           label="Delete"
+          sx={{ color: 'error.main' }}
           onClick={() => {
-            handleDeleteRow(params.row._id);
+            setSingleRowToDelete(params.row._id);
+            confirmSingleRow.onTrue();
           }}
         />,
       ],
     },
   ];
 
-  const getTogglableColumns = () =>
-    columns
-      .filter((column) => !HIDE_COLUMNS_TOGGLABLE.includes(column.field))
-      .map((column) => column.field);
 
-  const CustomToolbar = () => (
-    <GridToolbarContainer>
-      <CategoryTableToolbar
-        filters={filters}
-        onFilters={handleFilters}
-      />
-
-      <GridToolbarQuickFilter />
-
-      <Stack
-        spacing={1}
-        flexGrow={1}
-        direction="row"
-        alignItems="center"
-        justifyContent="flex-end"
-      >
-        {!!(selectedRowIds as string[]).length && (
-          <Button
-            size="small"
-            color="error"
-            startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
-            onClick={confirmRows.onTrue}
-          >
-            Delete ({(selectedRowIds as string[]).length})
-          </Button>
-        )}
-
-        <GridToolbarColumnsButton />
-        <GridToolbarFilterButton />
-        <GridToolbarExport />
-      </Stack>
-    </GridToolbarContainer>
-  );
 
   return (
     <>
@@ -421,20 +427,18 @@ export default function CategoryListView() {
               setColumnVisibilityModel(newModel);
             }}
             slots={{
-              toolbar: CustomToolbar,
+              toolbar: () => (
+                <CustomToolbar
+                  filters={filters}
+                  onFilters={handleFilters}
+                  selectedRowIds={selectedRowIds}
+                  onConfirmRows={confirmRows.onTrue}
+                />
+              ),
             }}
             sx={{
               '& .MuiDataGrid-cell': {
                 borderBottom: '1px dashed #919eab33',
-              },
-            }}
-            slotProps={{
-              toolbar: {
-                selectedRowIds,
-                onDeleteRows: handleDeleteRows,
-                onEditRows: () => {
-                  console.info('EDIT ROWS', selectedRowIds);
-                },
               },
             }}
           />
@@ -447,7 +451,7 @@ export default function CategoryListView() {
         title="Delete"
         content={
           <>
-            Are you sure want to delete <strong>{(selectedRowIds as string[]).length}</strong> categories?
+            Are you sure want to delete <strong>{(selectedRowIds as unknown as string[]).length}</strong> categories?
           </>
         }
         action={
@@ -458,6 +462,29 @@ export default function CategoryListView() {
               handleDeleteRows();
               confirmRows.onFalse();
             }}
+          >
+            Delete
+          </Button>
+        }
+      />
+
+      <ConfirmDialog
+        open={confirmSingleRow.value}
+        onClose={() => {
+          confirmSingleRow.onFalse();
+          setSingleRowToDelete(null);
+        }}
+        title="Delete Category"
+        content={
+          <>
+            Are you sure you want to delete this category? This action cannot be undone.
+          </>
+        }
+        action={
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleConfirmSingleDelete}
           >
             Delete
           </Button>

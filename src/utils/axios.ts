@@ -73,7 +73,7 @@ export const endpoints = {
     login: '/api/auth/login',
     register: '/api/auth/register',
     signup: '/api/auth/signup',
-    forgetPassword: '/api/auth/forget-password',    
+    forgetPassword: '/api/auth/forget-password',
   },
   analytics: {
     dashboard: '/api/analytics/dashboard/',
@@ -126,5 +126,8 @@ export const endpoints = {
   },
   category: {
     all: '/api/category/all',
+    add: '/api/category/add',
+    edit: '/api/category/edit',
+    delete: '/api/category/delete',
   },
 };

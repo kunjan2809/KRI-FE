@@ -93,7 +93,7 @@ const Logo = forwardRef<HTMLDivElement, LogoProps>(
     }
 
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', height: isMini ? '64px' : '80px', width: '100%', paddingLeft: isMini ? '0px' : '20px', justifyContent: isMini ? 'center' : '' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', height: isMini ? '64px' : '80px', width: '100%',  justifyContent:'center', paddingRight: isMini ? '0px' : '20px' }}>
         <Link component={RouterLink} href="/" sx={{ display: 'contents' }}>
           {!isMini ?
             <img src='/assets/Logo-horizontal.svg' alt="logo" style={{ width: '100px' }} />

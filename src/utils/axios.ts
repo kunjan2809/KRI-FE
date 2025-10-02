@@ -105,6 +105,7 @@ export const endpoints = {
     detailsById: '/api/products/admin/details/',
     quantity: '/api/products/admin/quantity/',
     status: '/api/products/admin/status/',
+    featured: '/api/products/featured',
   },
   image: {
     product: '/api/images/product/',
@@ -129,5 +130,8 @@ export const endpoints = {
     add: '/api/category/add',
     edit: '/api/category/edit',
     delete: '/api/category/delete',
+  },
+  newsletter: {
+    subscribe: '/api/leads/subscribe',
   },
 };

@@ -12,6 +12,7 @@ import { GridRenderCellParams } from '@mui/x-data-grid';
 
 export function RenderCellCategory({ params }: { params: GridRenderCellParams }) {
   const categoryName = params.row.name || '';
+  const categoryId = params.row._id || '';
   const firstChar = categoryName.charAt(0).toUpperCase() || '?';
   
   return (
@@ -33,7 +34,7 @@ export function RenderCellCategory({ params }: { params: GridRenderCellParams })
           {categoryName}
         </Typography>
         <Typography variant="caption" color="text.secondary" noWrap>
-          {categoryName.split(' ')[0]} {/* Show first word as sub-label */}
+          {categoryId} {/* Show category id as sub-label */}
         </Typography>
       </Box>
     </Stack>

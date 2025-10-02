@@ -146,40 +146,10 @@ export default function CategoryListView() {
     }
   }, [categories]);
 
-  // Fallback data if API fails
-  const fallbackCategories: any[] = [
-    {
-      _id: 'fallback-1',
-      id: 'fallback-1',
-      name: 'Electronics',
-      description: 'Electronic devices and gadgets',
-      created_at: new Date().toISOString(),
-      product_count: 25,
-    },
-    {
-      _id: 'fallback-2',
-      id: 'fallback-2',
-      name: 'Clothing',
-      description: 'Fashion and apparel items',
-      created_at: new Date().toISOString(),
-      product_count: 50,
-    },
-    {
-      _id: 'fallback-3',
-      id: 'fallback-3',
-      name: 'Home & Garden',
-      description: 'Home improvement and garden supplies',
-      created_at: new Date().toISOString(),
-      product_count: 30,
-    },
-  ];
-
   // Use fallback data if API fails and no data is available
   let displayData: any[] = [];
   if (tableData.length > 0) {
     displayData = tableData;
-  } else if (categoriesError && !categoriesLoading) {
-    displayData = fallbackCategories;
   }
 
   const dataFiltered = applyFilter({

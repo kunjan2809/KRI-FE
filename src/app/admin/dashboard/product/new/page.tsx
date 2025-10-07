@@ -1,4 +1,4 @@
-import { ProductCreateNewView } from 'src/sections/product/view';
+import { ProductFormView } from 'src/sections/product/view';
 
 // ----------------------------------------------------------------------
 
@@ -6,6 +6,6 @@ export const metadata = {
   title: 'KRI: Create a new product',
 };
 
-export default function ProductCreateNewPage() {
-  return <ProductCreateNewView />;
+export default function ProductFormPage() {
+  return <ProductFormView />;
 }

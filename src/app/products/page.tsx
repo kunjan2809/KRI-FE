@@ -53,7 +53,7 @@ const sortOptions = [
   { value: 'price-low', label: 'Price: Low to High' },
   { value: 'price-high', label: 'Price: High to Low' },
   { value: 'rating', label: 'Highest Rated' },
-  { value: 'popular', label: 'Most Popular' },
+  // { value: 'popular', label: 'Most Popular' },
 ];
 
 const filterOptions = [
@@ -61,7 +61,7 @@ const filterOptions = [
   { value: 'price-low', label: 'Price: Low to High', isSelected: false },
   { value: 'price-high', label: 'Price: High to Low', isSelected: false },
   { value: 'rating', label: 'Highest Rated', isSelected: false },
-  { value: 'popular', label: 'Most Popular', isSelected: false },
+  // { value: 'popular', label: 'Most Popular', isSelected: false },
 ];
 const filterExpandedOptions = [
   { value: 'category', label: 'Category', isExpanded: true },
@@ -329,6 +329,7 @@ export default function ProductsPage() {
                   <Chip
                     key={1}
                     label="Hide filters"
+                    icon={<Iconify icon="eva:funnel-outline" />}
                     onClick={() => handleShowFilters()}
                     onDelete={() => handleShowFilters()}
                   />
@@ -337,6 +338,7 @@ export default function ProductsPage() {
                   <Chip
                     key={1}
                     label="Show filters"
+                    icon={<Iconify icon="eva:funnel-outline" />}
                     variant="outlined"
                     onClick={() => handleShowFilters()}
                   />

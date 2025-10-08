@@ -32,7 +32,7 @@ const filterOptions = [
   { value: 'price-low', label: 'Price: Low to High', isSelected: false },
   { value: 'price-high', label: 'Price: High to Low', isSelected: false },
   { value: 'rating', label: 'Highest Rated', isSelected: false },
-  { value: 'popular', label: 'Most Popular', isSelected: false },
+  // { value: 'popular', label: 'Most Popular', isSelected: false },
 ];
 
 export default function ProductsPage() {
@@ -140,14 +140,15 @@ export default function ProductsPage() {
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
       {/* Page Header */}
-      {/* <Box sx={{ mb: 4 }}>
-        <Typography variant="h3" component="h1" sx={{ mb: 2, fontWeight: 'bold' }}>
-          Discover Unique Products
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h3" component="h2" sx={{ fontWeight: 'bold' }}>
+          Your Wishlist
         </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-          Explore our curated collection of handcrafted and unique items from talented creators
+        <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+          Your favorite products are waiting for you.
         </Typography>
-      </Box> */}
+
+      </Box>
       <Box sx={{ display: 'flex', width: '100%' }}>
         <Box>
 

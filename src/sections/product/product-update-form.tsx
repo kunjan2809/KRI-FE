@@ -1,20 +1,19 @@
 import * as Yup from 'yup';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useMemo, useState, useCallback, useEffect } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
+import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Switch from '@mui/material/Switch';
-import Divider from '@mui/material/Divider';
 import Grid from '@mui/material/Unstable_Grid2';
 import CardHeader from '@mui/material/CardHeader';
 import Typography from '@mui/material/Typography';
 import LoadingButton from '@mui/lab/LoadingButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import Button from '@mui/material/Button';
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
@@ -22,18 +21,17 @@ import { useRouter } from 'src/routes/hooks';
 import { useResponsive } from 'src/hooks/use-responsive';
 import { useAuthToken } from 'src/auth/hooks';
 
+import { updateProduct, uploadProductImage } from 'src/api/product';
+
 import { useSnackbar } from 'src/components/snackbar';
 import FormProvider, {
     RHFSelect,
     RHFEditor,
     RHFUpload,
-    RHFSwitch,
     RHFTextField,
-    RHFAutocomplete,
 } from 'src/components/hook-form';
 
-import { IProductCreateRequest, IProductAPIResponse, IUploadProductImage } from 'src/types/product';
-import { updateProduct, uploadProductImage } from 'src/api/product';
+import { IProductAPIResponse, IProductCreateRequest, IUploadProductImage } from 'src/types/product';
 
 // ----------------------------------------------------------------------
 
@@ -72,7 +70,14 @@ export default function ProductUpdateForm({ productId, currentProduct }: Props) 
     const ProductSchema = Yup.object().shape({
         name: Yup.string().required('Product name is required'),
         sku: Yup.string().required('SKU is required'),
-        description: Yup.string().required('Description is required'),
+        description: Yup.string()
+            .required('Description is required')
+            .test('is-not-empty', 'Description is required', (value) => {
+                if (!value) return false;
+                // Remove HTML tags and check if there's actual content
+                const textContent = value.replace(/<[^>]*>/g, '').trim();
+                return textContent.length > 0;
+            }),
         price: Yup.number().moreThan(0, 'Price must be greater than 0'),
         stock_quantity: Yup.number().min(0, 'Stock quantity cannot be negative'),
         color: Yup.string().required('Color is required'),
@@ -235,7 +240,14 @@ export default function ProductUpdateForm({ productId, currentProduct }: Props) 
 
                         <RHFTextField name="sku" label="SKU" />
 
-                        <RHFTextField name="description" label="Description" multiline rows={4} />
+                        <Stack spacing={1.5}>
+                          <Typography variant="subtitle2">Description</Typography>
+                          <RHFEditor 
+                            name="description" 
+                            simple 
+                            placeholder="Describe your product in detail..."
+                          />
+                        </Stack>
 
                         <RHFSelect native name="category_id" label="Category" InputLabelProps={{ shrink: true }}>
                             <option value="" />

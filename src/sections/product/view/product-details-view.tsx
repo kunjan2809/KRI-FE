@@ -41,15 +41,15 @@ const SUMMARY = [
   {
     title: '100% Original',
     description: 'Chocolate bar candy canes ice cream toffee cookie halvah.',
-    icon: 'solar:verified-check-bold',
+    icon: 'solar:medal-ribbon-star-bold',
   },
   {
     title: '2 Day size Replacement',
     description: 'Marshmallow biscuit donut dragée fruitcake wafer.',
-    icon: 'solar:clock-circle-bold',
+    icon: 'solar:refresh-circle-bold',
   },
   {
-    title: 'Year Warranty',
+    title: '1 Year Warranty',
     description: 'Cotton candy gingerbread cake I love sugar sweet.',
     icon: 'solar:shield-check-bold',
   },

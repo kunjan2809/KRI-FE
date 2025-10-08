@@ -205,7 +205,7 @@ export default function CartPage() {
       <Container maxWidth="lg" sx={{ py: 6 }}>
         {/* Shopping Cart Section */}
         <Box sx={{ mb: 6 }}>
-          <Typography variant="h3" component="h2" sx={{ mb: 2, fontWeight: 'bold' }}>
+          <Typography variant="h3" component="h2" sx={{ fontWeight: 'bold' }}>
             Your Shopping Bag
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
@@ -391,19 +391,19 @@ export default function CartPage() {
                 {/* Guarantees */}
                 <Stack spacing={1} sx={{ mt: 3 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Box sx={{ width: 16, height: 16, borderRadius: '50%', bgcolor: 'success.main' }} />
+                    <Iconify icon="eva:lock-fill" sx={{ color: 'success.main', width: 16, height: 16 }} />
                     <Typography variant="body2" color="text.secondary">
                       Secure Payment
                     </Typography>
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Box sx={{ width: 16, height: 16, borderRadius: '50%', bgcolor: 'success.main' }} />
+                    <Iconify icon="eva:refresh-fill" sx={{ color: 'success.main', width: 16, height: 16 }} />
                     <Typography variant="body2" color="text.secondary">
                       Free returns within 14 days
                     </Typography>
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Box sx={{ width: 16, height: 16, borderRadius: '50%', bgcolor: 'success.main' }} />
+                    <Iconify icon="eva:car-fill" sx={{ color: 'success.main', width: 16, height: 16 }} />
                     <Typography variant="body2" color="text.secondary">
                       Free shipping on orders over $2,000
                     </Typography>

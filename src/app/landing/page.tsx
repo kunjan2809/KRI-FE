@@ -14,6 +14,8 @@ import {
   TextField,
   IconButton,
   InputAdornment,
+  Alert,
+  Snackbar,
 } from '@mui/material';
 import { useRouter } from 'src/routes/hooks';
 import { paths } from 'src/routes/paths';
@@ -25,6 +27,8 @@ import productData from '../../../Product.json';
 import ProductCarousel from './carousel/Carousel';
 import HeroSection from './HeroSection/HeroSection';
 
+import { useGetFeaturedProducts } from 'src/api/product';
+import { subscribeToNewsletter } from 'src/api/newsletter';
 import bracelet from '../../../public/assets/categories/bresslet.jpg';
 import necklace from '../../../public/assets/categories/nackless.jpg';
 import ring from '../../../public/assets/categories/ring.jpg';
@@ -49,9 +53,16 @@ export default function LandingPage() {
   const [email, setEmail] = useState('');
   const [isHovered, setIsHovered] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  const [toast, setToast] = useState({
+    open: false,
+    message: '',
+    severity: 'success' as 'success' | 'error',
+  });
 
-  // Get featured products from Product.json (first 4 products)
-  const featuredProducts = productData.slice(0, 4);
+  const { featuredProducts } = useGetFeaturedProducts();
+
 
   // Use Product.json data for recommended products
   const recommendedProducts: IProductItem[] = [
@@ -106,26 +117,83 @@ export default function LandingPage() {
   ];
 
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (email) {
-      setIsSubmitted(true);
-      setTimeout(() => {
-        setIsSubmitted(false);
-        setEmail('');
-      }, 3000);
+  // Email validation function
+  const validateEmail = (emailAddress: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(emailAddress);
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setEmail(value);
+
+    // Clear error when user starts typing
+    if (emailError) {
+      setEmailError('');
     }
   };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Reset previous errors
+    setEmailError('');
+
+    // Validate email
+    if (!email.trim()) {
+      setEmailError('Email is required');
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      setEmailError('Please enter a valid email address');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await subscribeToNewsletter(email);
+
+      // Show success toast
+      setToast({
+        open: true,
+        message: response.message || 'Successfully subscribed to newsletter!',
+        severity: 'success',
+      });
+
+      // Clear email field
+      setEmail('');
+      setIsSubmitted(true);
+
+      // Reset submitted state after 3 seconds
+      setTimeout(() => {
+        setIsSubmitted(false);
+      }, 3000);
+
+    } catch (error) {
+      // Show error toast
+      setToast({
+        open: true,
+        message: error instanceof Error ? error.message : 'Failed to subscribe. Please try again.',
+        severity: 'error',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleToastClose = () => {
+    setToast(prev => ({ ...prev, open: false }));
+  };
+
 
   const handleProductClick = (productId: string) => {
     router.push(paths.user.products.details(productId));
   };
 
   const handleCategoryClick = (categoryName: string) => {
-    const categoryPath = paths.user.categories[categoryName.toLowerCase().replace(/\s+/g, '') as keyof typeof paths.user.categories];
-    if (categoryPath) {
-      router.push(categoryPath);
-    }
+    router.push(`/products?searchStr=${encodeURIComponent(categoryName)}`);
   };
 
   const handleViewAllProducts = () => {
@@ -408,16 +476,20 @@ export default function LandingPage() {
                     <TextField
                       type="email"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      onChange={handleEmailChange}
                       placeholder="Enter your email address"
                       required
                       fullWidth
+                      error={!!emailError}
+                      helperText={emailError}
+                      disabled={isLoading}
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position="end">
                             <Button
                               type="submit"
                               variant="contained"
+                              disabled={isLoading}
                               onMouseEnter={() => setIsHovered(true)}
                               onMouseLeave={() => setIsHovered(false)}
                               sx={{
@@ -429,7 +501,20 @@ export default function LandingPage() {
                                 borderRadius: '0 8px 8px 0',
                               }}
                             >
-                              <Iconify icon="mdi:arrow-right" width={24} />
+                              {isLoading ? (
+                                <Box
+                                  sx={{
+                                    width: 20,
+                                    height: 20,
+                                    border: '2px solid #fff',
+                                    borderTop: '2px solid transparent',
+                                    borderRadius: '50%',
+                                    animation: 'spin 1s linear infinite',
+                                  }}
+                                />
+                              ) : (
+                                <Iconify icon="mdi:arrow-right" width={24} />
+                              )}
                             </Button>
                           </InputAdornment>
                         ),
@@ -753,6 +838,39 @@ export default function LandingPage() {
           </Stack>
         </Box> */}
       </Container>
+
+      {/* Toast Notification */}
+      <Snackbar
+        open={toast.open}
+        autoHideDuration={6000}
+        onClose={handleToastClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={handleToastClose}
+          severity={toast.severity}
+          sx={{ width: '100%' }}
+        >
+          {toast.message}
+        </Alert>
+      </Snackbar>
+
+      {/* Loading spinner animation */}
+      <Box
+        component="style"
+        sx={{
+          '& + style': {
+            display: 'none',
+          },
+        }}
+      >
+        {`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}
+      </Box>
     </>
   );
 }

@@ -1,26 +1,26 @@
 import * as Yup from 'yup';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useMemo, useState, useCallback, useEffect } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
+import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Switch from '@mui/material/Switch';
-import Divider from '@mui/material/Divider';
 import Grid from '@mui/material/Unstable_Grid2';
 import CardHeader from '@mui/material/CardHeader';
 import Typography from '@mui/material/Typography';
 import LoadingButton from '@mui/lab/LoadingButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import Button from '@mui/material/Button';
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 
 import { useResponsive } from 'src/hooks/use-responsive';
 import { useAuthToken } from 'src/auth/hooks';
+
 
 import { useSnackbar } from 'src/components/snackbar';
 import FormProvider, {
@@ -94,6 +94,33 @@ export default function ProductUpdateForm({ productId, currentProduct }: Props) 
   const [isLoading, setIsLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
+  // const ProductSchema = Yup.object().shape({
+  //     name: Yup.string().required('Product name is required'),
+  //     sku: Yup.string().required('SKU is required'),
+  //     description: Yup.string()
+  //         .required('Description is required')
+  //         .test('is-not-empty', 'Description is required', (value) => {
+  //             if (!value) return false;
+  //             // Remove HTML tags and check if there's actual content
+  //             const textContent = value.replace(/<[^>]*>/g, '').trim();
+  //             return textContent.length > 0;
+  //         }),
+  //     price: Yup.number().moreThan(0, 'Price must be greater than 0'),
+  //     stock_quantity: Yup.number().min(0, 'Stock quantity cannot be negative'),
+  //     color: Yup.string().required('Color is required'),
+  //     weight: Yup.number().min(0, 'Weight cannot be negative'),
+  //     status: Yup.string().required('Status is required'),
+  //     category_id: Yup.string().required('Category is required'),
+  //     discount_type: Yup.string().nullable(),
+  //     discount_rate: Yup.number().when('hasDiscount', {
+  //         is: true,
+  //         then: (schema) => schema.min(0, 'Discount rate cannot be negative'),
+  //     }),
+  //     primary_image: Yup.object().shape({
+  //         image_url: Yup.string().required('Primary image is required'),
+  //         alt_text: Yup.string().required('Alt text is required'),
+  //     })
+  // });
   const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
       backgroundColor: theme.palette.common.black,
@@ -115,7 +142,7 @@ export default function ProductUpdateForm({ productId, currentProduct }: Props) 
   }));
 
   const variationValidationSchema = Yup.object().shape({
-     id: Yup.string().required('id is required'),
+    id: Yup.string().required('id is required'),
     color: Yup.string().required('color is required'),
     size: Yup.string().required('size is required'),
     sku: Yup.string().required('sku is required'),
@@ -160,21 +187,21 @@ export default function ProductUpdateForm({ productId, currentProduct }: Props) 
       weight: currentProduct?.weight || 0,
       status: currentProduct?.status || 'published',
       category_id: currentProduct?.category_id?._id || '',
-      category_name : currentProduct?.category_id?.name || '',
+      category_name: currentProduct?.category_id?.name || '',
       primary_image: {
         image_url: currentProduct?.primary_image?.image_url || '',
         alt_text: currentProduct?.primary_image?.alt_text || '',
         is_primary: true,
         sort_order: 1,
       },
-      variations: currentProduct?.variations.map((item)=>({
+      variations: currentProduct?.variations.map((item) => ({
         id: item.id,
         color: item.color,
         size: item.size,
-        sku:item.sku,
-        price:item.price,
-        stock_quantity:item.stock_quantity,
-        status:item.status
+        sku: item.sku,
+        price: item.price,
+        stock_quantity: item.stock_quantity,
+        status: item.status
       })) || [],
     }),
     [currentProduct]
@@ -266,13 +293,13 @@ export default function ProductUpdateForm({ productId, currentProduct }: Props) 
 
       // Only upload image if a new file is selected
       if (selectedFile) {
-        
-      const productImageData: IUploadProductImage = {
-        product_id: productId,
-        image_url: data.primary_image?.image_url || '',
-        is_primary: true,
-        file: selectedFile || undefined,
-      };
+
+        const productImageData: IUploadProductImage = {
+          product_id: productId,
+          image_url: data.primary_image?.image_url || '',
+          is_primary: true,
+          file: selectedFile || undefined,
+        };
         await uploadProductImage(productId, productImageData, token);
       }
       await updateProduct(productId, productData, token);
@@ -301,10 +328,10 @@ export default function ProductUpdateForm({ productId, currentProduct }: Props) 
   };
 
   const handleAddRow = () => {
-    setValue('variations',[...values.variations, emptyRow]);
+    setValue('variations', [...values.variations, emptyRow]);
   };
 
-   const handleChange = (id: string, field: keyof IProductVariantRow, value: string | number) => {
+  const handleChange = (id: string, field: keyof IProductVariantRow, value: string | number) => {
     setValue('variations', values.variations.map((variations) => (variations.id === id ? { ...variations, [field]: value } : variations))
     );
     const index = values.variations.findIndex((row) => row.id === id);
@@ -354,7 +381,7 @@ export default function ProductUpdateForm({ productId, currentProduct }: Props) 
                 <StyledTableRow key={row.id}>
                   <StyledTableCell component="th" scope="row">
                     <TextField
-                     {...register(`variations.${index}.color`)}
+                      {...register(`variations.${index}.color`)}
                       id={`${row.id}-color`}
                       name="color"
                       value={row.color}
@@ -367,7 +394,7 @@ export default function ProductUpdateForm({ productId, currentProduct }: Props) 
                   </StyledTableCell>
                   <StyledTableCell align="right">
                     <TextField
-                     {...register(`variations.${index}.size`)}
+                      {...register(`variations.${index}.size`)}
                       id={`${row.id}-size`}
                       name="size"
                       placeholder="256GB"
@@ -380,7 +407,7 @@ export default function ProductUpdateForm({ productId, currentProduct }: Props) 
                   </StyledTableCell>
                   <StyledTableCell align="right">
                     <TextField
-                     {...register(`variations.${index}.sku`)}
+                      {...register(`variations.${index}.sku`)}
                       id={`${row.id}-sku`}
                       name="sku"
                       placeholder="IPHONE15PRO-PINK-256"
@@ -393,7 +420,7 @@ export default function ProductUpdateForm({ productId, currentProduct }: Props) 
                   </StyledTableCell>
                   <StyledTableCell align="right">
                     <TextField
-                     {...register(`variations.${index}.price`)}
+                      {...register(`variations.${index}.price`)}
                       id={`${row.id}-price`}
                       name="price"
                       placeholder="99.99"
@@ -406,7 +433,7 @@ export default function ProductUpdateForm({ productId, currentProduct }: Props) 
                   </StyledTableCell>
                   <StyledTableCell align="right">
                     <TextField
-                     {...register(`variations.${index}.stock_quantity`)}
+                      {...register(`variations.${index}.stock_quantity`)}
                       id={`${row.id}-stock_quantity`}
                       name="stock_quantity"
                       placeholder="30"
@@ -419,7 +446,7 @@ export default function ProductUpdateForm({ productId, currentProduct }: Props) 
                   </StyledTableCell>
                   <StyledTableCell align="right">
                     <RHFSelect
-                     {...register(`variations.${index}.status`)}
+                      {...register(`variations.${index}.status`)}
                       id={`${row.id}-status`}
                       name="status"
                       native
@@ -508,7 +535,7 @@ export default function ProductUpdateForm({ productId, currentProduct }: Props) 
               name="category_id"
               label="Category"
               InputLabelProps={{ shrink: true }}
-              
+
             >
               <option value="" />
               {PRODUCT_CATEGORY_OPTIONS.map((category) => (
@@ -664,7 +691,7 @@ export default function ProductUpdateForm({ productId, currentProduct }: Props) 
               </Box>
             )}
 
-           
+
           </Stack>
         </Card>
       </Grid>
@@ -698,7 +725,7 @@ export default function ProductUpdateForm({ productId, currentProduct }: Props) 
               InputLabelProps={{ shrink: true }}
             />
 
-             <RHFTextField
+            <RHFTextField
               name="stock_quantity"
               label="Stock Quantity"
               placeholder="0"

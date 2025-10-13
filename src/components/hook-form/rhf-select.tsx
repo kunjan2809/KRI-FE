@@ -31,7 +31,6 @@ export function RHFSelect({
   ...other
 }: RHFSelectProps) {
   const { control } = useFormContext();
-
   return (
     <Controller
       name={name}
@@ -95,7 +94,6 @@ export function RHFMultiSelect({
 
   const renderValues = (selectedIds: string[]) => {
     const selectedItems = options.filter((item) => selectedIds.includes(item.value));
-
     if (!selectedItems.length && placeholder) {
       return <Box sx={{ color: 'text.disabled' }}>{placeholder}</Box>;
     }

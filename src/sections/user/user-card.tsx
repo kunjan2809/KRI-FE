@@ -7,18 +7,23 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import ListItemText from '@mui/material/ListItemText';
 import { alpha, useTheme } from '@mui/material/styles';
+import Button from '@mui/material/Button';
 
 import { _socials } from 'src/_mock';
 import { AvatarShape } from 'src/assets/illustrations';
 
 import Image from 'src/components/image';
 import Iconify from 'src/components/iconify';
+import ConfirmDialog from 'src/components/custom-dialog/confirm-dialog';
 
 import { IUserStatus, INUserItem } from 'src/types/user';
 import { useAuthToken } from 'src/auth/hooks';
 import { updateUserStatus } from 'src/api/user';
 import { Chip, Tooltip } from '@mui/material';
 import { getDummyAvtarUrl } from 'src/utils/avtarData';
+import { useBoolean } from 'src/hooks/use-boolean';
+import { useCopyToClipboard } from 'src/hooks/use-copy-to-clipboard';
+import { useState } from 'react';
 
 // ----------------------------------------------------------------------
 
@@ -38,9 +43,37 @@ export default function UserCard({ user }: Props) {
   const avatarUrl = avatar.avatarUrl;
   const userId = _id;
 
+  // Dialog state management
+  const confirmDialog = useBoolean();
+  const [pendingStatus, setPendingStatus] = useState<IUserStatus | null>(null);
+
+  // Copy to clipboard functionality
+  const { copy: copyToClipboard } = useCopyToClipboard();
+
   const handleUpdateStatus = async (userStatus: IUserStatus) => {
     await updateUserStatus(userId, userStatus, token as string);
   }
+
+  const handleStatusChangeClick = (newStatus: IUserStatus) => {
+    setPendingStatus(newStatus);
+    confirmDialog.onTrue();
+  };
+
+  const handleConfirmStatusChange = async () => {
+    if (pendingStatus) {
+      await handleUpdateStatus(pendingStatus);
+      setPendingStatus(null);
+    }
+    confirmDialog.onFalse();
+  };
+
+  const handleCopyEmail = async () => {
+    await copyToClipboard(email);
+  };
+
+  const handleCopyPhone = async () => {
+    await copyToClipboard(phoneNumber);
+  };
 
   return (
     <Card sx={{ textAlign: 'center' }}>
@@ -103,10 +136,11 @@ export default function UserCard({ user }: Props) {
 
       <Stack direction="row" alignItems="center" justifyContent="center" sx={{ mb: 2.5 }}>
         <Tooltip
-          title={email}
+          title={`Click to copy: ${email}`}
           placement="bottom"
         >
           <IconButton
+            onClick={handleCopyEmail}
             sx={{
               color: '#212B36',
               '&:hover': {
@@ -119,10 +153,11 @@ export default function UserCard({ user }: Props) {
         </Tooltip>
 
         <Tooltip
-          title={phoneNumber}
+          title={`Click to copy: ${phoneNumber}`}
           placement="bottom"
         >
           <IconButton
+            onClick={handleCopyPhone}
             sx={{
               color: '#212B36',
               '&:hover': {
@@ -140,12 +175,12 @@ export default function UserCard({ user }: Props) {
           >
             <IconButton
               sx={{
-                color: 'success.main',
+                color: 'error.main',
                 '&:hover': {
                   bgcolor: alpha('#212B36', 0.08),
                 },
               }}
-              onClick={() => handleUpdateStatus({ status: 'banned' })}
+              onClick={() => handleStatusChangeClick({ status: 'banned' })}
             >
               <Iconify icon="material-symbols:person-filled" />
             </IconButton>
@@ -159,12 +194,12 @@ export default function UserCard({ user }: Props) {
           >
             <IconButton
               sx={{
-                color: 'error.main',
+                color: 'success.main',
                 '&:hover': {
                   bgcolor: alpha('#212B36', 0.08),
                 },
               }}
-              onClick={() => handleUpdateStatus({ status: 'active' })}
+              onClick={() => handleStatusChangeClick({ status: 'active' })}
             >
               <Iconify icon="mingcute:user-forbid-fill" />
             </IconButton>
@@ -201,6 +236,34 @@ export default function UserCard({ user }: Props) {
           {order_statistics?.returned_orders}
         </div>
       </Box>
+
+      <ConfirmDialog
+        open={confirmDialog.value}
+        onClose={() => {
+          confirmDialog.onFalse();
+          setPendingStatus(null);
+        }}
+        title={pendingStatus?.status === 'banned' ? 'Ban User' : 'Activate User'}
+        content={
+          <>
+            {pendingStatus?.status === 'banned'
+              ? 
+              <p>Are you sure you want to ban <b>{name}</b>? This will prevent them from accessing the platform.</p>
+              : 
+              <p>Are you sure you want to activate <b>{name}</b>? This will restore their access to the platform.</p>
+            }
+          </>
+        }
+        action={
+          <Button
+            variant="contained"
+            color={pendingStatus?.status === 'banned' ? 'error' : 'success'}
+            onClick={handleConfirmStatusChange}
+          >
+            {pendingStatus?.status === 'banned' ? 'Ban User' : 'Activate User'}
+          </Button>
+        }
+      />
     </Card >
   );
 }

@@ -440,3 +440,30 @@ export async function uploadReviewImage(
 
   return response.json();
 }
+
+export function useGetFeaturedProducts() {
+  const URL = `${BASE_API}${endpoints.product.featured}`;
+
+  const { data, isLoading, error, isValidating } = useSWR(URL, apiFetcher, {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    errorRetryCount: 3,
+    onError: (err) => {
+      console.error('useGetFeaturedProducts error:', err);
+    },
+  });
+
+  const memoizedValue = useMemo(
+    () => ({
+      featuredProducts: (data?.data?.products as IProductItem[]) || [],
+      totalProducts: data?.data?.total_products || 0,
+      featuredProductsLoading: isLoading,
+      featuredProductsError: error,
+      featuredProductsValidating: isValidating,
+      featuredProductsEmpty: !isLoading && !data?.data?.products?.length,
+    }),
+    [data?.data?.products, data?.data?.total_products, error, isLoading, isValidating]
+  );
+
+  return memoizedValue;
+}

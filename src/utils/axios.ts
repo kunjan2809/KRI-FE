@@ -73,7 +73,7 @@ export const endpoints = {
     login: '/api/auth/login',
     register: '/api/auth/register',
     signup: '/api/auth/signup',
-    forgetPassword: '/api/auth/forget-password',    
+    forgetPassword: '/api/auth/forget-password',
   },
   analytics: {
     dashboard: '/api/analytics/dashboard/',
@@ -105,6 +105,7 @@ export const endpoints = {
     detailsById: '/api/products/admin/details/',
     quantity: '/api/products/admin/quantity/',
     status: '/api/products/admin/status/',
+    featured: '/api/products/featured',
     addVariations: '/api/products/admin/:productId/variations',
     editVariations: '/api/products/admin/:productId/variations/:variationId',
     deleteVariations: '/api/products/admin/:productId/variations/:variationId'
@@ -129,5 +130,11 @@ export const endpoints = {
   },
   category: {
     all: '/api/category/all',
+    add: '/api/category/add',
+    edit: '/api/category/edit',
+    delete: '/api/category/delete',
+  },
+  newsletter: {
+    subscribe: '/api/leads/subscribe',
   },
 };

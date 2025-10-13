@@ -2,23 +2,25 @@
 
 import { useCallback, useState } from 'react';
 
-import { Box, Pagination, Tab, Tabs } from '@mui/material';
 import Container from '@mui/material/Container';
 import { alpha } from '@mui/material/styles';
+import { Box, Pagination, Tab, Tabs } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
 
 import { USER_STATUS_OPTIONS } from 'src/_mock';
 
+import { useAuthToken } from 'src/auth/hooks';
+import { useGetUsers } from 'src/api/user';
+
+import Label from 'src/components/label';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
-import Label from 'src/components/label';
-
-import { useGetUsers } from 'src/api/user';
-import { useAuthToken } from 'src/auth/hooks';
 
 import { INUserItem } from 'src/types/user';
+
 import UserCardList from '../user-card-list';
+import UserCardSkeleton from '../user-card-skeleton';
 
 // ----------------------------------------------------------------------
 
@@ -48,7 +50,7 @@ export default function UserCardsView() {
     limit: 10,
   };
 
-  const { data: apiUsers } = useGetUsers(params, token as string);
+  const { data: apiUsers, isLoading } = useGetUsers(params, token as string);
   const users = apiUsers?.users || [];
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -97,14 +99,32 @@ export default function UserCardsView() {
         ))}
       </Tabs>
 
-      <UserCardList users={users} />
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
-        <Pagination
-          count={apiUsers?.total_pages}
-          page={page}
-          onChange={handlePageChange}
-        />
-      </Box>
+      {isLoading ? (
+        <Box
+          gap={3}
+          display="grid"
+          gridTemplateColumns={{
+            xs: 'repeat(1, 1fr)',
+            sm: 'repeat(2, 1fr)',
+            md: 'repeat(3, 1fr)',
+          }}
+        >
+          {Array.from({ length: 6 }).map((_, index) => (
+            <UserCardSkeleton key={index} />
+          ))}
+        </Box>
+      ) : (
+        <>
+          <UserCardList users={users} />
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
+            <Pagination
+              count={apiUsers?.total_pages}
+              page={page}
+              onChange={handlePageChange}
+            />
+          </Box>
+        </>
+      )}
     </Container>
   );
 }

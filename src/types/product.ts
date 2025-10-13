@@ -84,21 +84,15 @@ export type IProductTableFilters = {
 
 // New API response types based on the provided structure
 export type IProductImage = {
-  _id: string;
-  product_id: string;
   image_url: string;
-  alt_text: string;
   is_primary: boolean;
-  sort_order: number;
-  created_at: string;
-  edited_at: string;
 };
 
 export type IUploadProductImage = {
   product_id?: string;
   image_url?: string;
   is_primary: boolean;
-  file?: File;
+  file?: File[];
 };
 
 export type IUploadReviewImage = {
@@ -120,6 +114,7 @@ export type IProductAPIResponse = {
   price: number;
   discount_type: string | null;
   discount_rate: number;
+  mrp: number;
   stock_quantity: number;
   color: string;
   weight: number;
@@ -134,27 +129,82 @@ export type IProductAPIResponse = {
   created_at: string;
   edited_at: string;
   primary_image: IProductImage;
+  variations: IProductVariantRowResponse[];
 };
 
 export type IProductCreateRequest = {
   name: string;
   sku: string;
   description: string;
-  price: number;
-  discount_type?: string | null;
-  discount_rate?: number;
+  pricing: Pricing;
   stock_quantity: number;
-  color: string;
   weight: number;
   status: string;
   category_id: string;
+  variations: IProductCraeteVariation[];
 };
 
+export type IProductUpdateRequest = {
+  _id?: string;
+  name?: string;
+  sku?: string;
+  description?: string;
+  price?: number;
+  discount_type?: string | null;
+  mrp?: number;
+  discount_rate?: number;
+  stock_quantity?: number;
+  weight?: number;
+  status?: string;
+  category_id?: string;
+  primary_image?: {
+    _id?: string;
+    product_id?: string;
+    image_url?: string;
+    is_primary?: boolean;
+  };
+};
+
+export type Pricing = {
+  mrp: number;
+  price: number;
+  discount_type: string | null | undefined;
+  discount_rate: number | undefined;
+};
+
+export type IProductCraeteVariation = {
+  color: string;
+  size: string;
+  sku: string;
+  price: number;
+  stock_quantity: number;
+  status: string;
+};
 
 export type IProductQuantity = {
   quantity: number;
 };
 
 export type IProductStatus = {
+  status: string;
+};
+
+export type IProductVariantRow = {
+  id: string;
+  color: string;
+  size: string;
+  sku: string;
+  price: number;
+  stock_quantity: number;
+  status: string;
+};
+
+export type IProductVariantRowResponse = {
+  _id: string;
+  color: string;
+  size: string;
+  sku: string;
+  price: number;
+  stock_quantity: number;
   status: string;
 };

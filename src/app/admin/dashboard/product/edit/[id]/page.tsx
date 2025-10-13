@@ -1,6 +1,6 @@
 import axios, { endpoints } from 'src/utils/axios';
 
-import { ProductEditView } from 'src/sections/product/view';
+import {  ProductFormView } from 'src/sections/product/view';
 
 // ----------------------------------------------------------------------
 
@@ -15,9 +15,8 @@ type Props = {
 };
 
 export default function ProductEditPage({ params }: Props) {
-  const { id } = params;
 
-  return <ProductEditView id={id} />;
+  return <ProductFormView />;
 }
 
 // export async function generateStaticParams() {

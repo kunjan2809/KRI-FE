@@ -106,6 +106,9 @@ export const endpoints = {
     quantity: '/api/products/admin/quantity/',
     status: '/api/products/admin/status/',
     featured: '/api/products/featured',
+    addVariations: '/api/products/admin/:productId/variations',
+    editVariations: '/api/products/admin/:productId/variations/:variationId',
+    deleteVariations: '/api/products/admin/:productId/variations/:variationId'
   },
   image: {
     product: '/api/images/product/',

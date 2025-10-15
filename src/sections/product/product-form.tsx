@@ -33,6 +33,7 @@ import FormProvider, {
 } from 'src/components/hook-form';
 
 import {
+  EditProductRequest,
   IProductAPIResponse,
   IProductCraeteVariation,
   IProductCreateRequest,
@@ -45,9 +46,12 @@ import {
 import {
   createProduct,
   createVariations,
+  deleteProductImage,
+  deleteVariation,
   editVariations,
   getProductById,
   updateProduct,
+  updateProductImage,
   uploadProductImage,
 } from 'src/api/product';
 import { useGetCategories } from 'src/api/category';
@@ -72,23 +76,17 @@ const PRODUCT_DISCOUNT_TYPE_OPTIONS = [
   { value: 'price', label: 'Fixed Amount' },
 ];
 
-const emptyRow: IProductVariantRow = {
-  id: uuidv4(),
-  color: '',
-  size: '',
-  sku: '',
-  price: 0,
-  stock_quantity: 0,
-};
-
-const imageToBase64 = (file: File) => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = (error) => reject(error);
-  });
-};
+const emptyRow = (): IProductVariantRow => {
+  return {
+    id: uuidv4(),
+    color: '',
+    size: '',
+    sku: '',
+    price: 0,
+    stock_quantity: 0,
+    isLocal: true,
+  };
+}
 
 const imageValidationSchema = Yup.object().shape({
   id: Yup.string().required('Image ID is required'),
@@ -130,7 +128,7 @@ const ProductSchema = Yup.object().shape({
           const num = parseFloat(value);
           return !isNaN(num) && num > 0;
         })
-        .test('percentage-limit', 'Percentage discount cannot exceed 100%', function(value) {
+        .test('percentage-limit', 'Percentage discount cannot exceed 100%', function (value) {
           const { parent } = this;
           if (parent.discount_type === 'percentage' && value) {
             const num = parseFloat(value);
@@ -148,27 +146,27 @@ const ProductSchema = Yup.object().shape({
   category_id: Yup.string().required('Category is required'),
   variations: Yup.array()
     .of(variationValidationSchema)
-    .test('variation-validation', 'All variation fields are required when variations are added', function(variations) {
+    .test('variation-validation', 'All variation fields are required when variations are added', function (variations) {
       if (!variations || variations.length === 0) {
         return true; // No variations is valid
       }
-      
+
       // Check if any variation has empty required fields
-      const hasEmptyFields = variations.some(variation => 
-        !variation.color || !variation.size || !variation.sku || 
+      const hasEmptyFields = variations.some(variation =>
+        !variation.color || !variation.size || !variation.sku ||
         variation.price <= 0 || variation.stock_quantity < 0
       );
-      
+
       if (hasEmptyFields) {
         return this.createError({
           message: 'Please complete all fields in existing variations before adding new ones',
           path: 'variations',
         });
       }
-      
+
       return true;
     }),
-  primary_image: Yup.array()
+  productImages: Yup.array()
     .of(imageValidationSchema)
     .min(1, 'At least 1 image is required')
     .required('Images are required'),
@@ -189,7 +187,7 @@ const defaultValues = {
   weight: 0,
   status: 'published',
   category_id: '',
-  primary_image: [],
+  productImages: [],
   variations: [],
 }
 
@@ -205,7 +203,7 @@ export default function ProductForm() {
   const params = useParams();
   const productId = params.id;
 
-  const [isPublishing, setIsPublishing] = useState(true);
+  const [actualProductData, setActualProductData] = useState<any>(null);
   const [deletingRowIndex, setDeletingRowIndex] = useState<number | null>(null);
   const { categories, categoriesLoading, categoriesError } = useGetCategories();
 
@@ -229,7 +227,6 @@ export default function ProductForm() {
 
   const handlePublishToggle = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      setIsPublishing(event.target.checked);
       setValue('status', event.target.checked ? 'published' : 'draft');
     },
     [setValue]
@@ -237,10 +234,10 @@ export default function ProductForm() {
 
   const handleDiscountToggle = (event: React.ChangeEvent<HTMLInputElement>) => {
     const isEnabled = event.target.checked;
-    
+
     // Update isDiscount field
     setValue('pricing.isDiscount', isEnabled);
-    
+
     // Clear discount values when disabled
     if (!isEnabled) {
       setValue('pricing.discount_type', '');
@@ -253,9 +250,7 @@ export default function ProductForm() {
   };
 
   const onSubmit = handleSubmit(async (data) => {
-    // Yup schema now handles conditional validation automatically
-    // No need for manual validation checks here
-
+    console.log('===========================', data);
     // Create final submit data with proper null conversion
     delete data.pricing.isDiscount;
     const finalData = {
@@ -267,76 +262,204 @@ export default function ProductForm() {
       }
     };
 
-    console.log('=== FORM SUBMISSION DATA ===');
-    console.log('Product Data:', {
-      name: finalData.name,
-      sku: finalData.sku,
-      description: finalData.description,
-      pricing: finalData.pricing,
-      stock_quantity: finalData.stock_quantity,
-      weight: finalData.weight,
-      status: finalData.status,
-      category_id: finalData.category_id,
-    });
-    
-    console.log('Variations Data:', finalData.variations);
-    console.log('Images Data:', finalData.primary_image);
-    console.log('Total Variations:', finalData.variations?.length || 0);
-    console.log('===========================');
+    console.log('===========================', productId,finalData);
 
-    // API body parameters
-    // {
-    //   "name": "iPhone 15 Pro",
-    //   "sku": "IPHONE15PRO-256GB",
-    //   "description": "Latest iPhone with advanced features and titanium design",
-    //   "product_description": "<p>Latest iPhone with <strong>advanced features</strong> and <em>titanium design</em></p><ul><li>48MP Main camera</li><li>A17 Pro chip</li><li>Titanium build</li><li>Action Button</li></ul>",
-    //   "category_id": "507f1f77bcf86cd799439012",
-    //   "status": "draft",
-    //   "variations": [
-    //     {
-    //       "color": "Titanium",
-    //       "size": "256GB",
-    //       "sku": "IPHONE15PRO-TITANIUM-256",
-    //       "price": 999.99,
-    //       "stock": 50,
-    //       "status": "active"
-    //     },
-    //     {
-    //       "color": "Blue",
-    //       "size": "256GB",
-    //       "sku": "IPHONE15PRO-BLUE-256",
-    //       "price": 999.99,
-    //       "stock": 30,
-    //       "status": "active"
-    //     }
-    //   ],
-    //   "pricing": {
-    //     "mrp": 1199.99,
-    //     "price": 999.99,
-    //     "discount_type": "percentage",
-    //     "discount_rate": 16.67
-    //   },
-    //   "stock_quantity": 80,
-    //   "weight": 0.187
-    // }
- 
+
+    if (productId) {
+      // data format
+      // {
+      //   "_id": "68ef7466eeaaa9a009ec4c06",
+      //   "name": "test003",
+      //   "sku": "TEST003",
+      //   "description": "test003",
+      //   "product_description": "<p>Latest iPhone with <strong>advanced features</strong> and <em>titanium design</em></p><ul><li>48MP Main camera</li><li>A17 Pro chip</li><li>Titanium build</li><li>Action Button</li></ul>",
+      //   "price": 21,
+      //   "mrp": 12,
+      //   "discount_type": null,
+      //   "discount_rate": 0,
+      //   "stock_quantity": 5656,
+      //   "weight": 1210,
+      //   "status": "published",
+      //   "category_id": 68dbc38cae58105f43785c17
+      //   "featured": false,
+      // }
+      const payload: EditProductRequest = {
+        "name": finalData.name,
+        "sku": finalData.sku,
+        "description": finalData.description,
+        "product_description": "<p>Latest iPhone with <strong>advanced features</strong> and <em>titanium design</em></p><ul><li>48MP Main camera</li><li>A17 Pro chip</li><li>Titanium build</li><li>Action Button</li></ul>",
+        "price": finalData.pricing.price.toString(),
+        "mrp": finalData.pricing.mrp.toString(),
+        "discount_type": finalData.pricing.discount_type || null,
+        "discount_rate": finalData.pricing.discount_rate ? finalData.pricing.discount_rate.toString() : null,
+        "stock_quantity": finalData.stock_quantity?.toString() || '',
+        "weight": finalData.weight?.toString() || '',
+        "status": finalData.status,
+        "category_id": finalData.category_id,
+      }
+
+      try {
+        const response = await updateProduct(productId as string, payload, token);
+        console.log('Product created successfully!', response);
+
+        const globalPromisesManager = [];
+        const imagesToDelete = actualProductData.productImages.filter((image: any) => !finalData.productImages.some((newImage: any) => newImage.id === image.id));
+        const imagesToUpload = finalData.productImages.filter((image: any) => image.isFile);
+        const imagesToUpdate = finalData.productImages.filter((image: any) => !image.isFile);
+
+        if (imagesToDelete.length > 0) {
+          const deleteImagesPromises = imagesToDelete.map(async (image: any) => {
+            const response = await deleteProductImage(image.id, token);
+            console.log(`Image deleted successfully! ${image.id}:`, response);
+            return response;
+          });
+          globalPromisesManager.push(...deleteImagesPromises);
+        }
+
+        if (imagesToUpload.length > 0) {
+          const uploadImagesPromises = imagesToUpload.map(async (image: any) => {
+            const imageData = {
+              product_id: productId as string,
+              is_primary: image.primary || false,
+              file: image.file as File,
+            };
+            const response = await uploadProductImage(imageData, token);
+            console.log(`Image uploaded successfully! ${image.id}:`, response);
+            return response;
+          });
+          globalPromisesManager.push(...uploadImagesPromises);
+        }
+
+        if (imagesToUpdate.length > 0) {
+          const updateImagesPromises = imagesToUpdate.map(async (image: any) => {
+            const response = await updateProductImage(image.id, { is_primary: image.primary }, token);
+            console.log(`Image updated successfully! ${image.id}:`, response);
+            return response;
+          });
+          globalPromisesManager.push(...updateImagesPromises);
+        }
+
+        const variationToAdd = finalData.variations?.filter((variation: any) => variation.isLocal) ?? []
+        const variationToDelete = actualProductData.variations?.filter((variation: any) => !finalData.variations?.some((newVariation: any) => newVariation.id === variation.id)) ?? []
+        const variationToUpdate = finalData.variations?.filter((variation: any) => !variation.isLocal) ?? []
+
+        if (variationToDelete.length > 0) {
+          const deleteVariationsPromises = variationToDelete.map(async (variation: any) => {
+            const response = await deleteVariation(productId as string, variation.id, token);
+            console.log(`Variation deleted successfully! ${variation.id}:`, response);
+            return response;
+          });
+          globalPromisesManager.push(...deleteVariationsPromises);
+        }
+        if (variationToUpdate.length > 0) {
+          const updateVariationsPromises = variationToUpdate.map(async (variation: any) => {
+            const payload = {
+              "color": variation.color,
+              "size": variation.size,
+              "sku": variation.sku,
+              "price": variation.price,
+              "stock_quantity": variation.stock_quantity,
+              "status": 'active',
+            }
+            const response = await editVariations(productId as string, variation.id, payload, token);
+            console.log(`Variation updated successfully! ${variation.id}:`, response);
+            return response;
+          });
+          globalPromisesManager.push(...updateVariationsPromises);
+        }
+        if (variationToAdd.length > 0) {
+          const addVariationsPromises = variationToAdd.map(async (variation: any) => {
+            const payload = {
+              "color": variation.color,
+              "size": variation.size,
+              "sku": variation.sku,
+              "price": variation.price,
+              "stock_quantity": variation.stock_quantity,
+              "status": 'active',
+            }
+            const response = await createVariations(productId as string, payload, token);
+            console.log(`Variation added successfully! ${variation.id}:`, response);
+            return response;
+          });
+          globalPromisesManager.push(...addVariationsPromises);
+        }
+        await Promise.all(globalPromisesManager);
+        enqueueSnackbar('Product updated successfully!', { variant: 'success' });
+        router.push(paths.dashboard.product.root);
+
+      } catch (error) {
+        console.error('Error creating product:', error);
+        enqueueSnackbar(error instanceof Error ? error.message : 'Failed to create product', {
+          variant: 'error',
+        });
+      }
+    } else {
+      const payload = {
+        "name": finalData.name,
+        "sku": finalData.sku,
+        "description": finalData.description,
+        "product_description": "<p>Latest iPhone with <strong>advanced features</strong> and <em>titanium design</em></p><ul><li>48MP Main camera</li><li>A17 Pro chip</li><li>Titanium build</li><li>Action Button</li></ul>",
+        "category_id": finalData.category_id,
+        "status": finalData.status,
+        "variations": finalData.variations,
+        "pricing": {
+          "mrp": finalData.pricing.mrp,
+          "price": finalData.pricing.price,
+          "discount_type": finalData.pricing.discount_type,
+          "discount_rate": finalData.pricing.discount_rate
+        },
+        "stock_quantity": finalData.stock_quantity,
+        "weight": finalData.weight
+      }
+
+      try {
+        const response = await createProduct(payload, token);
+        console.log('Product created successfully!', response);
+        const newProductId = response.data?.product?._id;
+
+        if (newProductId) {
+          // Upload images
+          const imagesPromises = finalData.productImages.map(async (image: any, index: number) => {
+            const imageData = {
+              product_id: newProductId,
+              is_primary: image.primary || false,
+              file: image.file as File,
+            };
+            const response = await uploadProductImage(imageData, token);
+            console.log(`Image uploaded successfully! ${index + 1}:`, response);
+            return response;
+          });
+
+          await Promise.all(imagesPromises);
+
+          enqueueSnackbar('Product created successfully!', { variant: 'success' });
+          router.push(paths.dashboard.product.root);
+        }
+      } catch (error) {
+        console.error('Error creating product:', error);
+        enqueueSnackbar(error instanceof Error ? error.message : 'Failed to create product', {
+          variant: 'error',
+        });
+      }
+    }
+
   });
 
   const handleAddRow = () => {
     const currentVariations = values.variations || [];
-    
+
     // If there are existing variations, validate them first
     if (currentVariations.length > 0) {
       // Check if any existing variation has empty required fields
-      const hasInvalidRows = currentVariations.some(variation => 
-        !variation.color || !variation.size || !variation.sku || 
+      const hasInvalidRows = currentVariations.some(variation =>
+        !variation.color || !variation.size || !variation.sku ||
         variation.price <= 0 || variation.stock_quantity < 0
       );
-      
+
       if (hasInvalidRows) {
         // Trigger validation to show errors
         trigger('variations');
-        
+
         // Show a user-friendly message
         enqueueSnackbar('Please complete all fields in existing variations before adding a new one', {
           variant: 'warning',
@@ -344,13 +467,13 @@ export default function ProductForm() {
         return;
       }
     }
-    
+
     // If validation passes, add the new row
-    setValue('variations', [...currentVariations, emptyRow]);
+    setValue('variations', [...currentVariations, emptyRow()]);
   };
 
   const handleImageUpload = useCallback((acceptedFiles: File[]) => {
-    const currentImages = values.primary_image || [];
+    const currentImages = values.productImages || [];
     const isFirstImage = currentImages.length === 0;
 
     const newImages = acceptedFiles.map((file) => ({
@@ -367,15 +490,15 @@ export default function ProductForm() {
     }
 
     const updatedImages = [...currentImages, ...newImages];
-    setValue('primary_image', updatedImages);
+    setValue('productImages', updatedImages);
 
     // Trigger revalidation to clear any errors
-    trigger('primary_image');
+    trigger('productImages');
 
-  }, [values.primary_image, setValue, trigger]);
+  }, [values.productImages, setValue, trigger]);
 
   const handleImageDelete = useCallback((imageId: string) => {
-    const currentImages = values.primary_image || [];
+    const currentImages = values.productImages || [];
     const imageToDelete = currentImages.find(img => img.id === imageId);
     const updatedImages = currentImages.filter((img) => img.id !== imageId);
 
@@ -384,20 +507,20 @@ export default function ProductForm() {
       updatedImages[0].primary = true;
     }
 
-    setValue('primary_image', updatedImages);
-    trigger('primary_image');
-  }, [values.primary_image, setValue, trigger]);
+    setValue('productImages', updatedImages);
+    trigger('productImages');
+  }, [values.productImages, setValue, trigger]);
 
   const handleSetPrimaryImage = useCallback((imageId: string) => {
-    const currentImages = values.primary_image || [];
+    const currentImages = values.productImages || [];
     const updatedImages = currentImages.map((img) => ({
       ...img,
       primary: img.id === imageId,
     }));
 
-    setValue('primary_image', updatedImages);
-    trigger('primary_image');
-  }, [values.primary_image, setValue, trigger]);
+    setValue('productImages', updatedImages);
+    trigger('productImages');
+  }, [values.productImages, setValue, trigger]);
 
   // Dropzone hook for file uploads
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -425,10 +548,57 @@ export default function ProductForm() {
 
   const getProductDataById = async () => {
     try {
-      if (typeof productId === 'string') {
-        const response = await getProductById(productId, token);
+      if (productId) {
+        let response = await getProductById(productId as string, token);
+        response = response.data.product;
+
+        if (response) {
+          const imagesFromResponse = response.images.map((image: any) => ({
+            id: image._id,
+            url: image.image_url,
+            isFile: false,
+            primary: image.is_primary,
+          }));
+
+          const variationsFromResponse = response.variations.map((variation: any) => ({
+            id: variation._id,
+            color: variation.color,
+            size: variation.size,
+            sku: variation.sku,
+            price: variation.price,
+            stock_quantity: variation.stock_quantity,
+          }));
+
+          const valuesFromResponse = {
+            name: response.name,
+            sku: response.sku,
+            description: response.description,
+            pricing: {
+              price: response.price,
+              mrp: response.mrp,
+              discount_type: response.discount_type || '',
+              discount_rate: response.discount_rate || '',
+            },
+            stock_quantity: response.stock_quantity,
+            weight: response.weight,
+            status: response.status,
+            category_id: response.category_id._id,
+            productImages: imagesFromResponse,
+            variations: variationsFromResponse,
+          }
+
+          Object.keys(valuesFromResponse).forEach((key) => {
+            setValue(key as keyof typeof valuesFromResponse, valuesFromResponse[key as keyof typeof valuesFromResponse]);
+          });
+
+          setValue('pricing.isDiscount', !!response.discount_type);
+          setActualProductData({
+            ...valuesFromResponse
+          });
+        }
       }
     } catch (err) {
+      console.error('Error fetching product:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch product';
       enqueueSnackbar(errorMessage, { variant: 'error' });
     }
@@ -451,6 +621,9 @@ export default function ProductForm() {
     }
   }, [categoriesError, enqueueSnackbar]);
 
+
+  console.log('errors', errors, values);
+  
   const renderVariation = (
     <>
       {mdUp && (
@@ -506,9 +679,9 @@ export default function ProductForm() {
                 </Box>
 
                 {values.variations.map((row, index) => {
-                  const isRowIncomplete = !row.color || !row.size || !row.sku || 
+                  const isRowIncomplete = !row.color || !row.size || !row.sku ||
                     row.price <= 0 || row.stock_quantity < 0;
-                  
+
                   return (
                     <Box
                       key={row.id}
@@ -527,112 +700,112 @@ export default function ProductForm() {
                         },
                       }}
                     >
-                    {/* Color Field */}
-                    <Box>
-                      <RHFTextField
-                        name={`variations.${index}.color`}
-                        placeholder="e.g., Red"
-                        size="small"
-                        fullWidth
-                      />
-                      {errors?.variations?.[index]?.color && (
-                        <Typography variant="caption" color="error" sx={{ mt: 0.5, display: 'block' }}>
-                          {errors.variations[index].color.message}
-                        </Typography>
-                      )}
-                    </Box>
-                      
-                    {/* Size Field */}
-                    <Box>
-                    <RHFTextField
-                      name={`variations.${index}.size`}
-                        placeholder="e.g., Large"
-                        size="small"
-                        fullWidth
-                      />
-                      {errors?.variations?.[index]?.size && (
-                        <Typography variant="caption" color="error" sx={{ mt: 0.5, display: 'block' }}>
-                          {errors.variations[index].size.message}
-                        </Typography>
-                      )}
-                    </Box>
+                      {/* Color Field */}
+                      <Box>
+                        <RHFTextField
+                          name={`variations.${index}.color`}
+                          placeholder="e.g., Red"
+                          size="small"
+                          fullWidth
+                        />
+                        {errors?.variations?.[index]?.color && (
+                          <Typography variant="caption" color="error" sx={{ mt: 0.5, display: 'block' }}>
+                            {errors.variations[index].color.message}
+                          </Typography>
+                        )}
+                      </Box>
 
-                    {/* SKU Field */}
-                    <Box>
-                    <RHFTextField
-                      name={`variations.${index}.sku`}
-                        placeholder="e.g., PROD-RED-L"
-                        size="small"
-                        fullWidth
-                      />
-                      {errors?.variations?.[index]?.sku && (
-                        <Typography variant="caption" color="error" sx={{ mt: 0.5, display: 'block' }}>
-                          {errors.variations[index].sku.message}
-                        </Typography>
-                      )}
-                    </Box>
+                      {/* Size Field */}
+                      <Box>
+                        <RHFTextField
+                          name={`variations.${index}.size`}
+                          placeholder="e.g., Large"
+                          size="small"
+                          fullWidth
+                        />
+                        {errors?.variations?.[index]?.size && (
+                          <Typography variant="caption" color="error" sx={{ mt: 0.5, display: 'block' }}>
+                            {errors.variations[index].size.message}
+                          </Typography>
+                        )}
+                      </Box>
 
-                    {/* Price Field */}
-                    <Box>
-                    <RHFTextField
-                      name={`variations.${index}.price`}
-                        placeholder="0.00"
-                      type="number"
-                        size="small"
-                        fullWidth
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <Box component="span" sx={{ color: 'text.disabled' }}>
-                                $
-                              </Box>
-                            </InputAdornment>
-                          ),
-                        }}
-                      />
-                      {errors?.variations?.[index]?.price && (
-                        <Typography variant="caption" color="error" sx={{ mt: 0.5, display: 'block' }}>
-                          {errors.variations[index].price.message}
-                        </Typography>
-                      )}
-                    </Box>
+                      {/* SKU Field */}
+                      <Box>
+                        <RHFTextField
+                          name={`variations.${index}.sku`}
+                          placeholder="e.g., PROD-RED-L"
+                          size="small"
+                          fullWidth
+                        />
+                        {errors?.variations?.[index]?.sku && (
+                          <Typography variant="caption" color="error" sx={{ mt: 0.5, display: 'block' }}>
+                            {errors.variations[index].sku.message}
+                          </Typography>
+                        )}
+                      </Box>
 
-                    {/* Stock Field */}
-                    <Box>
-                    <RHFTextField
-                      name={`variations.${index}.stock_quantity`}
-                        placeholder="0"
-                      type="number"
-                        size="small"
-                        fullWidth
-                      />
-                      {errors?.variations?.[index]?.stock_quantity && (
-                        <Typography variant="caption" color="error" sx={{ mt: 0.5, display: 'block' }}>
-                          {errors.variations[index].stock_quantity.message}
-                        </Typography>
-                      )}
-                    </Box>
+                      {/* Price Field */}
+                      <Box>
+                        <RHFTextField
+                          name={`variations.${index}.price`}
+                          placeholder="0.00"
+                          type="number"
+                          size="small"
+                          fullWidth
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                <Box component="span" sx={{ color: 'text.disabled' }}>
+                                  $
+                                </Box>
+                              </InputAdornment>
+                            ),
+                          }}
+                        />
+                        {errors?.variations?.[index]?.price && (
+                          <Typography variant="caption" color="error" sx={{ mt: 0.5, display: 'block' }}>
+                            {errors.variations[index].price.message}
+                          </Typography>
+                        )}
+                      </Box>
 
-                    {/* Delete Button */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <IconButton
-                      onClick={() => handleClickDeleteRow(index)}
-                        size="small"
-                        sx={{ 
-                          color: 'error.main',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          '&:hover': {
-                            backgroundColor: 'error.lighter',
-                          }
-                        }}
-                        aria-label="remove variation"
-                      >
-                        <Iconify icon="solar:trash-bin-trash-bold" width={20} />
-                    </IconButton>
+                      {/* Stock Field */}
+                      <Box>
+                        <RHFTextField
+                          name={`variations.${index}.stock_quantity`}
+                          placeholder="0"
+                          type="number"
+                          size="small"
+                          fullWidth
+                        />
+                        {errors?.variations?.[index]?.stock_quantity && (
+                          <Typography variant="caption" color="error" sx={{ mt: 0.5, display: 'block' }}>
+                            {errors.variations[index].stock_quantity.message}
+                          </Typography>
+                        )}
+                      </Box>
+
+                      {/* Delete Button */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <IconButton
+                          onClick={() => handleClickDeleteRow(index)}
+                          size="small"
+                          sx={{
+                            color: 'error.main',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            '&:hover': {
+                              backgroundColor: 'error.lighter',
+                            }
+                          }}
+                          aria-label="remove variation"
+                        >
+                          <Iconify icon="solar:trash-bin-trash-bold" width={20} />
+                        </IconButton>
+                      </Box>
                     </Box>
-                  </Box>
                   );
                 })}
               </Box>
@@ -647,12 +820,12 @@ export default function ProductForm() {
                 disabled={(() => {
                   const currentVariations = values.variations || [];
                   if (currentVariations.length === 0) return false;
-                  
-                  const hasInvalidRows = currentVariations.some(variation => 
-                    !variation.color || !variation.size || !variation.sku || 
+
+                  const hasInvalidRows = currentVariations.some(variation =>
+                    !variation.color || !variation.size || !variation.sku ||
                     variation.price <= 0 || variation.stock_quantity < 0
                   );
-                  
+
                   return hasInvalidRows;
                 })()}
                 sx={{
@@ -669,11 +842,11 @@ export default function ProductForm() {
             {values.variations && values.variations.length > 0 && (
               <Box sx={{ mt: 1 }}>
                 {(() => {
-                  const hasInvalidRows = values.variations.some(variation => 
-                    !variation.color || !variation.size || !variation.sku || 
+                  const hasInvalidRows = values.variations.some(variation =>
+                    !variation.color || !variation.size || !variation.sku ||
                     variation.price <= 0 || variation.stock_quantity < 0
                   );
-                  
+
                   if (hasInvalidRows) {
                     return (
                       <Alert severity="warning" sx={{ mt: 1 }}>
@@ -683,7 +856,7 @@ export default function ProductForm() {
                       </Alert>
                     );
                   }
-                  
+
                   return (
                     <Alert severity="success" sx={{ mt: 1 }}>
                       <Typography variant="body2">
@@ -844,45 +1017,45 @@ export default function ProductForm() {
 
             {values.pricing.isDiscount && (
               <Box>
-              <Box
-                columnGap={2}
-                rowGap={3}
-                display="grid"
-                gridTemplateColumns={{
-                  xs: 'repeat(1, 1fr)',
-                  md: 'repeat(2, 1fr)',
-                }}
-              >
-                <RHFSelect
-                  native
-                  name="pricing.discount_type"
-                  label="Discount Type"
-                  onChange={(e) => handlePricingChange('discount_type', e.target.value)}
-                >
-                  {PRODUCT_DISCOUNT_TYPE_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </RHFSelect>
-
-                <RHFTextField
-                  name="pricing.discount_rate"
-                  label="Discount Rate"
-                  placeholder="0"
-                  type="number"
-                  InputLabelProps={{ shrink: true }}
-                  onChange={(e) => handlePricingChange('discount_rate', e.target.value)}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <Box component="span" sx={{ color: 'text.disabled' }}>
-                          {values.pricing.discount_type === 'percentage' ? '%' : '$'}
-                        </Box>
-                      </InputAdornment>
-                    ),
+                <Box
+                  columnGap={2}
+                  rowGap={3}
+                  display="grid"
+                  gridTemplateColumns={{
+                    xs: 'repeat(1, 1fr)',
+                    md: 'repeat(2, 1fr)',
                   }}
-                />
+                >
+                  <RHFSelect
+                    native
+                    name="pricing.discount_type"
+                    label="Discount Type"
+                    onChange={(e) => handlePricingChange('discount_type', e.target.value)}
+                  >
+                    {PRODUCT_DISCOUNT_TYPE_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </RHFSelect>
+
+                  <RHFTextField
+                    name="pricing.discount_rate"
+                    label="Discount Rate"
+                    placeholder="0"
+                    type="number"
+                    InputLabelProps={{ shrink: true }}
+                    onChange={(e) => handlePricingChange('discount_rate', e.target.value)}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <Box component="span" sx={{ color: 'text.disabled' }}>
+                            {values.pricing.discount_type === 'percentage' ? '%' : '$'}
+                          </Box>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
                 </Box>
               </Box>
             )}
@@ -956,7 +1129,7 @@ export default function ProductForm() {
               sx={{
                 p: 3,
                 border: '2px dashed',
-                borderColor: errors?.primary_image
+                borderColor: errors?.productImages
                   ? 'error.main'
                   : isDragActive
                     ? 'primary.main'
@@ -966,14 +1139,14 @@ export default function ProductForm() {
                 cursor: 'pointer',
                 backgroundColor: isDragActive
                   ? 'action.hover'
-                  : errors?.primary_image
+                  : errors?.productImages
                     ? 'error.lighter'
                     : 'transparent',
                 '&:hover': {
-                  borderColor: errors?.primary_image
+                  borderColor: errors?.productImages
                     ? 'error.main'
                     : 'primary.main',
-                  backgroundColor: errors?.primary_image
+                  backgroundColor: errors?.productImages
                     ? 'error.lighter'
                     : 'action.hover',
                 },
@@ -985,7 +1158,7 @@ export default function ProductForm() {
                   icon="eva:cloud-upload-fill"
                   width={48}
                   sx={{
-                    color: errors?.primary_image
+                    color: errors?.productImages
                       ? 'error.main'
                       : isDragActive
                         ? 'primary.main'
@@ -995,7 +1168,7 @@ export default function ProductForm() {
                 <Typography
                   variant="h6"
                   sx={{
-                    color: errors?.primary_image
+                    color: errors?.productImages
                       ? 'error.main'
                       : 'text.primary'
                   }}
@@ -1012,10 +1185,10 @@ export default function ProductForm() {
             </Box>
 
             {/* Image Preview Grid */}
-            {values.primary_image && values.primary_image.length > 0 && (
+            {values.productImages && values.productImages.length > 0 && (
               <Box>
                 <Typography variant="subtitle1" sx={{ mb: 1 }}>
-                  Uploaded Images ({values.primary_image.length})
+                  Uploaded Images ({values.productImages.length})
                 </Typography>
                 <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
                   Click on any image to set it as primary. The primary image will be used as the main product image.
@@ -1027,7 +1200,7 @@ export default function ProductForm() {
                     gap: 2,
                   }}
                 >
-                  {values.primary_image.map((image) => (
+                  {values.productImages.map((image) => (
                     <Box
                       key={image.id}
                       onClick={() => handleSetPrimaryImage(image.id)}
@@ -1104,9 +1277,9 @@ export default function ProductForm() {
             )}
 
             {/* Error Display */}
-            {errors?.primary_image && (
+            {errors?.productImages && (
               <Typography variant="caption" color="error" sx={{ mt: 1, display: 'block' }}>
-                {errors.primary_image.message}
+                {errors.productImages.message}
               </Typography>
             )}
           </Stack>
@@ -1120,7 +1293,7 @@ export default function ProductForm() {
       {mdUp && <Grid md={4} />}
       <Grid xs={12} md={8} sx={{ display: 'flex', alignItems: 'center' }}>
         <FormControlLabel
-          control={<Switch checked={isPublishing} onChange={handlePublishToggle} />}
+          control={<Switch checked={values.status === 'published'} onChange={handlePublishToggle} />}
           label="Publish immediately"
           sx={{ flexGrow: 1, pl: 3 }}
         />

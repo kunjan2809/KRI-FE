@@ -75,15 +75,16 @@ export function RenderCellStock({ params }: ParamsProps) {
 
 export function RenderCellProduct({ params }: ParamsProps) {
   const router = useRouter();
+  const imageUrl = params.row.all_images?.find((image: any) => image.is_primary)?.image_url|| params.row.all_images?.[0]?.image_url || params.row.coverUrl;    
 
   const handleNavigate = () => {
-    router.push(paths.dashboard.product.details(params.row._id));
+    router.push(paths.user.products.details(params.row._id));
   }
   return (
     <Stack direction="row" alignItems="center" sx={{ py: 2, width: 1, }}>
       <Avatar
         alt={params.row.name}
-        src={params.row.primary_image?.image_url || params.row.coverUrl}
+        src={imageUrl}
         variant="rounded"
         sx={{ width: 64, height: 64, mr: 2 }}
       />

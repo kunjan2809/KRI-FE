@@ -15,6 +15,7 @@ import {
   IProductAPIResponse,
   IProductUpdateRequest,
   IProductCraeteVariation,
+  EditProductRequest,
 } from 'src/types/product';
 
 // ----------------------------------------------------------------------
@@ -282,7 +283,7 @@ export async function deleteProduct(productId: string, token: string) {
 
 export async function updateProduct(
   productId: string,
-  productData: IProductUpdateRequest,
+  productData: EditProductRequest,
   token: string
 ) {
   const baseUrl = BASE_API;
@@ -376,25 +377,24 @@ export async function updateProductStatus(
 }
 
 export async function uploadProductImage(
-  productId: string,
-  productImage: IUploadProductImage,
+  imageData:{
+    product_id: string;
+    is_primary: boolean;
+    file: File;
+  },
   token: string
 ) {
   const baseUrl = BASE_API;
-  const URL = `${baseUrl}${endpoints.image.product}${productId}`;
+  const URL = `${baseUrl}${endpoints.image.product}${imageData.product_id}`;
 
   const formData = new FormData();
 
   // If file is provided, append it; otherwise use image_url
-  if (productImage.file) {
-    formData.append('image', productImage.file);
-  } else if (productImage.image_url) {
-    formData.append('image_url', productImage.image_url);
-  } else {
-    throw new Error('Either file or image_url must be provided');
+  if (imageData.file) {
+    formData.append('image', imageData.file);
   }
 
-  formData.append('is_primary', productImage.is_primary.toString());
+  formData.append('is_primary', imageData.is_primary.toString());
 
   const response = await fetch(URL, {
     method: 'POST',
@@ -407,6 +407,56 @@ export async function uploadProductImage(
   if (!response.ok) {
     const errorDetails = await response.json();
     throw new Error(errorDetails.message || 'Error uploading product image');
+  }
+
+  return response.json();
+}
+
+export async function deleteProductImage(
+  imageId: string,
+  token: string
+) {
+  const baseUrl = BASE_API;
+  const URL = `${baseUrl}${endpoints.image.product}${imageId}`;
+
+  const response = await fetch(URL, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorDetails = await response.json();
+    throw new Error(errorDetails.message || 'Error deleting product image');
+  }
+
+  return response.json();
+}
+
+export async function updateProductImage(
+  imageId: string,
+  imageData: {
+    is_primary: boolean;
+  },
+  token: string
+) {
+  const baseUrl = BASE_API;
+  const URL = `${baseUrl}${endpoints.image.product}${imageId}`;
+
+  const response = await fetch(URL, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(imageData),
+  });
+
+  console.log('response', response);
+  if (!response.ok) {
+    const errorDetails = await response.json();
+    throw new Error(errorDetails.message || 'Error updating product image');
   }
 
   return response.json();

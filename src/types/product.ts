@@ -89,6 +89,14 @@ export type IProductImage = {
   is_primary: boolean;
 };
 
+export type IProductImageForm = {
+  file?: File | null | undefined;
+  url?: string | null | undefined;
+  id: string;
+  isFile: boolean;
+  primary: boolean;
+};
+
 export type IUploadProductImage = {
   product_id?: string;
   image_url?: string;
@@ -166,6 +174,22 @@ export type IProductUpdateRequest = {
   };
 };
 
+export interface EditProductRequest {
+  name: string
+  sku: string
+  description: string
+  product_description: string
+  price: string
+  mrp: string
+  discount_type: string | null
+  discount_rate: string | null
+  stock_quantity: string
+  weight: string
+  status: string
+  category_id: string
+}
+
+
 export type Pricing = {
   mrp: number;
   price: number;
@@ -197,6 +221,7 @@ export type IProductVariantRow = {
   sku: string;
   price: number;
   stock_quantity: number;
+  isLocal?: boolean;
 };
 
 export type IProductVariantRowResponse = {

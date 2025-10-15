@@ -64,7 +64,7 @@ export function useGetProducts(params: GetProductsParams = {}) {
 
   const URL = `${baseUrl}${endpoints.product.all}?${queryParams.toString()}`;
 
-  const { data, isLoading, error, isValidating } = useSWR(
+  const { data, isLoading, error, isValidating, mutate } = useSWR(
     token ? { url: URL, token } : null,
     apiProductFetcher,
     {
@@ -78,6 +78,10 @@ export function useGetProducts(params: GetProductsParams = {}) {
     }
   );
 
+  const reFetchProducts = () => {
+    mutate({ url: URL, token });
+  };
+
   const memoizedValue = useMemo(
     () => ({
       products: (data?.data?.products as IProductItem[]) || [],
@@ -88,6 +92,7 @@ export function useGetProducts(params: GetProductsParams = {}) {
       productsError: error,
       productsValidating: isValidating,
       productsEmpty: !isLoading && !data?.data?.products?.length,
+      reFetchProducts: () => reFetchProducts()
     }),
     [
       data?.data?.products,
@@ -97,8 +102,11 @@ export function useGetProducts(params: GetProductsParams = {}) {
       error,
       isLoading,
       isValidating,
+      reFetchProducts,
     ]
   );
+
+
 
   return memoizedValue;
 }
@@ -232,9 +240,9 @@ export async function editVariations(
   return response.json();
 }
 
-export async function deleteVariation(productId: string, variationId: string,token:string) {
+export async function deleteVariation(productId: string, variationId: string, token: string) {
   const baseUrl = BASE_API;
-    const url = `${baseUrl}${endpoints.product.deleteVariations.replace(':productId', `${productId}`).replace(':variationId', `${variationId}`)}`;
+  const url = `${baseUrl}${endpoints.product.deleteVariations.replace(':productId', `${productId}`).replace(':variationId', `${variationId}`)}`;
 
   const response = await fetch(url, {
     method: 'DELETE',

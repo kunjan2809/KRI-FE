@@ -65,6 +65,31 @@ export default function ProductTableToolbar({
 
   return (
     <>
+      <FormControl
+        sx={{
+          flexShrink: 0,
+          width: { xs: 1, md: 200 },
+        }}
+      >
+        <InputLabel>Stock</InputLabel>
+
+        <Select
+          multiple
+          value={stock}
+          onChange={handleChangeStock}
+          input={<OutlinedInput label="Stock" />}
+          renderValue={(selected) => selected.map((value) => value).join(', ')}
+          onClose={handleCloseStock}
+          sx={{ textTransform: 'capitalize' }}
+        >
+          {stockOptions.map((option) => (
+            <MenuItem key={option.value} value={option.value}>
+              <Checkbox disableRipple size="small" checked={stock.includes(option.value)} />
+              {option.label}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
 
       <FormControl
         sx={{
@@ -72,13 +97,13 @@ export default function ProductTableToolbar({
           width: { xs: 1, md: 200 },
         }}
       >
-        <InputLabel>Publish</InputLabel>
+        <InputLabel>Status</InputLabel>
 
         <Select
           multiple
           value={publish}
           onChange={handleChangePublish}
-          input={<OutlinedInput label="Publish" />}
+          input={<OutlinedInput label="Status" />}
           renderValue={(selected) => selected.map((value) => value).join(', ')}
           onClose={handleClosePublish}
           sx={{ textTransform: 'capitalize' }}

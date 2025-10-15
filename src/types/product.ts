@@ -78,6 +78,7 @@ export type IProductTableFilterValue = string | string[];
 export type IProductTableFilters = {
   stock: string[];
   publish: string[];
+  search: string;
 };
 
 // ----------------------------------------------------------------------
@@ -196,7 +197,6 @@ export type IProductVariantRow = {
   sku: string;
   price: number;
   stock_quantity: number;
-  status: string;
 };
 
 export type IProductVariantRowResponse = {

@@ -1,63 +1,66 @@
 'use client';
 
-import Button from '@mui/material/Button';
+import { useCallback, useState } from 'react';
+
 import Container from '@mui/material/Container';
+import { alpha } from '@mui/material/styles';
+import { Box, Pagination, Tab, Tabs } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
-import { RouterLink } from 'src/routes/components';
 
-import { _userCards, USER_STATUS_OPTIONS } from 'src/_mock';
+import { USER_STATUS_OPTIONS } from 'src/_mock';
 
-import Iconify from 'src/components/iconify';
+import { useAuthToken } from 'src/auth/hooks';
+import { useGetUsers } from 'src/api/user';
+
+import Label from 'src/components/label';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 
+import { INUserItem } from 'src/types/user';
+
 import UserCardList from '../user-card-list';
-import { Tab, Tabs } from '@mui/material';
-import Label from 'src/components/label';
-import { useCallback, useState } from 'react';
-import { alpha } from '@mui/material/styles';
+import UserCardSkeleton from '../user-card-skeleton';
 
 // ----------------------------------------------------------------------
+
+
 
 export default function UserCardsView() {
   const settings = useSettingsContext();
   const STATUS_OPTIONS = [{ value: 'all', label: 'All' }, ...USER_STATUS_OPTIONS];
   const [filters, setFilters] = useState({ status: 'all' });
-
-
-  const filteredUsers = _userCards.filter((user) => {
-    if (filters.status !== 'all') {
-      return user.status === filters.status;
-    }
-    return true;
-  });
-
+  const token = useAuthToken();
+  const [page, setPage] = useState<number>(1);
   const handleFilterStatus = useCallback(
     (event: React.SyntheticEvent, newValue: string) => {
       setFilters({ status: newValue });
     },
     []
   );
+
+  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
+    setPage(value);
+  }
+
+  const params = {
+    status_filter: filters.status === 'all' ? [] : [filters.status],
+    search: '',
+    page,
+    limit: 10,
+  };
+
+  const { data: apiUsers, isLoading } = useGetUsers(params, token as string);
+  const users = apiUsers?.users || [];
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <CustomBreadcrumbs
-        heading="User Cards"
+        heading="Users"
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },
-          { name: 'User', href: paths.dashboard.user.root },
-          { name: 'Cards' },
+          { name: 'User' },
         ]}
-        action={
-          <Button
-            component={RouterLink}
-            href={paths.dashboard.user.new}
-            variant="contained"
-            startIcon={<Iconify icon="mingcute:add-line" />}
-          >
-            New User
-          </Button>
-        }
+
         sx={{ mb: { xs: 3, md: 5 } }}
       />
 
@@ -83,21 +86,45 @@ export default function UserCardsView() {
                 }
                 color={
                   (tab.value === 'active' && 'success') ||
-                  (tab.value === 'pending' && 'warning') ||
                   (tab.value === 'banned' && 'error') ||
                   'default'
                 }
               >
-                {['active', 'pending', 'banned', 'rejected'].includes(tab.value)
-                  ? _userCards.filter((user) => user.status === tab.value).length
-                  : _userCards.length}
+                {['active', 'banned'].includes(tab.value)
+                  ? users.filter((user: INUserItem) => user.status === tab.value).length
+                  : users.length}
               </Label>
             }
           />
         ))}
       </Tabs>
 
-      <UserCardList users={filteredUsers} />
+      {isLoading ? (
+        <Box
+          gap={3}
+          display="grid"
+          gridTemplateColumns={{
+            xs: 'repeat(1, 1fr)',
+            sm: 'repeat(2, 1fr)',
+            md: 'repeat(3, 1fr)',
+          }}
+        >
+          {Array.from({ length: 6 }).map((_, index) => (
+            <UserCardSkeleton key={index} />
+          ))}
+        </Box>
+      ) : (
+        <>
+          <UserCardList users={users} />
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
+            <Pagination
+              count={apiUsers?.total_pages}
+              page={page}
+              onChange={handlePageChange}
+            />
+          </Box>
+        </>
+      )}
     </Container>
   );
 }

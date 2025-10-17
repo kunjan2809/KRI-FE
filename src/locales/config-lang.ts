@@ -12,6 +12,7 @@ import {
 
 // date pickers (MUI)
 import { enUS, frFR, viVN, zhCN } from '@mui/x-date-pickers/locales';
+
 // core (MUI)
 import {
   enUS as enUSCore,
@@ -20,14 +21,6 @@ import {
   zhCN as zhCNCore,
   arSA as arSACore,
 } from '@mui/material/locale';
-// data grid (MUI)
-import {
-  enUS as enUSDataGrid,
-  frFR as frFRDataGrid,
-  viVN as viVNDataGrid,
-  zhCN as zhCNDataGrid,
-  arSD as arSDDataGrid,
-} from '@mui/x-data-grid';
 
 // PLEASE REMOVE `LOCAL STORAGE` WHEN YOU CHANGE SETTINGS.
 // ----------------------------------------------------------------------
@@ -36,7 +29,7 @@ export const allLangs = [
   {
     label: 'English',
     value: 'en',
-    systemValue: merge(enUS, enUSDataGrid, enUSCore),
+    systemValue: merge(enUS, enUSCore),
     adapterLocale: enUSAdapter,
     icon: 'flagpack:gb-nir',
     numberFormat: {
@@ -47,7 +40,7 @@ export const allLangs = [
   {
     label: 'French',
     value: 'fr',
-    systemValue: merge(frFR, frFRDataGrid, frFRCore),
+    systemValue: merge(frFR, frFRCore),
     adapterLocale: frFRAdapter,
     icon: 'flagpack:fr',
     numberFormat: {
@@ -58,7 +51,7 @@ export const allLangs = [
   {
     label: 'Vietnamese',
     value: 'vi',
-    systemValue: merge(viVN, viVNDataGrid, viVNCore),
+    systemValue: merge(viVN, viVNCore),
     adapterLocale: viVNAdapter,
     icon: 'flagpack:vn',
     numberFormat: {
@@ -69,7 +62,7 @@ export const allLangs = [
   {
     label: 'Chinese',
     value: 'cn',
-    systemValue: merge(zhCN, zhCNDataGrid, zhCNCore),
+    systemValue: merge(zhCN, zhCNCore),
     adapterLocale: zhCNAdapter,
     icon: 'flagpack:cn',
     numberFormat: {
@@ -80,7 +73,7 @@ export const allLangs = [
   {
     label: 'Arabic',
     value: 'ar',
-    systemValue: merge(arSDDataGrid, arSACore),
+    systemValue: merge(arSACore),
     adapterLocale: arSAAdapter,
     icon: 'flagpack:sa',
     numberFormat: {

@@ -1,2 +1,60 @@
 /* scrollbar */
 @import 'simplebar-react/dist/simplebar.min.css';
+
+
+.slick-track {
+    display: flex;
+}
+
+.slick-list {
+    overflow: hidden;
+}
+
+.ql-toolbar,
+.ql-formats,
+.ql-align,
+.ql-picker-options,
+.ql-picker-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+
+.ql-editor {
+    font-family: 'Inter', sans-serif;
+
+    p {
+        margin-top: 0;
+    }
+}
+
+.ql-clipboard,
+.ql-hidden {
+    display: none;
+}
+
+.ql-toolbar {
+    display: flex;
+    flex-flow: wrap;
+    -webkit-box-align: center;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-top-left-radius: inherit;
+    border-top-right-radius: inherit;
+    background-color: var(--palette-background-paper);
+
+    button {
+        border: none;
+        background-color: transparent;
+
+        &:hover {
+            background-color: #f0f0f0;
+        }
+
+        .ql-stroke {
+            fill: none;
+        }
+    }
+}

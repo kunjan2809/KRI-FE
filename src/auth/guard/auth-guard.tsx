@@ -5,12 +5,12 @@ import { useRouter } from 'src/routes/hooks';
 
 import { SplashScreen } from 'src/components/loading-screen';
 
-import { useAuthContext } from '../hooks';
+import { useAuthContext } from '../hooks/use-auth-context';
 
 // ----------------------------------------------------------------------
 
 const loginPaths: Record<string, string> = {
-  jwt: paths.auth.jwt.login,
+  jwt: paths.user.root,
 };
 
 // ----------------------------------------------------------------------

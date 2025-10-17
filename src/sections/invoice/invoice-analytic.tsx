@@ -13,9 +13,9 @@ import Iconify from 'src/components/iconify';
 type Props = {
   icon: string;
   title: string;
-  total: number;
+  total: number | string;
   percent: number;
-  price: number;
+  price: number | string;
   color?: string;
 };
 
@@ -58,10 +58,10 @@ export default function InvoiceAnalytic({ title, total, icon, color, percent, pr
         <Typography variant="subtitle1">{title}</Typography>
 
         <Box component="span" sx={{ color: 'text.disabled', typography: 'body2' }}>
-          {fShortenNumber(total)} invoices
+          {typeof total === 'number' ? fShortenNumber(total) : '- '} invoices
         </Box>
 
-        <Typography variant="subtitle2">{fCurrency(price)}</Typography>
+        <Typography variant="subtitle2">{typeof price === 'number' ? fCurrency(price) : '- '}</Typography>
       </Stack>
     </Stack>
   );

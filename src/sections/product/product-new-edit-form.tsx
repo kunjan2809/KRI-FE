@@ -15,6 +15,7 @@ import Typography from '@mui/material/Typography';
 import LoadingButton from '@mui/lab/LoadingButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import Button from '@mui/material/Button';
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
@@ -430,7 +431,7 @@ export default function ProductNewEditForm({ currentProduct }: Props) {
           sx={{ flexGrow: 1, pl: 3 }}
         />
 
-        <LoadingButton type="submit" variant="contained" size="large" loading={isSubmitting}>
+        <LoadingButton type="submit" variant="contained" size="large" component={Button} disabled={isSubmitting}>
           {!currentProduct ? 'Create Product' : 'Save Changes'}
         </LoadingButton>
       </Grid>

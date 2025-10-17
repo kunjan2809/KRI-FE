@@ -90,6 +90,10 @@ export type IUserCard = {
   totalPosts: number;
   totalFollowers: number;
   totalFollowing: number;
+  joinDate: Date;
+  email: string;
+  phoneNumber: string;
+  status: string;
 };
 
 export type IUserItem = {
@@ -134,4 +138,27 @@ export type IUserAccountChangePassword = {
   oldPassword: string;
   newPassword: string;
   confirmNewPassword: string;
+};
+
+export type IUserOrderStatistics = {
+  total_orders: number;
+  total_order_value: number;
+  returned_orders: number;
+  returned_orders_value: number;
+};
+
+export type INUserItem = {
+  _id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  mobile_number: string;
+  profile_icon: string;
+  status: string;
+  created_at: string;
+  order_statistics: IUserOrderStatistics;
+};
+
+export type IUserStatus = {
+  status: string;
 };

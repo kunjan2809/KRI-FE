@@ -6,9 +6,7 @@ import { _mock } from './_mock';
 
 export const USER_STATUS_OPTIONS = [
   { value: 'active', label: 'Active' },
-  { value: 'pending', label: 'Pending' },
   { value: 'banned', label: 'Banned' },
-  { value: 'rejected', label: 'Rejected' },
 ];
 
 export const _userAbout = {
@@ -95,6 +93,9 @@ export const _userCards = [...Array(21)].map((_, index) => ({
   totalFollowers: _mock.number.nativeL(index),
   totalPosts: _mock.number.nativeL(index + 2),
   totalFollowing: _mock.number.nativeL(index + 1),
+  joinDate: _mock.time(index),
+  status:
+    (index % 2 && 'pending') || (index % 3 && 'banned') || (index % 4 && 'rejected') || 'active',
 }));
 
 export const _userPayment = [...Array(3)].map((_, index) => ({

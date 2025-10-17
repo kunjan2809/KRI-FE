@@ -97,13 +97,13 @@ export default function ProductTableToolbar({
           width: { xs: 1, md: 200 },
         }}
       >
-        <InputLabel>Publish</InputLabel>
+        <InputLabel>Status</InputLabel>
 
         <Select
           multiple
           value={publish}
           onChange={handleChangePublish}
-          input={<OutlinedInput label="Publish" />}
+          input={<OutlinedInput label="Status" />}
           renderValue={(selected) => selected.map((value) => value).join(', ')}
           onClose={handleClosePublish}
           sx={{ textTransform: 'capitalize' }}

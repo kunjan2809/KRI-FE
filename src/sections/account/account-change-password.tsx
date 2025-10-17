@@ -7,6 +7,7 @@ import Stack from '@mui/material/Stack';
 import IconButton from '@mui/material/IconButton';
 import LoadingButton from '@mui/lab/LoadingButton';
 import InputAdornment from '@mui/material/InputAdornment';
+import Button from '@mui/material/Button';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
@@ -116,7 +117,7 @@ export default function AccountChangePassword() {
           }}
         />
 
-        <LoadingButton type="submit" variant="contained" loading={isSubmitting} sx={{ ml: 'auto' }}>
+        <LoadingButton type="submit" variant="contained" sx={{ ml: 'auto' }} component={Button} disabled={isSubmitting}>
           Save Changes
         </LoadingButton>
       </Stack>

@@ -4,6 +4,7 @@ import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import LoadingButton from '@mui/lab/LoadingButton';
 import InputAdornment from '@mui/material/InputAdornment';
+import Button from '@mui/material/Button';
 
 import Iconify from 'src/components/iconify';
 import { useSnackbar } from 'src/components/snackbar';
@@ -79,7 +80,7 @@ export default function AccountSocialLinks({ socialLinks }: Props) {
           />
         ))}
 
-        <LoadingButton type="submit" variant="contained" loading={isSubmitting} sx={{ ml: 'auto' }}>
+        <LoadingButton type="submit" variant="contained" sx={{ ml: 'auto' }} component={Button} disabled={isSubmitting}>
           Save Changes
         </LoadingButton>
       </Stack>

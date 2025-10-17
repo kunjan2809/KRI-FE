@@ -38,10 +38,10 @@ export default function AppFeatured({ list, ...other }: Props) {
   });
 
   return (
-    <Card {...other}  sx={{ maxHeight: '320px' }}>
-      <Carousel ref={carousel.carouselRef} {...carousel.carouselSettings}>
-        {list.map((app, index) => (
-          <CarouselItem key={app.id} item={app} active={index === carousel.currentIndex} />
+    <Card {...other} sx={{ maxHeight: '320px' }}>
+      <Carousel ref={carousel.carouselRef} {...carousel.carouselSettings} >
+        {list.map((app) => (
+          <CarouselItem key={app.id} item={app} />
         ))}
       </Carousel>
 
@@ -58,10 +58,9 @@ export default function AppFeatured({ list, ...other }: Props) {
 
 type CarouselItemProps = {
   item: ItemProps;
-  active?: boolean;
 };
 
-function CarouselItem({ item, active }: CarouselItemProps) {
+function CarouselItem({ item }: CarouselItemProps) {
   const theme = useTheme();
 
   const { coverUrl, title, description } = item;
@@ -84,7 +83,7 @@ function CarouselItem({ item, active }: CarouselItemProps) {
   );
 
   return (
-    <MotionContainer action animate={active} sx={{ position: 'relative' }}>
+    <MotionContainer action sx={{ position: 'relative' }}>
       <Stack
         spacing={1}
         sx={{
@@ -98,8 +97,8 @@ function CarouselItem({ item, active }: CarouselItemProps) {
         }}
       >
         <m.div variants={varFade().inRight}>
-          <Typography variant="overline" sx={{ color: 'primary.light' }}>
-            Featured App
+          <Typography variant="overline" sx={{ color: 'primary.light', textTransform: 'none' }}>
+            KRI Premium Jewellery
           </Typography>
         </m.div>
 

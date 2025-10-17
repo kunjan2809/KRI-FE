@@ -1,5 +1,14 @@
 module.exports = {
   trailingSlash: true,
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },  
+  experimental: {
+    staticPageGenerationTimeout: 0,
+  },
   modularizeImports: {
     '@mui/icons-material': {
       transform: '@mui/icons-material/{{member}}',

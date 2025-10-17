@@ -47,34 +47,44 @@ export function RenderCellCreatedAt({ params }: ParamsProps) {
 }
 
 export function RenderCellStock({ params }: ParamsProps) {
+  const stockQuantity = params.row.stock_quantity || 0;
+  
+  // Determine stock level and color
+  const getStockLevel = () => {
+    if (stockQuantity === 0) return { level: 'Out of Stock', color: 'error' as const };
+    if (stockQuantity <= 50) return { level: 'Low Stock', color: 'warning' as const };
+    return { level: 'In Stock', color: 'success' as const };
+  };
+
+  const { level, color } = getStockLevel();
+
   return (
     <Stack sx={{ typography: 'caption', color: 'text.secondary' }}>
       <LinearProgress
-        value={(params.row.available * 100) / params.row.stock_quantity}
+        value={stockQuantity === 0 ? 0 : Math.min((stockQuantity / 100) * 100, 100)}
         variant="determinate"
-        color={
-          (params.row.stock_quantity <= 15 && 'error') ||
-          (params.row.stock_quantity <= 50 && 'warning') ||
-          'success'
-        }
+        color={color as 'error' | 'warning' | 'success'}
         sx={{ mb: 1, height: 6, maxWidth: 80 }}
       />
-      {!!params.row.stock_quantity && params.row.stock_quantity} / 100
+      <Box sx={{ fontWeight: 'medium' }}>
+        {stockQuantity ?? ''} units
+      </Box>
     </Stack>
   );
 }
 
 export function RenderCellProduct({ params }: ParamsProps) {
   const router = useRouter();
+  const imageUrl = params.row.all_images?.find((image: any) => image.is_primary)?.image_url|| params.row.all_images?.[0]?.image_url || params.row.coverUrl;    
 
   const handleNavigate = () => {
-    router.push(paths.dashboard.product.details(params.row._id));
+    router.push(paths.user.products.details(params.row._id));
   }
   return (
     <Stack direction="row" alignItems="center" sx={{ py: 2, width: 1, }}>
       <Avatar
         alt={params.row.name}
-        src={params.row.coverUrl}
+        src={imageUrl}
         variant="rounded"
         sx={{ width: 64, height: 64, mr: 2 }}
       />
@@ -94,7 +104,7 @@ export function RenderCellProduct({ params }: ParamsProps) {
         }
         secondary={
           <Box component="div" sx={{ typography: 'body2', color: 'text.disabled' }}>
-            {params.row.category}
+            {params.row.category_id?.name || params.row.category || 'No Category'}
           </Box>
         }
         sx={{ display: 'flex', flexDirection: 'column' }}

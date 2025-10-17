@@ -1,5 +1,8 @@
 import { _mock } from './_mock';
 
+import necklace from '../../public/assets/categories/nackless.jpg';
+import watch from '../../public/assets/categories/watch.png';
+import earrings from '../../public/assets/categories/earrings.jpg';
 // APP
 // ----------------------------------------------------------------------
 
@@ -62,11 +65,17 @@ export const _appInvoices = [...Array(5)].map((_, index) => {
   };
 });
 
+const coverUrl = [
+  necklace,
+  watch,
+  earrings,
+];
+
 export const _appFeatured = [...Array(3)].map((_, index) => ({
   id: _mock.id(index),
   title: _mock.postTitle(index),
   description: _mock.sentence(index),
-  coverUrl: _mock.image.cover(index),
+  coverUrl: coverUrl[index].src,
 }));
 
 // ANALYTIC

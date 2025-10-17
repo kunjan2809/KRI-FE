@@ -5,8 +5,11 @@ import { useMemo, useEffect, useReducer, useCallback } from 'react';
 import axios, { endpoints } from 'src/utils/axios';
 
 import { AuthContext } from './auth-context';
-import { setSession, isValidToken } from './utils';
+import { setSession } from './utils';
 import { AuthUserType, ActionMapType, AuthStateType } from '../../types';
+import { SESSION_ACCESS_TOKEN, SESSION_DATA_RENEWAL_TOKEN, SESSION_USER_DATA } from 'src/utils/constants';
+import { paths } from 'src/routes/paths';
+import { useRouter } from 'next/navigation';
 
 // ----------------------------------------------------------------------
 /**
@@ -85,35 +88,52 @@ const reducer = (state: AuthStateType, action: ActionsType) => {
 
 // ----------------------------------------------------------------------
 
-const STORAGE_KEY = 'accessToken';
-
 type Props = {
   children: React.ReactNode;
 };
 
 export function AuthProvider({ children }: Props) {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const router = useRouter();
+
 
   const initialize = useCallback(async () => {
     try {
-      const accessToken = sessionStorage.getItem(STORAGE_KEY);
+      const accessToken = localStorage.getItem(SESSION_ACCESS_TOKEN);
 
-      if (accessToken && isValidToken(accessToken)) {
+      if (accessToken) {
         setSession(accessToken);
 
-        const res = await axios.get(endpoints.auth.me);
-
-        const { user } = res.data;
-
-        dispatch({
-          type: Types.INITIAL,
-          payload: {
-            user: {
-              ...user,
-              accessToken,
+        const userData = localStorage.getItem(SESSION_USER_DATA);
+        const dataRenewalToken = localStorage.getItem(SESSION_DATA_RENEWAL_TOKEN);
+        const isTimeMoreThanTwoMinutes = dataRenewalToken && new Date(dataRenewalToken).getTime() > Date.now() - 2 * 60 * 1000;
+        
+        if (userData && !isTimeMoreThanTwoMinutes) {
+          dispatch({
+            type: Types.INITIAL,
+            payload: {
+              user: { ...JSON.parse(userData), accessToken },
             },
-          },
-        });
+          });
+        } else {
+          const res = await axios.get(endpoints.auth.me);
+          const { user } = res.data?.data;
+
+          if (user) {
+            localStorage.setItem(SESSION_USER_DATA, JSON.stringify(user));
+            localStorage.setItem(SESSION_DATA_RENEWAL_TOKEN, new Date().toISOString());
+
+            dispatch({
+              type: Types.INITIAL,
+              payload: {
+                user: {
+                  ...user,
+                  accessToken,
+                },
+              },
+            });
+          }
+        }
       } else {
         dispatch({
           type: Types.INITIAL,
@@ -123,7 +143,6 @@ export function AuthProvider({ children }: Props) {
         });
       }
     } catch (error) {
-      console.error(error);
       dispatch({
         type: Types.INITIAL,
         payload: {
@@ -145,12 +164,13 @@ export function AuthProvider({ children }: Props) {
     };
 
     const res = await axios.post(endpoints.auth.login, data);
-
     const { data: responseData } = res.data;
     const { token, user } = responseData;
 
     setSession(token);
-    sessionStorage.setItem(STORAGE_KEY, token);
+    localStorage.setItem(SESSION_ACCESS_TOKEN, token);
+    localStorage.setItem(SESSION_DATA_RENEWAL_TOKEN, new Date().toISOString());
+    localStorage.setItem(SESSION_USER_DATA, JSON.stringify(user));
 
     dispatch({
       type: Types.LOGIN,
@@ -161,16 +181,19 @@ export function AuthProvider({ children }: Props) {
         },
       },
     });
+
+    router.push(paths.dashboard.root);
   }, []);
 
   // REGISTER
   const register = useCallback(
-    async (email: string, password: string, firstName: string, lastName: string) => {
+    async (email: string, password: string, firstName: string, lastName: string, profileIcon?: string) => {
       const data = {
         email,
         password,
         first_name: firstName,
         last_name: lastName,
+        profile_icon: profileIcon || "1", // Default to first avatar if not provided
       };
 
       const res = await axios.post(endpoints.auth.signup, data);
@@ -179,7 +202,7 @@ export function AuthProvider({ children }: Props) {
       const { token, user } = responseData;
 
       setSession(token);
-      sessionStorage.setItem(STORAGE_KEY, token);
+      localStorage.setItem(SESSION_ACCESS_TOKEN, token);
 
       dispatch({
         type: Types.REGISTER,
@@ -207,7 +230,7 @@ export function AuthProvider({ children }: Props) {
       const { token } = responseData;
 
       setSession(token);
-      sessionStorage.setItem(STORAGE_KEY, token);
+      localStorage.setItem(SESSION_ACCESS_TOKEN, token);
 
       dispatch({
         type: Types.FORGET_PASSWORD,
@@ -224,6 +247,8 @@ export function AuthProvider({ children }: Props) {
   // LOGOUT
   const logout = useCallback(async () => {
     setSession(null);
+    localStorage.removeItem(SESSION_ACCESS_TOKEN);
+    localStorage.removeItem(SESSION_USER_DATA);
     dispatch({
       type: Types.LOGOUT,
     });

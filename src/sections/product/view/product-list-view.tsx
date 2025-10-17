@@ -19,6 +19,7 @@ import {
   GridToolbarColumnsButton,
   GridColumnVisibilityModel,
   GridSortModel,
+  GridFilterModel,
 } from '@mui/x-data-grid';
 
 import { paths } from 'src/routes/paths';
@@ -32,14 +33,13 @@ import { PRODUCT_STOCK_OPTIONS } from 'src/_mock';
 
 import Iconify from 'src/components/iconify';
 import { useSnackbar } from 'src/components/snackbar';
-import EmptyContent from 'src/components/empty-content';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import Alert from '@mui/material/Alert';
 import Typography from '@mui/material/Typography';
 
-import { IProductItem, IProductTableFilters, IProductTableFilterValue } from 'src/types/product';
+import { IProductTableFilters, IProductTableFilterValue } from 'src/types/product';
 import { useAuthToken } from 'src/auth/hooks';
 
 import ProductTableToolbar from '../product-table-toolbar';
@@ -62,6 +62,7 @@ const PUBLISH_OPTIONS = [
 const defaultFilters: IProductTableFilters = {
   publish: [],
   stock: [],
+  search: '',
 };
 
 const HIDE_COLUMNS = {
@@ -71,8 +72,8 @@ const HIDE_COLUMNS = {
 const HIDE_COLUMNS_TOGGLABLE = ['category', 'actions'];
 
 const SORT_MODEL = {
-  field: 'created_at',
-  sort: 'desc',
+  field: 'created_at' as const,
+  sort: 'desc' as const,
 };
 
 // ----------------------------------------------------------------------
@@ -93,14 +94,26 @@ export default function ProductListView() {
   const [filters, setFilters] = useState(defaultFilters);
   const [sortModel, setSortModel] = useState<GridSortModel[0]>(SORT_MODEL);
   const [page, setPage] = useState<number>(1);
-  const [limit, setLimit] = useState<number>(10);
+  const [limit, setLimit] = useState<number>(20);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState<string>('');
+  const [deleteRowIds, setDeleteRowIds] = useState<string[]>([]);
 
-  const { products, productsLoading, productsError, productsEmpty, pagination } = useGetProducts({
+  // Debounce search query to avoid too many API calls
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const { products, productsLoading, productsError, pagination, reFetchProducts } = useGetProducts({
     stock_filters: filters.stock,
     status_filters: filters.publish,
-    search: '',
-    sort_by: sortModel.field,
-    sort_order: sortModel.sort,
+    search: debouncedSearchQuery,
+    sort_by: sortModel.field as 'created_at' | 'name' | 'price' | 'stock_quantity' | 'sku',
+    sort_order: sortModel.sort as 'asc' | 'desc',
     page,
     limit,
   });
@@ -117,115 +130,48 @@ export default function ProductListView() {
     }
   }, [products]);
 
-  // Fallback data if API fails
-  const fallbackProducts: IProductItem[] = [
-    {
-      id: 'fallback-1',
-      sku: 'FALLBACK-001',
-      name: 'Sample Product 1',
-      code: 'SAMPLE001',
-      price: 99.99,
-      priceSale: null,
-      taxes: 10,
-      quantity: 50,
-      available: 25,
-      totalSold: 100,
-      totalRatings: 4.5,
-      totalReviews: 50,
-      category: 'Sample',
-      gender: 'Men',
-      colors: ['#000000'],
-      sizes: ['M', 'L', 'XL'],
-      inventoryType: 'in stock',
-      publish: 'published',
-      coverUrl: '/assets/images/mock/m-product/product-1.webp',
-      images: ['/assets/images/mock/m-product/product-1.webp'],
-      tags: ['Sample'],
-      description: 'This is a sample product for testing purposes.',
-      subDescription: 'Sample product description.',
-      reviews: [],
-      ratings: [],
-      newLabel: { enabled: false, content: 'NEW' },
-      saleLabel: { enabled: false, content: 'SALE' },
-      createdAt: new Date(),
-    },
-    {
-      id: 'fallback-2',
-      sku: 'FALLBACK-002',
-      name: 'Sample Product 2',
-      code: 'SAMPLE002',
-      price: 149.99,
-      priceSale: 129.99,
-      taxes: 10,
-      quantity: 30,
-      available: 15,
-      totalSold: 75,
-      totalRatings: 4.2,
-      totalReviews: 30,
-      category: 'Sample',
-      gender: 'Women',
-      colors: ['#FF0000'],
-      sizes: ['S', 'M', 'L'],
-      inventoryType: 'low stock',
-      publish: 'published',
-      coverUrl: '/assets/images/mock/m-product/product-2.webp',
-      images: ['/assets/images/mock/m-product/product-2.webp'],
-      tags: ['Sample'],
-      description: 'Another sample product for testing.',
-      subDescription: 'Another sample product description.',
-      reviews: [],
-      ratings: [],
-      newLabel: { enabled: true, content: 'NEW' },
-      saleLabel: { enabled: true, content: 'SALE' },
-      createdAt: new Date(),
-    }
-  ];
 
-  // Use fallback data if API fails and no data is available
-  let displayData: any[] = [];
-  if (tableData.length > 0) {
-    displayData = tableData;
-  } else if (productsError && !productsLoading) {
-    displayData = fallbackProducts;
-  }
-
-  const dataFiltered = applyFilter({
-    inputData: displayData,
-    filters,
-  });
+  // Use server-side data directly since filtering is handled by API
+  const dataFiltered = products || [];
 
   const canReset = !isEqual(defaultFilters, filters);
+
 
   const handleFilters = useCallback((name: string, value: IProductTableFilterValue) => {
     setFilters((prevState) => ({
       ...prevState,
       [name]: value,
     }));
+    setPage(1); // Reset to first page when filters change
+  }, []);
+
+  const handleSearch = useCallback((model: GridFilterModel) => {
+    setSearchQuery(model.quickFilterValues?.[0] ?? '');
+    setPage(1); // Reset to first page when search changes
   }, []);
 
   const handleResetFilters = useCallback(() => {
     setFilters(defaultFilters);
+    setSearchQuery('');
+    setDebouncedSearchQuery('');
+    setPage(1);
   }, []);
 
-  const handleDeleteRow = useCallback(
-    (id: string) => {
-      const deleteRow = tableData.filter((row) => row._id !== id);
-
-      enqueueSnackbar('Delete success!');
-      deleteProduct(id, token);
-
-      setTableData(deleteRow);
+  const handleDeleteRows = useCallback(
+    () => {
+      const deletePromises = deleteRowIds.map((id) => deleteProduct(id, token));
+      Promise.all(deletePromises).then(() => {
+        enqueueSnackbar('Delete success!');
+        setTableData(tableData.filter((row) => !deleteRowIds.includes(row._id)));
+        setDeleteRowIds([]);
+        reFetchProducts();
+        confirmRows.onFalse();
+      }).catch((error) => {
+        enqueueSnackbar('Delete failed!', { variant: 'error' });
+      });
     },
-    [enqueueSnackbar, tableData, token]
+    [enqueueSnackbar, tableData, token, reFetchProducts, confirmRows, deleteRowIds]
   );
-
-  const handleDeleteRows = useCallback(() => {
-    const deleteRows = tableData.filter((row) => !selectedRowIds.includes(row._id));
-
-    enqueueSnackbar('Delete success!');
-
-    setTableData(deleteRows);
-  }, [enqueueSnackbar, selectedRowIds, tableData]);
 
   const handleEditRow = useCallback(
     (id: string) => {
@@ -236,7 +182,7 @@ export default function ProductListView() {
 
   const handleViewRow = useCallback(
     (id: string) => {
-      router.push(paths.dashboard.product.details(id));
+      router.push(paths.user.products.details(id));
     },
     [router]
   );
@@ -254,18 +200,12 @@ export default function ProductListView() {
       field: 'created_at',
       headerName: 'Create at',
       width: 160,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
       renderCell: (params) => <RenderCellCreatedAt params={params} />,
     },
     {
       field: 'stock_quantity',
       headerName: 'Stock',
       width: 160,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
       type: 'singleSelect',
       valueOptions: PRODUCT_STOCK_OPTIONS,
       renderCell: (params) => <RenderCellStock params={params} />,
@@ -274,9 +214,6 @@ export default function ProductListView() {
       field: 'price',
       headerName: 'Price',
       width: 140,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
       editable: true,
       renderCell: (params) => <RenderCellPrice params={params} />,
     },
@@ -284,9 +221,6 @@ export default function ProductListView() {
       field: 'status',
       headerName: 'Status',
       width: 110,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
       type: 'singleSelect',
       editable: true,
       valueOptions: PUBLISH_OPTIONS,
@@ -320,7 +254,8 @@ export default function ProductListView() {
           icon={<Iconify icon="solar:trash-bin-trash-bold" />}
           label="Delete"
           onClick={() => {
-            handleDeleteRow(params.row._id);
+            confirmRows.onTrue();
+            setDeleteRowIds([params.row._id]);
           }}
           sx={{ color: 'error.main' }}
         />,
@@ -328,10 +263,6 @@ export default function ProductListView() {
     },
   ];
 
-  const getTogglableColumns = () =>
-    columns
-      .filter((column) => !HIDE_COLUMNS_TOGGLABLE.includes(column.field))
-      .map((column) => column.field);
 
   const CustomToolbar = () => (
     <GridToolbarContainer>
@@ -342,7 +273,10 @@ export default function ProductListView() {
         publishOptions={PUBLISH_OPTIONS}
       />
 
-      <GridToolbarQuickFilter />
+      <GridToolbarQuickFilter 
+        placeholder="Search products..."
+        debounceMs={1000}
+      />
 
       <Stack
         spacing={1}
@@ -356,7 +290,10 @@ export default function ProductListView() {
             size="small"
             color="error"
             startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
-            onClick={confirmRows.onTrue}
+            onClick={() => {
+              confirmRows.onTrue();
+              setDeleteRowIds(selectedRowIds.map((id) => id as string));
+            }}
           >
             Delete ({selectedRowIds.length})
           </Button>
@@ -405,13 +342,6 @@ export default function ProductListView() {
           </Alert>
         )}
 
-        {/* {productsLoading && (
-          <Alert severity="info" sx={{ mb: 3 }}>
-            <Typography variant="body2">
-              Loading products from API...
-            </Typography>
-          </Alert>
-        )} */}
 
         <Card>
           {canReset && (
@@ -438,10 +368,12 @@ export default function ProductListView() {
               setPage(newPage + 1);
               setLimit(newPageSize);
             }}
-            pageSizeOptions={[2, 10, 20]}
+            filterMode='server'
+            onFilterModelChange={handleSearch}
+            pageSizeOptions={[20, 50, 100]}
             disableRowSelectionOnClick
             onSortModelChange={(model) => {
-              setSortModel(model[0]);
+              setSortModel(model[0] ?? SORT_MODEL);
             }}
             checkboxSelection
             disableColumnFilter
@@ -482,7 +414,7 @@ export default function ProductListView() {
         title="Delete"
         content={
           <>
-            Are you sure want to delete <strong>{selectedRowIds.length}</strong> items?
+            Are you sure want to delete <strong>{deleteRowIds.length}</strong> products?
           </>
         }
         action={
@@ -491,7 +423,6 @@ export default function ProductListView() {
             color="error"
             onClick={() => {
               handleDeleteRows();
-              confirmRows.onFalse();
             }}
           >
             Delete
@@ -503,23 +434,3 @@ export default function ProductListView() {
 }
 
 // ----------------------------------------------------------------------
-
-function applyFilter({
-  inputData,
-  filters,
-}: {
-  inputData: any[];
-  filters: IProductTableFilters;
-}) {
-  const { stock, publish } = filters;
-
-  if (stock.length) {
-    inputData = inputData.filter((product) => stock.includes(product.stock_quantity?.toString()));
-  }
-
-  if (publish.length) {
-    inputData = inputData.filter((product) => publish.includes(product.status));
-  }
-
-  return inputData;
-}

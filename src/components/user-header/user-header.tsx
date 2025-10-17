@@ -1,11 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import {
   AppBar,
+  Avatar,
   Box,
   Button,
+  CircularProgress,
   Container,
   IconButton,
   InputBase,
@@ -15,20 +17,21 @@ import {
   Stack,
   Toolbar,
   Tooltip,
-  Avatar,
   Typography,
   useMediaQuery,
   useTheme,
 } from '@mui/material';
 import { alpha, styled } from '@mui/material/styles';
 
-import { useAuthContext } from 'src/auth/hooks/use-auth-context';
+import { useGetCategories } from 'src/api/category';
 import LoginPopup from 'src/app/landing/loginPopup/LoginPopup';
+import { useAuthContext } from 'src/auth/hooks/use-auth-context';
 import Iconify from 'src/components/iconify';
 import Logo from 'src/components/logo';
 import { RouterLink } from 'src/routes/components';
 import { useRouter } from 'src/routes/hooks';
 import { paths } from 'src/routes/paths';
+
 import { getDummyAvtarUrl } from 'src/utils/avtarData';
 
 // ----------------------------------------------------------------------
@@ -55,10 +58,11 @@ const SearchIconWrapper = styled('div')(({ theme }) => ({
   padding: '8px',
   height: 'calc(100% - 8px)',
   position: 'absolute',
-  pointerEvents: 'none',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
+  zIndex: 1110,
+  cursor: 'pointer',
   right: '4px',
   top: '4px',
   color: theme.palette.common.white,
@@ -69,6 +73,7 @@ const SearchIconWrapper = styled('div')(({ theme }) => ({
 const StyledInputBase = styled(InputBase)(({ theme }) => ({
   color: theme.palette.text.primary,
   width: '100%',
+  zIndex: 90,
   '&:focus': {
     borderColor: '#212B36',
   },
@@ -92,29 +97,6 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-const categoryLinks = [
-  { label: 'Gifts', href: '/gifts' },
-  { label: 'The Personalisation Shop', href: '/personalisation' },
-  { label: 'Home Favourites', href: '/home-favourites' },
-  { label: 'Fashion Finds', href: '/fashion' },
-  { label: 'Registry', href: '/registry' },
-  { label: 'Accessories', href: '/accessories' },
-  { label: 'Art & Collectibles', href: '/art-collectibles' },
-  { label: 'Baby', href: '/baby' },
-  { label: 'Bags & Purses', href: '/bags-purses' },
-  { label: 'Bath & Beauty', href: '/bath-beauty' },
-  { label: 'Books, Films & Music', href: '/books-films-music' },
-  { label: 'Clothing', href: '/clothing' },
-  { label: 'Craft Supplies & Tools', href: '/craft-supplies-tools' },
-  { label: 'Electronics & Accessories', href: '/electronics-accessories' },
-  { label: 'Home & Living', href: '/home-living' },
-  { label: 'Jewellery', href: '/jewellery' },
-  { label: 'Paper & Party Supplies', href: '/paper-party-supplies' },
-  { label: 'Pet Supplies', href: '/pet-supplies' },
-  { label: 'Shoes', href: '/shoes' },
-  { label: 'Toys & Games', href: '/toys-games' },
-  { label: 'Weddings', href: '/weddings' },
-];
 
 // ----------------------------------------------------------------------
 
@@ -124,13 +106,65 @@ export default function UserHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [anchorEl1, setAnchorEl1] = useState<null | HTMLElement>(null);
   const [loginPopupOpen, setLoginPopupOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
   // Get user data from auth context
   const { user, authenticated, logout } = useAuthContext();
-  // Determine if user is admin based on user data
-  const isAdmin = authenticated && user && (
-    user.is_admin === true
-  );
+
+  // Fetch categories from API
+  const { categories, categoriesLoading, categoriesError } = useGetCategories();
+
+  // Helper function to render category menu items
+  const renderCategoryMenuItems = () => {
+    if (categoriesLoading) {
+      return (
+        <MenuItem disabled>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'center', width: '100%' }}>
+            <CircularProgress size={20} />
+            <Typography variant="body2">Loading categories...</Typography>
+          </Box>
+        </MenuItem>
+      );
+    }
+
+    if (categoriesError) {
+      return (
+        <MenuItem disabled>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant="body2" color="error">
+              Failed to load categories
+            </Typography>
+          </Box>
+        </MenuItem>
+      );
+    }
+
+    if (categories.length === 0) {
+      return (
+        <MenuItem disabled>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant="body2" color="text.secondary">
+              No categories available
+            </Typography>
+          </Box>
+        </MenuItem>
+      );
+    }
+
+    return categories.map((category) => (
+      <MenuItem
+        onClick={() => {
+          handleCategoriesClose();
+          router.push(`/products?categoryId=${category._id}`);
+        }}
+        key={category._id}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {category.name}
+        </Box>
+      </MenuItem>
+    ));
+  };
 
   const handleCategoriesClose = () => {
     setAnchorEl1(null);
@@ -142,8 +176,9 @@ export default function UserHeader() {
 
   const handleSearch = (event: React.FormEvent) => {
     event.preventDefault();
-    // Handle search functionality
-    console.log('Search submitted');
+    if (searchQuery.trim()) {
+      router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
   };
 
   const handleLoginPopupClose = (): void => {
@@ -181,11 +216,6 @@ export default function UserHeader() {
     setAnchorEl(null);
   };
 
-  useEffect(() => {
-    if (authenticated && isAdmin) {
-      router.push(paths.dashboard.root);
-    }
-  }, [authenticated, isAdmin, router]);
 
   return (
     <>
@@ -289,11 +319,7 @@ export default function UserHeader() {
                         },
                       }}
                     >
-                      {categoryLinks.map((link) => (<MenuItem onClick={handleCategoriesClose} key={link.label}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          {link.label}
-                        </Box>
-                      </MenuItem>))}
+                      {renderCategoryMenuItems()}
                     </Menu>
                   </>
                 </Button>
@@ -315,8 +341,15 @@ export default function UserHeader() {
                 <StyledInputBase
                   placeholder="Search for anything"
                   inputProps={{ 'aria-label': 'search' }}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSearch(e);
+                    }
+                  }}
                 />
-                <SearchIconWrapper>
+                <SearchIconWrapper onClick={handleSearch}>
                   <Iconify icon="eva:search-fill" />
                 </SearchIconWrapper>
               </Search>
@@ -378,7 +411,7 @@ export default function UserHeader() {
                     </MenuItem>
                     <MenuItem onClick={handleOrdersClick}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Iconify icon="eva:shopping-cart-outline" />
+                        <Iconify icon="eva:shopping-bag-outline" />
                         Orders
                       </Box>
                     </MenuItem>

@@ -144,6 +144,7 @@ const HeroSection = () => {
                             <Button
                                 size="large"
                                 startIcon={<Iconify icon="mdi:sparkles" width={20} />}
+                                onClick={() => router.push(paths.user.products.root)}
                                 sx={{
                                     color: '#fff',
                                     backgroundColor: 'transparent',

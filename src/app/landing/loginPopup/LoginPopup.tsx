@@ -23,6 +23,7 @@ import { useRouter } from 'src/routes/hooks';
 
 import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
+import { getRandomStringNumber } from 'src/utils/avtarData';
 
 // OTP Input Component
 const OTPInput = ({ value, onChange, error, theme }: { value: string; onChange: (value: string) => void; error?: boolean; theme: any }) => {
@@ -168,30 +169,27 @@ const LoginPopup = ({ open, onClose }: LoginPopupProps) => {
             .matches(/^\d{6}$/, 'OTP must contain only numbers'),
     });
 
-    const loginDefaultValues = {
-        email: '',
-        password: '',
-    };
-
-    const registerDefaultValues = {
-        firstName: '',
-        lastName: '',
-        email: '',
-        password: '',
-    };
-
-    const otpDefaultValues = {
-        otp: '',
-    };
-
     const getCurrentSchema = () => {
         if (isEmailVerification) return OTPSchema;
         return isSignup ? RegisterSchema : LoginSchema;
     };
 
     const getCurrentDefaultValues = useCallback(() => {
-        if (isEmailVerification) return otpDefaultValues;
-        return isSignup ? registerDefaultValues : loginDefaultValues;
+        if (isEmailVerification) {
+            return { otp: '' };
+        }
+        if (isSignup) {
+            return {
+                firstName: '',
+                lastName: '',
+                email: '',
+                password: '',
+            };
+        }
+        return {
+            email: '',
+            password: '',
+        };
     }, [isEmailVerification, isSignup]);
 
     const methods = useForm<any>({
@@ -202,8 +200,14 @@ const LoginPopup = ({ open, onClose }: LoginPopupProps) => {
     const {
         reset,
         handleSubmit,
-        formState: { isSubmitting },
+        watch,
+        setValue,
+        trigger,
+        formState: { isSubmitting, errors  },
     } = methods;
+    
+
+const selectedProfileIcon = getRandomStringNumber();
 
     // Reset form when switching modes
     useEffect(() => {
@@ -224,8 +228,11 @@ const LoginPopup = ({ open, onClose }: LoginPopupProps) => {
                 onClose();
                 reset();
                 setErrorMsg('');
+                setIsSignup(false);
+                setIsEmailVerification(false);
+                setUserEmail('');
             } else if (isSignup) {
-                await register?.(data.email, data.password, data.firstName, data.lastName);
+                await register?.(data.email, data.password, data.firstName, data.lastName, selectedProfileIcon);
                 // After successful registration, show email verification
                 setUserEmail(data.email);
                 setIsEmailVerification(true);
@@ -310,19 +317,19 @@ const LoginPopup = ({ open, onClose }: LoginPopupProps) => {
 
                     <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
                         <OTPInput
-                            value={methods.watch('otp') || ''}
+                            value={watch('otp') || ''}
                             onChange={(value) => {
-                                methods.setValue('otp', value);
-                                methods.trigger('otp'); // Trigger validation
+                                setValue('otp', value);
+                                trigger('otp'); // Trigger validation
                             }}
-                            error={!!methods.formState.errors.otp}
+                            error={!!errors.otp}
                             theme={theme}
                         />
                     </Box>
 
-                    {methods.formState.errors.otp && (
+                    {errors.otp && (
                         <Typography variant="caption" color="error" sx={{ textAlign: 'center' }}>
-                            {String(methods.formState.errors.otp.message)}
+                            {String(errors.otp.message)}
                         </Typography>
                     )}
 
@@ -518,7 +525,7 @@ const LoginPopup = ({ open, onClose }: LoginPopupProps) => {
                         component="button"
                         variant="subtitle2"
                         onClick={handleBackToLogin}
-                        sx={{ textDecoration: 'none', cursor: 'pointer' }}
+                        sx={{ textDecoration: 'none', cursor: 'pointer', color: "#212B36" }}
                     >
                         Go back
                     </Link>

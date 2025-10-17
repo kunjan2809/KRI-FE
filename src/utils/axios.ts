@@ -1,6 +1,7 @@
 import axios, { AxiosRequestConfig } from 'axios';
 
 import { BASE_API } from 'src/config-global';
+import { SESSION_ACCESS_TOKEN, SESSION_USER_DATA } from './constants';
 
 // ----------------------------------------------------------------------
 
@@ -8,7 +9,15 @@ const axiosInstance = axios.create({ baseURL: BASE_API });
 
 axiosInstance.interceptors.response.use(
   (res) => res,
-  (error) => Promise.reject((error.response && error.response.data) || 'Something went wrong')
+  (error) => {
+    console.error("error", error);
+    if (error.response.status === 401 && error.response.data.code === 'UNAUTHORIZED') {
+      localStorage.removeItem(SESSION_ACCESS_TOKEN);
+      localStorage.removeItem(SESSION_USER_DATA);
+      window.location.href = '/login';
+    }
+    return Promise.reject((error.response && error.response.data) || 'Something went wrong')
+  }
 );
 
 export default axiosInstance;
@@ -64,7 +73,7 @@ export const endpoints = {
     login: '/api/auth/login',
     register: '/api/auth/register',
     signup: '/api/auth/signup',
-    forgetPassword: '/api/auth/forget-password',    
+    forgetPassword: '/api/auth/forget-password',
   },
   analytics: {
     dashboard: '/api/analytics/dashboard/',
@@ -96,6 +105,10 @@ export const endpoints = {
     detailsById: '/api/products/admin/details/',
     quantity: '/api/products/admin/quantity/',
     status: '/api/products/admin/status/',
+    featured: '/api/products/featured',
+    addVariations: '/api/products/admin/:productId/variations',
+    editVariations: '/api/products/admin/:productId/variations/:variationId',
+    deleteVariations: '/api/products/admin/:productId/variations/:variationId'
   },
   image: {
     product: '/api/images/product/',
@@ -114,5 +127,14 @@ export const endpoints = {
   user: {
     all: '/api/users/admin/all',
     status: '/api/users/admin/status/',
+  },
+  category: {
+    all: '/api/category/all',
+    add: '/api/category/add',
+    edit: '/api/category/edit',
+    delete: '/api/category/delete',
+  },
+  newsletter: {
+    subscribe: '/api/leads/subscribe',
   },
 };

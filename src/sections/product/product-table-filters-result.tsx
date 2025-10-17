@@ -50,7 +50,7 @@ export default function ProductTableFiltersResult({
 
   return (
     <Stack spacing={1.5} {...other}>
-      <Box sx={{ typography: 'body2' }}>
+      <Box sx={{ typography: 'body2', pt: 1 }}>
         <strong>{results}</strong>
         <Box component="span" sx={{ color: 'text.secondary', ml: 0.25 }}>
           results found

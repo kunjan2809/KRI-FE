@@ -7,6 +7,7 @@ import Grid from '@mui/material/Unstable_Grid2';
 import LoadingButton from '@mui/lab/LoadingButton';
 import ListItemText from '@mui/material/ListItemText';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import Button from '@mui/material/Button';
 
 import FormProvider from 'src/components/hook-form';
 import { useSnackbar } from 'src/components/snackbar';
@@ -122,7 +123,7 @@ export default function AccountNotifications() {
           </Grid>
         ))}
 
-        <LoadingButton type="submit" variant="contained" loading={isSubmitting} sx={{ ml: 'auto' }}>
+        <LoadingButton type="submit" variant="contained" sx={{ ml: 'auto' }} component={Button} disabled={isSubmitting}>
           Save Changes
         </LoadingButton>
       </Stack>

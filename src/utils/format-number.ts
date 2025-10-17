@@ -9,6 +9,12 @@ import { useLocales as getLocales } from 'src/locales';
 
 type InputValue = string | number | null;
 
+type DiscountPrice = {
+  price: number;
+  discount_type: string;
+  discount_rate: number;
+};
+
 function getLocaleCode() {
   const {
     currentLang: {
@@ -111,6 +117,29 @@ export function fData(inputValue: InputValue) {
   const index = Math.floor(Math.log(number) / Math.log(baseValue));
 
   const fm = `${parseFloat((number / baseValue ** index).toFixed(decimal))} ${units[index]}`;
+
+  return fm;
+}
+
+// ----------------------------------------------------------------------
+
+export function discountPrice(inputValue: DiscountPrice) {
+  const { code, currency } = getLocaleCode();
+
+  if (!inputValue) return '';
+
+  const price = Number(inputValue.price);
+  const discount_rate = Number(inputValue.discount_rate);
+  const discount_type = inputValue.discount_type;
+
+  const number = discount_type === "percentage" ? price - (price * discount_rate / 100) : price - discount_rate;
+
+  const fm = new Intl.NumberFormat(code, {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(number);
 
   return fm;
 }

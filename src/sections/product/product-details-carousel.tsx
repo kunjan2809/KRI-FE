@@ -10,7 +10,7 @@ import Image from 'src/components/image';
 import Lightbox, { useLightBox } from 'src/components/lightbox';
 import Carousel, { useCarousel, CarouselArrowIndex } from 'src/components/carousel';
 
-import { IProductItem } from 'src/types/product';
+import { IProductItem, IProductImage } from 'src/types/product';
 
 // ----------------------------------------------------------------------
 
@@ -66,10 +66,22 @@ type Props = {
   product: IProductItem;
 };
 
+interface IProductImg {
+  alt_text: string
+  created_at: string
+  edited_at: string
+  image_url: string
+  is_primary: boolean
+  product_id: string
+  sort_order: number
+  __v: number
+  _id: string
+}
+
 export default function ProductDetailsCarousel({ product }: Props) {
   const theme = useTheme();
 
-  const slides = product.images.map((img) => ({
+  const slides = product.images.map((img: string) => ({
     src: img,
   }));
 

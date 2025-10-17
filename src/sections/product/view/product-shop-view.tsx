@@ -38,7 +38,7 @@ import ProductFiltersResult from '../product-filters-result';
 // ----------------------------------------------------------------------
 
 const defaultFilters: IProductFilters = {
-  gender: [],
+  gender: '',
   colors: [],
   rating: '',
   category: 'all',

@@ -22,6 +22,7 @@ import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
 
 import { IOrderItem } from 'src/types/order';
+import { getDummyAvtarUrl } from 'src/utils/avtarData';
 
 // ----------------------------------------------------------------------
 
@@ -40,8 +41,7 @@ export default function OrderTableRow({
   onSelectRow,
   onDeleteRow,
 }: Props) {
-  const { items, status, orderNumber, createdAt, customer, totalQuantity, subTotal } = row;
-
+  const { products, order_status, _id, customer_info, total_amount, shipping_address, created_at } = row;
   const confirm = useBoolean();
 
   const collapse = useBoolean();
@@ -64,16 +64,16 @@ export default function OrderTableRow({
             },
           }}
         >
-          {orderNumber}
+          {_id}
         </Box>
       </TableCell>
 
       <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
-        <Avatar alt={customer.name} src={customer.avatarUrl} sx={{ mr: 2 }} />
+        <Avatar alt={`${customer_info.first_name} ${customer_info.last_name}`} src={getDummyAvtarUrl(customer_info.profile_icon).avatarUrl} sx={{ mr: 2 }} />
 
         <ListItemText
-          primary={customer.name}
-          secondary={customer.email}
+          primary={`${customer_info.first_name} ${customer_info.last_name}`}
+          secondary={customer_info.email}
           primaryTypographyProps={{ typography: 'body2' }}
           secondaryTypographyProps={{
             component: 'span',
@@ -84,8 +84,8 @@ export default function OrderTableRow({
 
       <TableCell>
         <ListItemText
-          primary={fDate(createdAt)}
-          secondary={fTime(createdAt)}
+          primary={fDate(created_at)}
+          secondary={fTime(created_at)}
           primaryTypographyProps={{ typography: 'body2', noWrap: true }}
           secondaryTypographyProps={{
             mt: 0.5,
@@ -95,21 +95,24 @@ export default function OrderTableRow({
         />
       </TableCell>
 
-      <TableCell align="center"> {totalQuantity} </TableCell>
+      <TableCell align="center"> {shipping_address?.street}, {shipping_address?.city}, {shipping_address?.state}, {shipping_address?.postal_code}, {shipping_address?.country} </TableCell>
+      <TableCell align="center"> {products.reduce((acc, item) => acc + item.quantity, 0)} </TableCell>
 
-      <TableCell> {fCurrency(subTotal)} </TableCell>
+      <TableCell> {fCurrency(products.reduce((acc, item) => acc + item.unit_price * item.quantity, 0))} </TableCell>
 
       <TableCell>
         <Label
           variant="soft"
           color={
-            (status === 'completed' && 'success') ||
-            (status === 'pending' && 'warning') ||
-            (status === 'cancelled' && 'error') ||
+            (order_status === 'shipped' && 'success') ||
+            (order_status === 'pending' && 'warning') ||
+            (order_status === 'cancelled' && 'error') ||
+            (order_status === 'delivered' && 'success') ||
+            (order_status === 'return' && 'error') ||
             'default'
           }
         >
-          {status}
+          {order_status}
         </Label>
       </TableCell>
 
@@ -135,7 +138,7 @@ export default function OrderTableRow({
 
   const renderSecondary = (
     <TableRow>
-      <TableCell sx={{ p: 0, border: 'none' }} colSpan={8}>
+      <TableCell sx={{ p: 0, border: 'none' }} colSpan={9}>
         <Collapse
           in={collapse.value}
           timeout="auto"
@@ -143,9 +146,9 @@ export default function OrderTableRow({
           sx={{ bgcolor: 'background.neutral' }}
         >
           <Stack component={Paper} sx={{ m: 1.5 }}>
-            {items.map((item) => (
+            {products?.map((item) => (
               <Stack
-                key={item.id}
+                key={item.product_id}
                 direction="row"
                 alignItems="center"
                 sx={{
@@ -156,14 +159,14 @@ export default function OrderTableRow({
                 }}
               >
                 <Avatar
-                  src={item.coverUrl}
+                  src={item.product_image}
                   variant="rounded"
                   sx={{ width: 48, height: 48, mr: 2 }}
                 />
 
                 <ListItemText
-                  primary={item.name}
-                  secondary={item.sku}
+                  primary={item.product_name}
+                  secondary={item.product_sku}
                   primaryTypographyProps={{
                     typography: 'body2',
                   }}
@@ -176,7 +179,7 @@ export default function OrderTableRow({
 
                 <Box>x{item.quantity}</Box>
 
-                <Box sx={{ width: 110, textAlign: 'right' }}>{fCurrency(item.price)}</Box>
+                <Box sx={{ width: 110, textAlign: 'right' }}>{fCurrency(item.unit_price)}</Box>
               </Stack>
             ))}
           </Stack>

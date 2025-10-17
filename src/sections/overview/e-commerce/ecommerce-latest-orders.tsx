@@ -51,7 +51,7 @@ export default function EcommerceLatestOrders({ title, subheader, list, ...other
     <Card {...other}>
       <CardHeader title={title} subheader={subheader} />
 
-      <Scrollbar> 
+      <Scrollbar>
         <Stack spacing={3} sx={{ p: 3, minWidth: 360 }}>
           {list.map((product) => (
             <ProductItem key={product.id} order={product} />

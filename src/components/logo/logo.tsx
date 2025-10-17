@@ -3,8 +3,12 @@ import { forwardRef } from 'react';
 import Link from '@mui/material/Link';
 import { useTheme } from '@mui/material/styles';
 import Box, { BoxProps } from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 
 import { RouterLink } from 'src/routes/components';
+import Image from 'next/image';
+import { useResponsive } from 'src/hooks/use-responsive';
+import { useSettingsContext } from '../settings';
 
 // ----------------------------------------------------------------------
 
@@ -15,6 +19,10 @@ export interface LogoProps extends BoxProps {
 const Logo = forwardRef<HTMLDivElement, LogoProps>(
   ({ disabledLink = false, sx, ...other }, ref) => {
     const theme = useTheme();
+    const settings = useSettingsContext();
+
+    const isMini = settings.themeLayout === 'mini';
+
 
     const PRIMARY_LIGHT = theme.palette.primary.light;
 
@@ -85,9 +93,15 @@ const Logo = forwardRef<HTMLDivElement, LogoProps>(
     }
 
     return (
-      <Link component={RouterLink} href="/" sx={{ display: 'contents' }}>
-        {logo}
-      </Link>
+      <Box sx={{ display: 'flex', alignItems: 'center', height: isMini ? '64px' : '80px', width: '100%',  justifyContent:'center', paddingRight: isMini ? '0px' : '20px' }}>
+        <Link component={RouterLink} href="/" sx={{ display: 'contents' }}>
+          {!isMini ?
+            <img src='/assets/Logo-horizontal.svg' alt="logo" style={{ width: '100px' }} />
+            :
+            <img src='/assets/mini-logo.svg' alt="logo" style={{ width: '32px' }} />
+          }
+        </Link>
+      </Box>
     );
   }
 );

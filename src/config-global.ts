@@ -6,6 +6,7 @@ import { paths } from 'src/routes/paths';
 export const HOST_API = process.env.NEXT_PUBLIC_HOST_API;
 export const ASSETS_API = process.env.NEXT_PUBLIC_ASSETS_API;
 export const ASSETS_IMAGE_API = process.env.NEXT_PUBLIC_IMAGE_URL;
+export const BASE_API = process.env.NEXT_PUBLIC_BASE_URL;
 
 export const FIREBASE_API = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -37,4 +38,4 @@ export const SUPABASE_API = {
 export const MAPBOX_API = process.env.NEXT_PUBLIC_MAPBOX_API;
 
 // ROOT PATH AFTER LOGIN SUCCESSFUL
-export const PATH_AFTER_LOGIN = paths.dashboard.root; // as '/dashboard'
+export const PATH_AFTER_LOGIN = paths.dashboard.root; // as '/admin/dashboard'

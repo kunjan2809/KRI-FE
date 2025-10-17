@@ -6,6 +6,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import LoadingButton from '@mui/lab/LoadingButton';
+import Button from '@mui/material/Button';
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
@@ -21,6 +22,7 @@ import { IInvoice } from 'src/types/invoice';
 import InvoiceNewEditDetails from './invoice-new-edit-details';
 import InvoiceNewEditAddress from './invoice-new-edit-address';
 import InvoiceNewEditStatusDate from './invoice-new-edit-status-date';
+
 
 // ----------------------------------------------------------------------
 
@@ -149,7 +151,8 @@ export default function InvoiceNewEditForm({ currentInvoice }: Props) {
           color="inherit"
           size="large"
           variant="outlined"
-          loading={loadingSave.value && isSubmitting}
+          component={Button}
+          disabled={loadingSave.value || isSubmitting}
           onClick={handleSaveAsDraft}
         >
           Save as Draft
@@ -158,7 +161,8 @@ export default function InvoiceNewEditForm({ currentInvoice }: Props) {
         <LoadingButton
           size="large"
           variant="contained"
-          loading={loadingSend.value && isSubmitting}
+          component={Button}
+          disabled={loadingSend.value || isSubmitting}
           onClick={handleCreateAndSend}
         >
           {currentInvoice ? 'Update' : 'Create'} & Send

@@ -17,10 +17,11 @@ import Dialog, { DialogProps } from '@mui/material/Dialog';
 
 import FormProvider, { RHFTextField, RHFUpload } from 'src/components/hook-form';
 
-import { uploadReviewImage } from 'src/api/product';
 import { IProductReviewNewForm, IUploadReviewImage } from 'src/types/product';
 import { useParams } from 'next/navigation';
-import { useAuthContext } from 'src/auth/hooks/use-auth-context';
+import { addReview } from 'src/api/reviews';
+import { useAuthToken } from 'src/auth/hooks';
+import { enqueueSnackbar } from 'notistack';
 
 // ----------------------------------------------------------------------
 
@@ -29,24 +30,24 @@ interface Props extends DialogProps {
 }
 
 export default function ProductReviewNewForm({ onClose, ...other }: Props) {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const { productId } = useParams();
-  const { user } = useAuthContext();
+  const token = useAuthToken();
+  const param = useParams();
+  const productId = param.id as string;
 
   const ReviewSchema = Yup.object().shape({
-    rating: Yup.number().min(1, 'Rating must be greater than or equal to 1').required('Rating is required'),
+    title: Yup.string().required('title is required'),
+    rating: Yup.number()
+      .min(1, 'Rating must be greater than or equal to 1')
+      .required('Rating is required'),
     review: Yup.string().required('Review is required'),
-    name: Yup.string().required('Name is required'),
-    email: Yup.string().required('Email is required').email('Email must be a valid email address'),
-    image: Yup.mixed().nullable(),
+    images: Yup.array().nullable(),
   });
 
   const defaultValues = {
+    title: '',
     rating: 0,
     review: '',
-    name: '',
-    email: '',
-    image: null,
+    images: [],
   };
 
   const methods = useForm({
@@ -56,66 +57,63 @@ export default function ProductReviewNewForm({ onClose, ...other }: Props) {
 
   const {
     reset,
+    setValue,
     control,
     handleSubmit,
     watch,
     formState: { errors, isSubmitting },
   } = methods;
 
-  const watchedImage = watch('image');
+  const values = watch();
 
-  const handleDrop = useCallback((acceptedFiles: File[]) => {
-    const file = acceptedFiles[0];
-    if (file) {
-      setSelectedFile(file);
-    }
-  }, []);
+  const handleDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      const files = values.images || [];
 
-  const handleRemoveFile = useCallback(() => {
-    setSelectedFile(null);
-  }, []);
+      const newFiles = acceptedFiles.map((file) =>
+        Object.assign(file, {
+          preview: URL.createObjectURL(file),
+        })
+      );
+      setValue('images', [...files, ...newFiles], { shouldValidate: true });
+    },
+    [setValue, values.images]
+  );
+
+  const handleRemoveFile = useCallback(
+    (inputFile: File | string) => {
+      const filtered = values.images && values.images?.filter((file) => file !== inputFile);
+      setValue('images', filtered);
+    },
+    [setValue, values.images]
+  );
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      // Generate a temporary review ID for image upload
-      const reviewId = `temp_${Date.now()}`;
-
-      // Upload image if file is selected
-      if (selectedFile) {
-        const reviewImageData: IUploadReviewImage = {
-          review_id: reviewId,
-          file: selectedFile,
-        };
-
-        // Note: In a real application, you would need to get the token from auth context
-        // For now, we'll simulate the upload
-        console.log('Review image data:', reviewImageData);
-        // await uploadReviewImage(reviewId, reviewImageData, user?.accessToken);
-      }
       const reviewData: IProductReviewNewForm = {
-        rating: data.rating,
+        title: data.title,
         rating_description: data.review,
-        product_id: productId as string,
-        user_id: user?.id as string,
+        rating: data.rating,
       };
 
-      console.log('Review data:', reviewData);
-
-      // await createProductReview(reviewData, user?.accessToken);
-
+        if (values.images) {
+          const reviewImageData: IUploadReviewImage = {
+            file: values.images,
+          };
+          await addReview(productId, reviewImageData, reviewData, token);
+        }
+      
       reset();
-      setSelectedFile(null);
       onClose();
-
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch product';
+      enqueueSnackbar(errorMessage, { variant: 'error' });
     }
   });
 
   const onCancel = useCallback(() => {
     onClose();
     reset();
-    setSelectedFile(null);
   }, [onClose, reset]);
 
   return (
@@ -146,35 +144,30 @@ export default function ProductReviewNewForm({ onClose, ...other }: Props) {
           {!!errors.rating && <FormHelperText error> {errors.rating?.message}</FormHelperText>}
 
           <Box sx={{ width: '100%', mt: 3 }}>
-            <Typography variant="subtitle2" fontWeight="medium" >
+            <Typography variant="subtitle2" fontWeight="medium">
+              Title
+            </Typography>
+            <RHFTextField name="title" rows={3} sx={{}} />
+          </Box>
+          <Box sx={{ width: '100%', mt: 3 }}>
+            <Typography variant="subtitle2" fontWeight="medium">
               Review
             </Typography>
             <RHFTextField name="review" multiline rows={3} sx={{}} />
           </Box>
+
           <Box sx={{ width: '100%', mt: 3 }}>
-            <Typography variant="subtitle2" fontWeight="medium" >
-              Name
-            </Typography>
-            <RHFTextField name="name" rows={3} sx={{}} />
-          </Box>
-          <Box sx={{ width: '100%', mt: 3 }}>
-            <Typography variant="subtitle2" fontWeight="medium" >
-              Email
-            </Typography>
-            <RHFTextField name="email" rows={3} sx={{}} />
-          </Box>
-          <Box sx={{ width: '100%', mt: 3 }}>
-            <Typography variant="subtitle2" fontWeight="medium" >
+            <Typography variant="subtitle2" fontWeight="medium">
               Review Image (Optional)
             </Typography>
+
             <RHFUpload
-              name="image"
-              multiple={false}
+              multiple
               thumbnail
+              name="images"
               maxSize={3145728}
               onDrop={handleDrop}
               onRemove={handleRemoveFile}
-              helperText="Upload an image to accompany your review (max 3MB)"
             />
           </Box>
         </DialogContent>
@@ -184,7 +177,12 @@ export default function ProductReviewNewForm({ onClose, ...other }: Props) {
             Cancel
           </Button>
 
-          <LoadingButton type="submit" variant="contained" component={Button} disabled={isSubmitting}>
+          <LoadingButton
+            type="submit"
+            variant="contained"
+            component={Button}
+            disabled={isSubmitting}
+          >
             Post
           </LoadingButton>
         </DialogActions>

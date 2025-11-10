@@ -2,6 +2,7 @@ import { Card, CardMedia, CardContent, Typography, Box, Button } from '@mui/mate
 import Iconify from 'src/components/iconify'
 import { useTheme } from '@mui/material/styles';
 import { useState } from 'react';
+import { Suggestion } from 'src/types/product';
 
 const formatPrice = (price: number) => new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -9,9 +10,9 @@ const formatPrice = (price: number) => new Intl.NumberFormat('en-US', {
 }).format(price);
 
 interface RecommendedProductsCardProps {
-    product: any;
-    addToCart: (product: any) => void;
-    addToWishlist: (product: any) => void;
+    product: Suggestion;
+    addToCart: (productId: string) => void;
+    addToWishlist: (productId: string,wishlist:boolean) => void;
     showWishlistButton?: boolean;
 }
 
@@ -23,7 +24,7 @@ const RecommendedProductsCard = ({ product, addToCart, addToWishlist, showWishli
     const handleClick = () => {
         setAnimate(true);
         setWishlist(!wishlist);
-        addToWishlist(product.id);
+        addToWishlist(product._id,wishlist);
         setTimeout(() => setAnimate(false), 500);
     };
     return (
@@ -117,8 +118,8 @@ const RecommendedProductsCard = ({ product, addToCart, addToWishlist, showWishli
                     <Iconify icon="eva:heart-fill" width={24} />
                 </Box>
             )}
-            <CardContent sx={{ p: 2 }}>
-                <Typography variant="h6" component="h3" sx={{ mb: 1, fontSize: '1rem' }}>
+            <CardContent sx={{ p: 2 , height:`calc(100% - 200)`}}>
+                <Typography variant="h6" component="h3" sx={{ mb: 1, fontSize: '1rem',margin:'auto'}}>
                     {product.name}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>

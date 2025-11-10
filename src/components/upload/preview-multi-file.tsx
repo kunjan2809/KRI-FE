@@ -1,4 +1,4 @@
-import { m, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 
 import Stack from '@mui/material/Stack';
 import { alpha } from '@mui/material/styles';
@@ -26,7 +26,6 @@ export default function MultiFilePreview({ thumbnail, files, onRemove, sx }: Upl
           return (
             <Stack
               key={key}
-              component={m.div}
               {...varFade().inUp}
               alignItems="center"
               display="inline-flex"
@@ -76,7 +75,6 @@ export default function MultiFilePreview({ thumbnail, files, onRemove, sx }: Upl
         return (
           <Stack
             key={key}
-            component={m.div}
             {...varFade().inUp}
             spacing={2}
             direction="row"

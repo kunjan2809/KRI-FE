@@ -13,10 +13,10 @@ export type IProductFilters = {
 // ----------------------------------------------------------------------
 
 export type IProductReviewNewForm = {
-  rating: number | null;
+  title: string;
+  rating: number;
   rating_description: string;
-  user_id: string;
-  product_id: string;
+  order_id?: string;
 };
 
 export type IProductReview = {
@@ -107,7 +107,7 @@ export type IUploadProductImage = {
 export type IUploadReviewImage = {
   review_id?: string;
   image_url?: string;
-  file?: File;
+  file?: File[];
 };
 
 export type IProductCategory = {
@@ -175,20 +175,19 @@ export type IProductUpdateRequest = {
 };
 
 export interface EditProductRequest {
-  name: string
-  sku: string
-  description: string
-  product_description: string
-  price: string
-  mrp: string
-  discount_type: string | null
-  discount_rate: string | null
-  stock_quantity: string
-  weight: string
-  status: string
-  category_id: string
+  name: string;
+  sku: string;
+  description: string;
+  product_description: string;
+  price: string;
+  mrp: string;
+  discount_type: string | null;
+  discount_rate: string | null;
+  stock_quantity: string;
+  weight: string;
+  status: string;
+  category_id: string;
 }
-
 
 export type Pricing = {
   mrp: number;
@@ -233,3 +232,236 @@ export type IProductVariantRowResponse = {
   stock_quantity: number;
   status: string;
 };
+
+export interface ProductDetailsRoot {
+  success: boolean;
+  data: ProductDetailsData;
+}
+
+export interface ProductDetailsData {
+  product: Product;
+  reviews: Reviews;
+}
+
+export interface Product {
+  _id: string;
+  name: string;
+  sku: string;
+  description: string;
+  product_description: string;
+  price: number;
+  mrp: number;
+  discount_type: any;
+  discount_rate: number;
+  sold: number;
+  stock_quantity: number;
+  weight: number;
+  status: string;
+  category_id: CategoryId;
+  deleted_at: any;
+  featured: boolean;
+  created_at: string;
+  edited_at: string;
+  __v: number;
+  images: Image[];
+  variations?: Variation[] | [];
+}
+
+export interface CategoryId {
+  _id: string;
+  name: string;
+}
+
+export interface Image {
+  _id: string;
+  product_id: string;
+  image_url: string;
+  alt_text: string;
+  is_primary: boolean;
+  sort_order: number;
+  created_at: string;
+  edited_at: string;
+  __v: number;
+}
+
+export interface TransformProduct {
+  _id: string;
+  name: string;
+  sku: string;
+  description: string;
+  product_description: string;
+  price: number;
+  mrp: number;
+  discount_type: any;
+  discount_rate: number;
+  sold: number;
+  stock_quantity: number;
+  weight: number;
+  status: string;
+  category_id: CategoryId;
+  deleted_at: any;
+  featured: boolean;
+  created_at: string;
+  edited_at: string;
+  __v: number;
+  images: string[];
+  variations?: Variation[];
+}
+
+export interface Variation {
+  _id: string;
+  product_id: string;
+  color: string;
+  size: string;
+  price: number;
+  stock_quantity: number;
+  sku: string;
+  status: string;
+  deleted_at: any;
+  created_at: string;
+  updated_at: string;
+  __v: number;
+  variation_name: string;
+  is_deleted: boolean;
+  id: string;
+}
+
+export interface Reviews {
+  summary: Summary;
+  details: Detail;
+}
+
+export interface Summary {
+  average_rating: number;
+  total_reviews: number;
+}
+
+export interface Detail {
+  _id: string;
+  product_id: string;
+  user_id: UserId;
+  rating: number;
+  rating_description: string;
+  order_id: string;
+  created_at: string;
+  edited_at: string;
+  images: ReviewImage[];
+}
+
+export interface UserId {
+  _id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  mobile_number: string;
+  is_admin: boolean;
+  full_name: string;
+  created_at: string;
+  edited_at: string;
+}
+export interface ReviewImage {
+  _id: string;
+  review_id: string;
+  image_url: string;
+  created_at: string;
+}
+
+//suggestion product
+
+export interface SuggestionRoot {
+  success: boolean;
+  data: SuggestionData;
+}
+
+export interface SuggestionData {
+  product_id: string;
+  category_id: string;
+  suggestions: Suggestion[];
+  total_suggestions: number;
+}
+
+export interface Suggestion {
+  _id: string;
+  id: string;
+  name: string;
+  sku: string;
+  description: string;
+  collection: string;
+  originalPrice: number;
+  price: number;
+  mrp: number;
+  image: string;
+  wishlist: boolean;
+  is_in_wishlist: boolean;
+  discount_type?: string;
+  discount_rate: number;
+  stock_quantity: number;
+  weight: number;
+  status: string;
+  category: Category;
+  category_id: string;
+  deleted_at: any;
+  created_at: string;
+  edited_at: string;
+  __v: number;
+  primary_image: PrimaryImage;
+  all_images: AllImage[];
+  variations: Variation[];
+  review_overview: ReviewOverview;
+  product_description?: string;
+  featured?: boolean;
+}
+
+export interface PrimaryImage {
+  _id: string;
+  product_id: string;
+  image_url: string;
+  alt_text: string;
+  is_primary: boolean;
+  sort_order: number;
+  created_at: string;
+  edited_at: string;
+  __v: number;
+}
+
+export interface Category {
+  _id: string;
+  id: string;
+  name: string;
+  description: string;
+}
+
+export interface AllImage {
+  _id: string;
+  product_id: string;
+  image_url: string;
+  alt_text: string;
+  is_primary: boolean;
+  sort_order: number;
+  created_at: string;
+  edited_at: string;
+  __v: number;
+}
+
+export interface Variation {
+  deleted_at: any;
+  _id: string;
+  product_id: string;
+  color: string;
+  size: string;
+  price: number;
+  stock_quantity: number;
+  sku: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  __v: number;
+  variation_name: string;
+  is_deleted: boolean;
+  id: string;
+}
+
+export interface ReviewOverview {
+  average_rating: number;
+  total_reviews: number;
+}

@@ -2,10 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
-
-import { SplashScreen } from 'src/components/loading-screen';
-
 import { useAuthContext } from '../hooks/use-auth-context';
+import { Box, CircularProgress } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
@@ -22,7 +20,7 @@ type Props = {
 export default function AuthGuard({ children }: Props) {
   const { loading } = useAuthContext();
 
-  return <>{loading ? <SplashScreen /> : <Container>{children}</Container>}</>;
+  return <>{loading ? <Box sx={{display:'flex',justifyContent:'center',alignItems:'center',height:'80vh'}}><CircularProgress size="3rem"/></Box> : <Container>{children}</Container>}</>;
 }
 
 // ----------------------------------------------------------------------

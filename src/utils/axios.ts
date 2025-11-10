@@ -96,7 +96,7 @@ export const endpoints = {
   },
   product: {
     list: '/api/product/list',
-    details: '/api/product/details',
+    details: '/api/products/details/',
     search: '/api/product/search',
     all: '/api/products/admin/all',
     create: '/api/products/admin/add',
@@ -108,7 +108,8 @@ export const endpoints = {
     featured: '/api/products/featured',
     addVariations: '/api/products/admin/:productId/variations',
     editVariations: '/api/products/admin/:productId/variations/:variationId',
-    deleteVariations: '/api/products/admin/:productId/variations/:variationId'
+    deleteVariations: '/api/products/admin/:productId/variations/:variationId',
+    suggestions: '/api/products/suggestions/'
   },
   image: {
     product: '/api/images/product/',
@@ -137,4 +138,15 @@ export const endpoints = {
   newsletter: {
     subscribe: '/api/leads/subscribe',
   },
+  cart:{
+    add: '/api/cart/add'
+  },
+  reviews:{
+    add:'/api/reviews/product/',
+    all: '/api/reviews/product/',
+  },
+  wishlist:{
+    add:'/api/wishlist/add',
+    remove:'/api/wishlist/remove/'
+  }
 };

@@ -28,20 +28,21 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-
+import { CartItem } from 'src/types/cart';
 import Iconify from 'src/components/iconify';
-
+import { updateItemQuantity,removeItemFromCart } from 'src/api/cart';
+import { useAuthToken } from 'src/auth/hooks';
 // ----------------------------------------------------------------------
 
-interface CartItem {
-  id: string;
-  name: string;
-  description: string;
-  material: string;
-  price: number;
-  quantity: number;
-  image: string;
-}
+// interface CartItem {
+//   id: string;
+//   name: string;
+//   description: string;
+//   material: string;
+//   price: number;
+//   quantity: number;
+//   image: string;
+// }
 
 interface Address {
   id: string;
@@ -120,6 +121,7 @@ export default function CheckoutPopup({
   onUpdateCart,
   onCheckoutComplete,
 }: CheckoutPopupProps) {
+  const token=useAuthToken()
   const [activeStep, setActiveStep] = useState(0);
   const [localCartData, setLocalCartData] = useState<CartItem[]>(cartData);
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(mockAddresses[0]);
@@ -204,23 +206,24 @@ export default function CheckoutPopup({
   };
 
   // Calculate totals
-  const subtotal = localCartData.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const subtotal = localCartData.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
   const shipping = subtotal > 2000 ? 0 : 50;
   const tax = subtotal * 0.08;
   const total = subtotal + shipping + tax;
 
-  const updateQuantity = (itemId: string, newQuantity: number) => {
+  const updateQuantity = async(itemId: string, newQuantity: number) => {
     if (newQuantity < 1) return;
-
     const updatedCart = localCartData.map(item =>
       item.id === itemId ? { ...item, quantity: newQuantity } : item
     );
+    await updateItemQuantity(itemId,token,newQuantity)
     setLocalCartData(updatedCart);
     onUpdateCart(updatedCart);
   };
 
-  const removeItem = (itemId: string) => {
+  const removeItem = async(itemId: string) => {
     const updatedCart = localCartData.filter(item => item.id !== itemId);
+    await removeItemFromCart(itemId,token)
     setLocalCartData(updatedCart);
     onUpdateCart(updatedCart);
   };
@@ -341,20 +344,20 @@ export default function CheckoutPopup({
                         <CardMedia
                           component="img"
                           height="80"
-                          image={item.image}
-                          alt={item.name}
+                          image={item.product.primary_image?.image_url}
+                          alt={item.product.name}
                           sx={{ objectFit: 'cover', borderRadius: 1 }}
                         />
                       </Grid>
                       <Grid item xs={6}>
                         <Typography variant="subtitle1" fontWeight="bold">
-                          {item.name}
+                          {item.product.name}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          {item.material}
+                          {item.product.category.name}
                         </Typography>
                         <Typography variant="h6" color="primary.main" sx={{ mt: 1 }}>
-                          {formatPrice(item.price * item.quantity)}
+                          {formatPrice(item.product.price * item.quantity)}
                         </Typography>
                       </Grid>
                       <Grid item xs={3}>

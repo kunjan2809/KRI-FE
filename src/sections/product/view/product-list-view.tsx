@@ -28,7 +28,7 @@ import { RouterLink } from 'src/routes/components';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
-import { deleteProduct, useGetProducts } from 'src/api/product';
+import { deleteProduct, patchFeaturedStatus, useGetProducts } from 'src/api/product';
 import { PRODUCT_STOCK_OPTIONS } from 'src/_mock';
 
 import Iconify from 'src/components/iconify';
@@ -51,6 +51,8 @@ import {
   RenderCellProduct,
   RenderCellCreatedAt,
 } from '../product-table-row';
+import { Box } from '@mui/material';
+import Label from 'src/components/label';
 
 // ----------------------------------------------------------------------
 
@@ -119,7 +121,7 @@ export default function ProductListView() {
   });
 
   const [selectedRowIds, setSelectedRowIds] = useState<GridRowSelectionModel>([]);
-
+ 
   const [columnVisibilityModel, setColumnVisibilityModel] =
     useState<GridColumnVisibilityModel>(HIDE_COLUMNS);
 
@@ -128,6 +130,7 @@ export default function ProductListView() {
     if (products && products.length) {
       setTableData(products);
     }
+   
   }, [products]);
 
 
@@ -186,7 +189,15 @@ export default function ProductListView() {
     },
     [router]
   );
+  const handleFeaturedToggole = async (productId: string, status: boolean) => {
+    try {
+     await patchFeaturedStatus(token, productId, !status)
+     reFetchProducts()
+    } catch (error) {
+      console.log("Somthing get wrong", error)
+    }
 
+  }
   const columns: GridColDef[] = [
     {
       field: 'name',
@@ -224,7 +235,12 @@ export default function ProductListView() {
       type: 'singleSelect',
       editable: true,
       valueOptions: PUBLISH_OPTIONS,
-      renderCell: (params) => <RenderCellPublish params={params} />,
+      renderCell: (params) => <Box>
+        {params.row.featured && <Label variant="soft" color='success'>
+          featured
+        </Label>
+        }<RenderCellPublish params={params} />
+      </Box>
     },
     {
       type: 'actions',
@@ -251,6 +267,12 @@ export default function ProductListView() {
         />,
         <GridActionsCellItem
           showInMenu
+          icon={<Iconify icon="ph-star" />}
+          label={params.row.featured ? 'Remove featured' : 'Make featured'}
+          onClick={() => handleFeaturedToggole(params.row._id, params.row.featured)}
+        />,
+        <GridActionsCellItem
+          showInMenu
           icon={<Iconify icon="solar:trash-bin-trash-bold" />}
           label="Delete"
           onClick={() => {
@@ -273,7 +295,7 @@ export default function ProductListView() {
         publishOptions={PUBLISH_OPTIONS}
       />
 
-      <GridToolbarQuickFilter 
+      <GridToolbarQuickFilter
         placeholder="Search products..."
         debounceMs={1000}
       />

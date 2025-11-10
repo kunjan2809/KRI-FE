@@ -23,7 +23,7 @@ export function RenderCellPrice({ params }: ParamsProps) {
   return <>{fCurrency(params.row.price)}</>;
 }
 
-export function RenderCellPublish({ params }: ParamsProps) {
+export function RenderCellPublish({ params }: ParamsProps)  {
   return (
     <Label variant="soft" color={(params.row.status === 'published' && 'info') || 'default'}>
       {params.row.status}

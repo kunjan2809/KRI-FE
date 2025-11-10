@@ -1,4 +1,4 @@
-// ----------------------------------------------------------------------
+ // ----------------------------------------------------------------------
 
 export type IProductFilterValue = string | string[] | number | number[];
 
@@ -233,3 +233,216 @@ export type IProductVariantRowResponse = {
   stock_quantity: number;
   status: string;
 };
+
+// interface for product request 
+export interface Product {
+  _id: string
+  name: string
+  sku: string
+  description: string
+  product_description: string
+  price: number
+  mrp: number
+  discount_type: string
+  discount_rate: number
+  final_price: number
+  discount_amount: number
+  stock_quantity: number
+  weight: number
+  status: string
+  featured: boolean
+  in_stock: boolean
+  low_stock: boolean
+ is_in_wishlist:boolean
+  created_at: string
+  edited_at: string
+  category_id: string
+  category_name: string
+  average_rating: number
+  total_reviews: number
+  available_colors: string[]
+  available_sizes: string[]
+  primary_image: ProductPrimaryImage
+  searchScore: number
+}
+export interface ProductPrimaryImage {
+  _id: string
+  product_id: string
+  image_url: string
+  alt_text: string
+  is_primary: boolean
+  sort_order: number
+}
+
+export interface PaginationPayload{
+  current_page: number
+  total_pages: number
+  total_products: number
+  limit: number
+}
+
+export interface Filters {
+  search: string
+  min_price: number
+  max_price: number
+  color: string
+  size: string
+  category_id: string
+}
+
+export interface Sorting {
+  newest_first: boolean
+  price_sort: string
+  highest_rated: boolean
+}
+
+export interface ProductPageApiResponse{
+  success: boolean
+  products: Product[]
+  pagination: PaginationPayload
+  filters: Filters
+  sorting: Sorting
+}
+
+// wishlist interface
+
+export interface WishlistProduct {
+  id: string
+  name: string
+  sku: string
+  description: string
+  product_description: string
+  price: number
+  mrp: number
+  final_price: number
+  discount_type: string
+  discount_rate: number
+  discount_amount: number
+  stock_quantity: number
+  in_stock: boolean
+  low_stock: boolean
+  weight: number
+  status: string
+  featured: boolean
+  category: Category
+  primary_image: WishlistPrimaryImage
+  all_images: AllImage[]
+  variations: Variation[]
+  review_overview: ReviewOverview
+  created_at: string
+  edited_at: string
+}
+export interface Category {
+  id: string
+  name: string
+}
+
+export interface WishlistPrimaryImage {
+  id: string
+  image_url: string
+  is_primary: boolean
+}
+
+export interface AllImage {
+  id: string
+  image_url: string
+  is_primary: boolean
+}
+
+export interface Variation {
+  _id: string
+  color: string
+  size: string
+  price: number
+  stock_quantity: number
+  sku: string
+  status: string
+}
+
+export interface ReviewOverview {
+  average_rating: number
+  total_reviews: number
+}
+export interface WishlistItem {
+  id: string
+  product: WishlistProduct
+  added_at: string
+}
+export interface WishlistSummary {
+  items_count: number
+}
+export interface Data {
+  wishlist_items: WishlistItem[]
+  wishlist_summary: WishlistSummary
+}
+
+export interface WishlistItemApiResponse {
+  success: boolean
+  data: Data
+}
+
+
+// recommande product interface
+
+export interface RecommandeApiResponse {
+  success: boolean
+  data: RecommandeData
+}
+
+export interface RecommandeData {
+  product_id: string
+  category_id: string
+  category_name: string
+  suggestions: Suggestion[]
+  total_suggestions: number
+}
+
+export interface Suggestion {
+  _id: string
+  name: string
+  sku: string
+  description: string
+  product_description: string
+  price: number
+  mrp: number
+  discount_type: string
+  discount_rate: number
+  stock_quantity: number
+  weight: number
+  status: string
+  category_id: string
+  deleted_at: any
+  featured: boolean
+  category: Category
+  final_price: number
+  discount_amount: number
+  in_stock: boolean
+  low_stock: boolean
+  is_deleted: boolean
+  created_at: string
+  edited_at: string
+  primary_image: SuggestionPrimaryImage
+  all_images: AllImage[]
+  is_in_wishlist: boolean
+  variations: any[]
+  review_overview: ReviewOverview,
+  wishlist:boolean,
+  image:string,
+  collection:string,
+  originalPrice:number,
+  id:string
+}
+
+
+export interface SuggestionPrimaryImage {
+  _id: string
+  product_id: string
+  image_url: string
+  alt_text: string
+  is_primary: boolean
+  sort_order: number
+  created_at: string
+  edited_at: string
+}
+
+

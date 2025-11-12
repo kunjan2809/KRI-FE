@@ -553,9 +553,9 @@ export default function ProductForm() {
         response = response.data.product;
 
         if (response) {
-          const imagesFromResponse = response.images.map((image: any) => ({
+          const imagesFromResponse = response?.images?.map((image: any) => ({
             id: image._id,
-            url: image.image_url,
+            url: image?.image_url,
             isFile: false,
             primary: image.is_primary,
           }));

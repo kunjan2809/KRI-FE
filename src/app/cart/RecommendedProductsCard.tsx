@@ -2,11 +2,7 @@ import { useState } from 'react';
 
 import { useTheme } from '@mui/material/styles';
 import { Card, CardMedia, CardContent, Typography, Box, Button } from '@mui/material'
-
 import Iconify from 'src/components/iconify'
-
-import { useTheme } from '@mui/material/styles';
-import { useState } from 'react';
 import { Suggestion } from 'src/types/product';
 
 const formatPrice = (price: number) => new Intl.NumberFormat('en-US', {

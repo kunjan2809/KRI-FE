@@ -124,7 +124,7 @@ export default function CartPage() {
   const handleCheckoutComplete = (orderData: any) => {
     console.log('Order completed:', orderData);
     // Handle successful checkout - could redirect to order confirmation page
-    router.push('/order-details');
+    router.push(paths.user.orders.root);
   };
 
 

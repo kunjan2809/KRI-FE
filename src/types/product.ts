@@ -1,4 +1,4 @@
- // ----------------------------------------------------------------------
+// ----------------------------------------------------------------------
 
 export type IProductFilterValue = string | string[] | number | number[];
 
@@ -44,10 +44,10 @@ export type IProductItem = {
   publish: string;
   coverUrl: string;
   primary_image: {
-    image_url:string
+    image_url: string;
   };
-  mrp:string;
-  stock_quantity:number;
+  mrp: string;
+  stock_quantity: number;
   images: string[];
   colors: string[];
   quantity: number;
@@ -238,212 +238,337 @@ export type IProductVariantRowResponse = {
   status: string;
 };
 
-// interface for product request 
+// interface for product request
 export interface Product {
-  _id: string
-  name: string
-  sku: string
-  description: string
-  product_description: string
-  price: number
-  mrp: number
-  discount_type: string
-  discount_rate: number
-  final_price: number
-  discount_amount: number
-  stock_quantity: number
-  weight: number
-  status: string
-  featured: boolean
-  in_stock: boolean
-  low_stock: boolean
+  _id: string;
+  name: string;
+  sku: string;
+  description: string;
+  product_description: string;
+  price: number;
+  mrp: number;
+  discount_type: string;
+  discount_rate: number;
+  final_price: number;
+  discount_amount: number;
+  stock_quantity: number;
+  weight: number;
+  status: string;
+  featured: boolean;
+  in_stock: boolean;
+  low_stock: boolean;
   sold: number;
- is_in_wishlist:boolean
-  created_at: string
-  edited_at: string
-   category_id: CategoryId;
-  category_name: string
-  average_rating: number
-  total_reviews: number
-  available_colors: string[]
-  available_sizes: string[]
-  primary_image: ProductPrimaryImage
-  searchScore: number
+  is_in_wishlist: boolean;
+  created_at: string;
+  edited_at: string;
+  category_id: CategoryId;
+  category_name: string;
+  average_rating: number;
+  total_reviews: number;
+  available_colors: string[];
+  available_sizes: string[];
+  primary_image: ProductPrimaryImage;
+  searchScore: number;
 }
 export interface ProductPrimaryImage {
-  _id: string
-  product_id: string
-  image_url: string
-  alt_text: string
-  is_primary: boolean
-  sort_order: number
+  _id: string;
+  product_id: string;
+  image_url: string;
+  alt_text: string;
+  is_primary: boolean;
+  sort_order: number;
 }
 
-export interface PaginationPayload{
-  current_page: number
-  total_pages: number
-  total_products: number
-  limit: number
+export interface PaginationPayload {
+  current_page: number;
+  total_pages: number;
+  total_products: number;
+  limit: number;
 }
 
 export interface Filters {
-  search: string
-  min_price: number
-  max_price: number
-  color: string
-  size: string
-  category_id: string
+  search: string;
+  min_price: number;
+  max_price: number;
+  color: string;
+  size: string;
+  category_id: string;
 }
 
 export interface Sorting {
-  newest_first: boolean
-  price_sort: string
-  highest_rated: boolean
+  newest_first: boolean;
+  price_sort: string;
+  highest_rated: boolean;
 }
 
-export interface ProductPageApiResponse{
-  success: boolean
-  products: Product[]
-  pagination: PaginationPayload
-  filters: Filters
-  sorting: Sorting
+export interface ProductPageApiResponse {
+  success: boolean;
+  products: Product[];
+  pagination: PaginationPayload;
+  filters: Filters;
+  sorting: Sorting;
 }
 
 // wishlist interface
 
 export interface WishlistProduct {
-  id: string
-  name: string
-  sku: string
-  description: string
-  product_description: string
-  price: number
-  mrp: number
-  final_price: number
-  discount_type: string
-  discount_rate: number
-  discount_amount: number
-  stock_quantity: number
-  in_stock: boolean
-  low_stock: boolean
-  weight: number
-  status: string
-  featured: boolean
-  category: Category
-  primary_image: WishlistPrimaryImage
-  all_images: AllImage[]
-  variations: Variation[]
-  review_overview: ReviewOverview
-  created_at: string
-  edited_at: string
+  id: string;
+  name: string;
+  sku: string;
+  description: string;
+  product_description: string;
+  price: number;
+  mrp: number;
+  final_price: number;
+  discount_type: string;
+  discount_rate: number;
+  discount_amount: number;
+  stock_quantity: number;
+  in_stock: boolean;
+  low_stock: boolean;
+  weight: number;
+  status: string;
+  featured: boolean;
+  category: Category;
+  primary_image: WishlistPrimaryImage;
+  all_images: AllImage[];
+  variations: Variation[];
+  review_overview: ReviewOverview;
+  created_at: string;
+  edited_at: string;
 }
 export interface Category {
-  id: string
-  name: string
+  id: string;
+  name: string;
 }
 
 export interface WishlistPrimaryImage {
-  id: string
-  image_url: string
-  is_primary: boolean
+  id: string;
+  image_url: string;
+  is_primary: boolean;
 }
 
 export interface AllImage {
-  id: string
-  image_url: string
-  is_primary: boolean
+  id: string;
+  image_url: string;
+  is_primary: boolean;
 }
 
 export interface Variation {
-  _id: string
-  color: string
-  size: string
-  price: number
-  stock_quantity: number
-  sku: string
-  status: string
+  _id: string;
+  id: string;
+  color: string;
+  size: string;
+  price: number;
+  stock_quantity: number;
+  sku: string;
+  status: string;
 }
 
 export interface ReviewOverview {
-  average_rating: number
-  total_reviews: number
+  average_rating: number;
+  total_reviews: number;
 }
 export interface WishlistItem {
-  id: string
-  product: WishlistProduct
-  added_at: string
+  id: string;
+  product: WishlistProduct;
+  added_at: string;
 }
 export interface WishlistSummary {
-  items_count: number
+  items_count: number;
 }
 export interface Data {
-  wishlist_items: WishlistItem[]
-  wishlist_summary: WishlistSummary
+  wishlist_items: WishlistItem[];
+  wishlist_summary: WishlistSummary;
 }
 
 export interface WishlistItemApiResponse {
-  success: boolean
-  data: Data
+  success: boolean;
+  data: Data;
 }
 
 // recommande product interface
 
 export interface RecommandeApiResponse {
-  success: boolean
-  data: RecommandeData
+  success: boolean;
+  data: RecommandeData;
 }
 
 export interface RecommandeData {
-  product_id: string
-  category_id: string
-  category_name: string
-  suggestions: Suggestion[]
-  total_suggestions: number
+  product_id: string;
+  category_id: string;
+  category_name: string;
+  suggestions: Suggestion[];
+  total_suggestions: number;
 }
 
 export interface Suggestion {
-  _id: string
-  name: string
-  sku: string
-  description: string
-  product_description: string
-  price: number
-  mrp: number
-  discount_type: string
-  discount_rate: number
-  stock_quantity: number
-  weight: number
-  status: string
-  category_id: string
-  deleted_at: any
-  featured: boolean
-  category: Category
-  final_price: number
-  discount_amount: number
-  in_stock: boolean
-  low_stock: boolean
-  is_deleted: boolean
-  created_at: string
-  edited_at: string
-  primary_image: SuggestionPrimaryImage
-  all_images: AllImage[]
-  is_in_wishlist: boolean
-  variations: any[]
-  review_overview: ReviewOverview,
-  wishlist:boolean,
-  image:string,
-  collection:string,
-  originalPrice:number,
-  id:string
+  _id: string;
+  name: string;
+  sku: string;
+  description: string;
+  product_description?: string;
+  price: number;
+  mrp: number;
+  discount_type?: string;
+  discount_rate: number;
+  stock_quantity: number;
+  weight: number;
+  status: string;
+  category_id: string;
+  deleted_at: any;
+  featured?: boolean;
+  category: Category;
+  final_price: number;
+  discount_amount: number;
+  in_stock: boolean;
+  low_stock: boolean;
+  is_deleted: boolean;
+  created_at: string;
+  edited_at: string;
+  primary_image: SuggestionPrimaryImage;
+  all_images: AllImage[];
+  is_in_wishlist: boolean;
+  variations: Variation[];
+  review_overview: ReviewOverview;
+  wishlist: boolean;
+  image: string;
+  collection: string;
+  originalPrice: number;
+  id: string;
 }
 
 export interface SuggestionPrimaryImage {
-  _id: string
-  product_id: string
-  image_url: string
-  alt_text: string
-  is_primary: boolean
-  sort_order: number
-  created_at: string
-  edited_at: string
+  _id: string;
+  product_id: string;
+  image_url: string;
+  alt_text: string;
+  is_primary: boolean;
+  sort_order: number;
+  created_at: string;
+  edited_at: string;
 }
+
+export interface TransformProduct {
+  _id: string;
+  name: string;
+  sku: string;
+  description: string;
+  product_description: string;
+  price: number;
+  mrp: number;
+  discount_type: any;
+  discount_rate: number;
+  sold: number;
+  stock_quantity: number;
+  weight: number;
+  status: string;
+  category_id: CategoryId;
+  deleted_at: any;
+  featured: boolean;
+  created_at: string;
+  edited_at: string;
+  __v: number;
+  images: string[];
+  variations?: Variation[];
+}
+
+export interface CategoryId {
+  _id: string;
+  name: string;
+}
+
+export interface Reviews {
+  summary: Summary;
+  details: Detail;
+}
+
+export interface Summary {
+  average_rating: number;
+  total_reviews: number;
+}
+
+export interface Detail {
+  _id: string;
+  product_id: string;
+  user_id: UserId;
+  rating: number;
+  rating_description: string;
+  order_id: string;
+  created_at: string;
+  edited_at: string;
+  images: ReviewImage[];
+}
+
+export interface UserId {
+  _id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  mobile_number: string;
+  is_admin: boolean;
+  full_name: string;
+  created_at: string;
+  edited_at: string;
+}
+export interface ReviewImage {
+  _id: string;
+  review_id: string;
+  image_url: string;
+  created_at: string;
+}
+
+export interface ProductDetailsRoot {
+  success: boolean;
+  data: ProductDetailsData;
+}
+
+export interface ProductDetailsData {
+  product: Product;
+  reviews: Reviews;
+}
+
+export interface SuggestionRoot {
+  success: boolean;
+  data: SuggestionData;
+}
+
+export interface SuggestionData {
+  product_id: string;
+  category_id: string;
+  suggestions: Suggestion[];
+  total_suggestions: number;
+}
+
+export interface Suggestion {
+  _id: string;
+  id: string;
+  name: string;
+  sku: string;
+  description: string;
+  collection: string;
+  originalPrice: number;
+  price: number;
+  mrp: number;
+  image: string;
+  wishlist: boolean;
+  is_in_wishlist: boolean;
+  discount_type?: string;
+  discount_rate: number;
+  stock_quantity: number;
+  weight: number;
+  status: string;
+  category: Category;
+  category_id: string;
+  deleted_at: any;
+  created_at: string;
+  edited_at: string;
+  __v: number;
+  primary_image: SuggestionPrimaryImage;
+  all_images: AllImage[];
+  variations: Variation[];
+  review_overview: ReviewOverview;
+  product_description?: string;
+  featured?: boolean;
+}
+

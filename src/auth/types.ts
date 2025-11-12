@@ -30,6 +30,7 @@ type CanRemove = {
     password: string,
     firstName: string,
     lastName: string,
+    mobile_number:string,
     profileIcon?: string
   ) => Promise<void>;
   //

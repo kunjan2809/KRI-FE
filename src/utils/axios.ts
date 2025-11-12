@@ -3,7 +3,6 @@ import axios, { AxiosRequestConfig } from 'axios';
 import { BASE_API } from 'src/config-global';
 import { SESSION_ACCESS_TOKEN, SESSION_USER_DATA } from './constants';
 
-
 // ----------------------------------------------------------------------
 
 const axiosInstance = axios.create({ baseURL: BASE_API });
@@ -11,13 +10,13 @@ const axiosInstance = axios.create({ baseURL: BASE_API });
 axiosInstance.interceptors.response.use(
   (res) => res,
   (error) => {
-    console.error("error", error);
+    console.error('error', error);
     if (error.response.status === 401 && error.response.data.code === 'UNAUTHORIZED') {
       localStorage.removeItem(SESSION_ACCESS_TOKEN);
       localStorage.removeItem(SESSION_USER_DATA);
       window.location.href = '/login';
     }
-    return Promise.reject((error.response && error.response.data) || 'Something went wrong')
+    return Promise.reject((error.response && error.response.data) || 'Something went wrong');
   }
 );
 
@@ -70,15 +69,15 @@ export const endpoints = {
   kanban: '/api/kanban',
   calendar: '/api/calendar',
   auth: {
-    profile:'/api/auth/profile',
+    profile: '/api/auth/profile',
     me: '/api/auth/me',
     login: '/api/auth/login',
     register: '/api/auth/register',
     signup: '/api/auth/signup',
     forgetPassword: '/api/auth/forget-password',
     getUserAddress: '/api/addresses',
-    resetPassword:'/api/auth/reset-password',
-    changePassword:'/api/auth/change-password'
+    resetPassword: '/api/auth/reset-password',
+    changePassword: '/api/auth/change-password',
   },
   analytics: {
     dashboard: '/api/analytics/dashboard/',
@@ -87,7 +86,7 @@ export const endpoints = {
     categories: '/api/analytics/categories/',
     revenue: '/api/analytics/revenue/',
     yearlyOrders: '/api/analytics/yearly/',
-    status:'/api/analytics/users/status'
+    status: '/api/analytics/users/status',
   },
   mail: {
     list: '/api/mail/list',
@@ -101,8 +100,8 @@ export const endpoints = {
     search: '/api/post/search',
   },
   product: {
-    productAll:'/api/products/all',
-    productSuggestion:'/api/products/suggestions',
+    productAll: '/api/products/all',
+    productSuggestion: '/api/products/suggestions',
     list: '/api/product/list',
     details: '/api/products/details/',
     search: '/api/product/search',
@@ -117,22 +116,20 @@ export const endpoints = {
     addVariations: '/api/products/admin/:productId/variations',
     editVariations: '/api/products/admin/:productId/variations/:variationId',
     deleteVariations: '/api/products/admin/:productId/variations/:variationId',
-    featuredtStatus:'/api/products/admin/featured'
-  
+    featuredtStatus: '/api/products/admin/featured',
+    suggestions: '/api/products/suggestions/',
   },
-  cart:{
-     all:'/api/cart',
-     add:'/api/cart/add',
-     remove:'/api/cart/remove',
-     update:'/api/cart/update',
-     place:'/api/orders/place'
-
+  cart: {
+    all: '/api/cart',
+    add: '/api/cart/add',
+    remove: '/api/cart/remove',
+    update: '/api/cart/update',
+    place: '/api/orders/place',
   },
-  shipment:{
-  add:"/api/addresses",
-  getAll:'/api/addresses',
-  getDefault:'/api/addresses/default'
-    suggestions: '/api/products/suggestions/'
+  shipment: {
+    add: '/api/addresses',
+    getAll: '/api/addresses',
+    getDefault: '/api/addresses/default',
   },
   image: {
     product: '/api/images/product/',
@@ -140,7 +137,7 @@ export const endpoints = {
   },
   order: {
     all: '/api/orders/admin/all',
-    updateStatus:'/api/orders/',
+    updateStatus: '/api/orders/',
     details: '/api/orders/admin/details/',
     delivery: '/api/orders/admin/delivery/',
     create: '/api/orders/admin/create/',
@@ -149,7 +146,7 @@ export const endpoints = {
     statistics: '/api/orders/admin/statistics',
     export: '/api/orders/admin/export',
     orderDetails: '/api/orders/',
-    returnRequest:'/api/orders/:orderId/return'
+    returnRequest: '/api/orders/:orderId/return',
   },
   user: {
     all: '/api/users/admin/all',
@@ -161,28 +158,21 @@ export const endpoints = {
     edit: '/api/category/edit',
     delete: '/api/category/delete',
   },
-  wishlist:{
-    all:'/api/wishlist',
-    add:'/api/wishlist/add',
-    remove:'/api/wishlist/remove',
+  wishlist: {
+    all: '/api/wishlist',
+    add: '/api/wishlist/add',
+    remove: '/api/wishlist/remove/',
   },
   newsletter: {
     subscribe: '/api/leads/subscribe',
   },
-  cart:{
-    add: '/api/cart/add'
-  },
-  reviews:{
-    add:'/api/reviews/product/',
+  reviews: {
+    add: '/api/reviews/product/',
     all: '/api/reviews/product/',
   },
-  wishlist:{
-    add:'/api/wishlist/add',
-    remove:'/api/wishlist/remove/'
+  shipping: {
+    add: '/api/addresses',
+    delete: '/api/addresses/',
+    edit: '/api/addresses/',
   },
-  shipping:{
-    add:'/api/addresses',
-    delete:'/api/addresses/',
-    edit:'/api/addresses/'
-  }
 };

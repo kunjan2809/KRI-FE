@@ -508,7 +508,7 @@ const OrderItems = ({
                     <Grid item xs={12} sm={3}>
                       <Box
                         component="img"
-                        src={item.primary_image.image_url}
+                        src={item?.primary_image?.image_url}
                         alt={item.product_id.name}
                         sx={{
                           width: '100%',

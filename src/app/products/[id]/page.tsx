@@ -36,7 +36,7 @@ import RecommendedProductsCard from 'src/app/cart/RecommendedProductsCard';
 import { getSuggestionById, getUserProductById } from 'src/api/product';
 import { useAuthToken } from 'src/auth/hooks';
 import { enqueueSnackbar } from 'notistack';
-import { addCart } from 'src/api/cart';
+import { AddToCart } from 'src/api/cart';
 import { addWishlist, removeWishlist } from 'src/api/wishlist';
 import { ProductDetailsLoading } from 'src/sections/product/product-skeleton';
 import { ReviewLoading } from 'src/sections/product/review-skeleton';
@@ -95,7 +95,7 @@ export default function ProductDetailsPage() {
           const { product, reviews } = response.data ?? {};
 
           if (product) {
-            const transformedArray = product.images.map((img) => `${img.image_url}`);
+            const transformedArray = product?.images?.map((img) => `${img?.image_url}`);
             setProductData({
               ...product,
               images: [...transformedArray],
@@ -148,10 +148,7 @@ export default function ProductDetailsPage() {
       const selectedVariation =
         variation && variation.find((v) => v.color === selectedColor && v.size === selectedSize);
       const variationId = selectedVariation?.id ?? null;
-      await addCart(
-        { product_id: productId, quantity, variation_id: variationId as string },
-        token
-      );
+      await AddToCart(token, productId, variationId as string, quantity);
       router.push(paths.user.cart);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to product add to cart';
@@ -161,9 +158,7 @@ export default function ProductDetailsPage() {
 
   const handleWishlist = async (productId: string, wishlist: boolean) => {
     try {
-      !wishlist
-        ? await addWishlist({ product_id: productId }, token)
-        : await removeWishlist(productId, token);
+      !wishlist ? await addWishlist(productId, token) : await removeWishlist(productId, token);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to product add to cart';
       enqueueSnackbar(errorMessage, { variant: 'error' });
@@ -502,16 +497,15 @@ export default function ProductDetailsPage() {
                       boxShadow: 'none',
                     }}
                   >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 ,mb:2}}>
-                    <Iconify icon="icomoon-free:shield" color="text.secondary" />
-                    <Typography variant="h6">
-                      Purchase Protection
-                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                      <Iconify icon="icomoon-free:shield" color="text.secondary" />
+                      <Typography variant="h6">Purchase Protection</Typography>
                     </Box>
                     <Typography variant="body2" color="text.secondary">
                       Your order is covered by our Buyer Protection Policy, ensuring a safe and
                       secure shopping experience. If any issue arises with your purchase, our
-                      support team will resolve it promptly and fairly. We’re committed to ensuring every experience with us is secure, seamless, and worry-free.
+                      support team will resolve it promptly and fairly. We’re committed to ensuring
+                      every experience with us is secure, seamless, and worry-free.
                     </Typography>
                   </Card>
                 </Stack>

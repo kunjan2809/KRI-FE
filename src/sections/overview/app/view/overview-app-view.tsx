@@ -10,7 +10,12 @@ import Grid from '@mui/material/Unstable_Grid2';
 import { SeoIllustration } from 'src/assets/illustrations';
 import { useAuthContext } from 'src/auth/hooks/use-auth-context';
 import { _orders, _appFeatured, _appInvoices, _ecommerceLatestProducts } from 'src/_mock';
-import { useGetDashboardAnalyticsUser, useGetDashboardAnalyticsOrders, useGetDashboardAnalyticsRevenue, useGetDashboardAnalyticsOrderCategory } from 'src/api/analytics';
+import {
+  useGetDashboardAnalyticsUser,
+  useGetDashboardAnalyticsOrders,
+  useGetDashboardAnalyticsRevenue,
+  useGetDashboardAnalyticsOrderCategory,
+} from 'src/api/analytics';
 import { useSettingsContext } from 'src/components/settings';
 
 import AppWelcome from '../app-welcome';
@@ -22,12 +27,26 @@ import EcommerceLatestOrders from '../../e-commerce/ecommerce-latest-orders';
 import EcommerceCurrentBalance from '../../e-commerce/ecommerce-current-balance';
 import EcommerceLatestProducts from '../../e-commerce/ecommerce-latest-products';
 import EcommerceLatestInvoices from '../../e-commerce/ecommerce-latest-invoices';
+import { Order } from 'src/types/analytics';
+import { useSearchOrders } from 'src/api/order';
+import { useGetProducts } from 'src/api/product';
+import { Box } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
-const calculatePercentage = (current: number, previous: number) => ((current - previous) / previous) * 100 || 0;
+const calculatePercentage = (current: number, previous: number) => {
+  if (previous === 0) {
+    return 0;
+  } else {
+    return ((current - previous) / previous) * 100 || 0;
+  }
+};
 
-const orderSummaryCart = (orderCategory: any) => orderCategory.categories?.map((category: any) => ({ label: category.category.name, value: category.order_count }));
+const orderSummaryCart = (orderCategory: any) =>
+  orderCategory.categories?.map((category: any) => ({
+    label: category.category.name,
+    value: category.order_count,
+  }));
 
 export default function OverviewAppView() {
   const { user } = useAuthContext();
@@ -38,15 +57,28 @@ export default function OverviewAppView() {
   const [orderSummaryCartData, setOrderSummaryCartData] = useState<any[]>([]);
 
   const { users } = useGetDashboardAnalyticsUser(user?.accessToken as string);
-  const { orderCategory, orderCategoryLoading } = useGetDashboardAnalyticsOrderCategory(user?.accessToken as string);
+  const { orderCategory, orderCategoryLoading } = useGetDashboardAnalyticsOrderCategory(
+    user?.accessToken as string
+  );
   const { orders } = useGetDashboardAnalyticsOrders(user?.accessToken as string);
   const { revenue } = useGetDashboardAnalyticsRevenue(user?.accessToken as string);
-
-  const userPercentage = calculatePercentage(users?.current_month?.users_registered, users?.previous_month?.users_registered);
-  const orderPercentage = calculatePercentage(orders?.current_month?.orders_count, orders?.previous_month?.orders_count);
-  const revenuePercentage = calculatePercentage(orders?.current_month?.total_revenue, orders?.previous_month?.total_revenue);
-
-
+  const userPercentage = calculatePercentage(
+    users?.current_month?.users_registered,
+    users?.previous_month?.users_registered
+  );
+  const orderPercentage = calculatePercentage(
+    orders?.current_month?.orders_count,
+    orders?.previous_month?.orders_count
+  );
+  const revenuePercentage = calculatePercentage(
+    orders?.current_month?.total_revenue,
+    orders?.previous_month?.total_revenue
+  );
+  const { searchOrders } = useSearchOrders({ sort_by: 'created_at', sort_order: 'desc' });
+  const { products } = useGetProducts({
+    sort_by: 'created_at',
+    sort_order: 'desc',
+  });
 
   useEffect(() => {
     if (!orderCategoryLoading && orderCategory) {
@@ -79,7 +111,7 @@ export default function OverviewAppView() {
           <AppWidgetSummary
             title="Monthly Orders"
             percent={orderPercentage}
-            total={orders?.current_month?.orders_count}
+            total={orders?.current_month?.orders_count || '0'}
             chart={{
               series: [5, 18, 12, 51, 68, 11, 39, 37, 27, 20],
             }}
@@ -90,7 +122,7 @@ export default function OverviewAppView() {
           <AppWidgetSummary
             title="Total Revenue"
             percent={revenuePercentage}
-            total={orders?.current_month?.total_revenue}
+            total={orders?.current_month?.total_revenue || '0'}
             chart={{
               colors: [theme.palette.info.light, theme.palette.info.main],
               series: [20, 41, 63, 33, 28, 35, 50, 46, 11, 26],
@@ -99,19 +131,10 @@ export default function OverviewAppView() {
         </Grid>
 
         <Grid xs={12} md={4}>
-          {/* <AppWidgetSummary
-            title="New users this month"
-            percent={-0.1}
-            total={678}
-            chart={{
-              colors: [theme.palette.warning.light, theme.palette.warning.main],
-              series: [8, 9, 31, 8, 16, 37, 8, 33, 46, 31],
-            }}
-          /> */}
           <AppWidgetSummary
             title="New users this month"
             percent={userPercentage}
-            total={users?.current_month?.users_registered}
+            total={users?.current_month?.users_registered || '0'}
             chart={{
               colors: [theme.palette.warning.light, theme.palette.warning.main],
               series: [8, 9, 31, 8, 16, 37, 8, 33, 46, 31],
@@ -139,7 +162,7 @@ export default function OverviewAppView() {
           <EcommerceLatestOrders
             id="demo__5"
             title="Latest Orders"
-            list={_orders.slice(0, 5) as any}
+            list={searchOrders.slice(0, 5) as any}
           />
         </Grid>
 
@@ -147,28 +170,26 @@ export default function OverviewAppView() {
           <EcommerceLatestProducts
             id="demo__5"
             title="Latest Products"
-            list={_ecommerceLatestProducts.slice(0, 5)}
+            list={products.slice(0, 5)}
           />
         </Grid>
 
         <Grid xs={12} md={6} lg={4}>
-          <EcommerceLatestInvoices
-            id="demo__5"
-            title="Invoices"
-            list={_appInvoices.slice(0, 5) as any}
-          />
-        </Grid>
-
-        <Grid xs={12} lg={8}>
-          <div> </div>
-        </Grid>
-
-        <Grid xs={12} md={6} lg={4}>
-          <EcommerceCurrentBalance
-            title="Monthly Revenue"
-            currentBalance={revenue?.total_revenue}
-            sentAmount={revenue?.returned_orders_revenue}
-          />
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              height: '100%',
+            }}
+          >
+            <EcommerceLatestInvoices id="demo__5" title="Invoices" />
+            <EcommerceCurrentBalance
+              title="Monthly Revenue"
+              currentBalance={revenue?.total_revenue}
+              sentAmount={revenue?.returned_orders_revenue}
+            />
+          </Box>
         </Grid>
       </Grid>
     </Container>

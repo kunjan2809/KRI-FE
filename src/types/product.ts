@@ -43,6 +43,11 @@ export type IProductItem = {
   sizes: string[];
   publish: string;
   coverUrl: string;
+  primary_image: {
+    image_url:string
+  };
+  mrp:string;
+  stock_quantity:number;
   images: string[];
   colors: string[];
   quantity: number;

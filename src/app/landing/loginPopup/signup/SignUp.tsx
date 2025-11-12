@@ -21,10 +21,11 @@ import FormProvider, { RHFTextField } from 'src/components/hook-form';
 import Iconify from 'src/components/iconify';
 import { useState } from 'react';
 
-interface login {
+interface SignUp {
   firstName: string;
   lastName: string;
   email: string;
+  mobile_number:string;
   password: string;
 }
 
@@ -50,10 +51,13 @@ const SignUp = ({
   const [errorMsg, setErrorMsg] = useState('');
   const password = useBoolean();
 
+  const phoneRegExp =  /^(\+[0-9]{1,2})?[0-9]{10}$/;
+
   const RegisterSchema = Yup.object().shape({
     firstName: Yup.string().required('First name required'),
     lastName: Yup.string().required('Last name required'),
     email: Yup.string().required('Email is required').email('Email must be a valid email address'),
+    mobile_number:Yup.string().required('Phone number is required').matches(phoneRegExp, "Phone number is not valid, optionally prefixed with a +1 or +2 digit country code."),
     password: Yup.string().required('Password is required'),
   });
 
@@ -61,10 +65,11 @@ const SignUp = ({
     firstName: '',
     lastName: '',
     email: '',
+    mobile_number:'',
     password: '',
   };
 
-  const methods = useForm<login>({
+  const methods = useForm<SignUp>({
     resolver: yupResolver(RegisterSchema),
     defaultValues,
   });
@@ -72,9 +77,6 @@ const SignUp = ({
   const {
     reset,
     handleSubmit,
-    watch,
-    setValue,
-    trigger,
     formState: { isSubmitting, errors },
   } = methods;
 
@@ -82,18 +84,19 @@ const SignUp = ({
 
   const onSubmit = handleSubmit(async (data: any) => {
     try {
+      setErrorMsg('');
       await register?.(
         data.email,
         data.password,
         data.firstName,
         data.lastName,
-        selectedProfileIcon
+        data.mobile_number,
+        selectedProfileIcon,
       );
       // After successful registration, show email verification
       setUserEmail(data.email);
       setIsEmailVerification(true);
       reset();
-      setErrorMsg('');
     } catch (error) {
       console.error(error);
       setErrorMsg(typeof error === 'string' ? error : error.message);
@@ -117,7 +120,6 @@ const SignUp = ({
 
   const handleSocialLogin = async (provider: 'google' | 'apple') => {
     try {
-      console.log(`${provider} login initiated`);
       // Here you would typically integrate with your authentication provider
       // For example, using Firebase Auth, Auth0, or your own OAuth implementation
 
@@ -166,6 +168,12 @@ const SignUp = ({
           Email Address
         </Typography>
         <RHFTextField name="email" placeholder="Email Address" />
+      </Box>
+      <Box sx={{ width: '100%' }}>
+        <Typography variant="subtitle2" fontWeight="medium">
+          Phone Number
+        </Typography>
+        <RHFTextField name="mobile_number" placeholder="Phone number" />
       </Box>
       <Box sx={{ width: '100%' }}>
         <Typography variant="subtitle2" fontWeight="medium">

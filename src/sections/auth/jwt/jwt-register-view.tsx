@@ -42,10 +42,14 @@ export default function JwtRegisterView() {
 
   const password = useBoolean();
 
+  const phoneRegExp =  /^(\+[0-9]{1,2})?[0-9]{10}$/;
+
+
   const RegisterSchema = Yup.object().shape({
     firstName: Yup.string().required('First name required'),
     lastName: Yup.string().required('Last name required'),
     email: Yup.string().required('Email is required').email('Email must be a valid email address'),
+    mobile_number:Yup.string().required('Phone number is required').matches(phoneRegExp, "Phone number is not valid, optionally prefixed with a +1 or +2 digit country code."),
     password: Yup.string().required('Password is required'),
   });
 
@@ -54,6 +58,7 @@ export default function JwtRegisterView() {
     lastName: '',
     email: '',
     password: '',
+    mobile_number:'',
   };
 
   const methods = useForm({
@@ -71,7 +76,7 @@ export default function JwtRegisterView() {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      await register?.(data.email, data.password, data.firstName, data.lastName, selectedProfileIcon);
+      await register?.(data.email, data.password, data.firstName, data.lastName,data.mobile_number, selectedProfileIcon);
 
       router.push(returnTo || PATH_AFTER_LOGIN);
     } catch (error) {
@@ -125,6 +130,7 @@ export default function JwtRegisterView() {
       </Stack>
 
       <RHFTextField name="email" label="Email address" />
+      <RHFTextField name="mobile_number" label="Phone number" />
 
       <RHFTextField
         name="password"

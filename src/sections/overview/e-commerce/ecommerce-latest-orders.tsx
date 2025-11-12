@@ -12,38 +12,39 @@ import Scrollbar from 'src/components/scrollbar';
 import { ColorPreview } from 'src/components/color-utils';
 import { Typography } from '@mui/material';
 import Label from 'src/components/label';
+import { OrderData } from 'src/types/analytics';
 
 // ----------------------------------------------------------------------
 
-type ItemProps = {
-  id: string;
-  orderNumber: string;
-  createdAt: Date;
-  taxes: number;
-  items: any[];
-  history: any[];
-  subTotal: number;
-  shipping: number;
-  discount: number;
-  customer: any;
-  delivery: any;
-  totalAmount: number;
-  totalQuantity: number;
-  shippingAddress: {
-    fullAddress: string;
-    phoneNumber: string;
-  },
-  payment: {
-    cardType: string;
-    cardNumber: string;
-  },
-  status: string;
-};
+// type ItemProps = {
+//   id: string;
+//   orderNumber: string;
+//   createdAt: Date;
+//   taxes: number;
+//   items: any[];
+//   history: any[];
+//   subTotal: number;
+//   shipping: number;
+//   discount: number;
+//   customer: any;
+//   delivery: any;
+//   totalAmount: number;
+//   totalQuantity: number;
+//   shippingAddress: {
+//     fullAddress: string;
+//     phoneNumber: string;
+//   },
+//   payment: {
+//     cardType: string;
+//     cardNumber: string;
+//   },
+//   status: string;
+// };
 
 interface Props extends CardProps {
   title?: string;
   subheader?: string;
-  list: ItemProps[];
+  list: OrderData[];
 }
 
 export default function EcommerceLatestOrders({ title, subheader, list, ...other }: Props) {
@@ -54,7 +55,7 @@ export default function EcommerceLatestOrders({ title, subheader, list, ...other
       <Scrollbar>
         <Stack spacing={3} sx={{ p: 3, minWidth: 360 }}>
           {list.map((product) => (
-            <ProductItem key={product.id} order={product} />
+            <ProductItem key={product._id} order={product} />
           ))}
         </Stack>
       </Scrollbar>
@@ -65,11 +66,11 @@ export default function EcommerceLatestOrders({ title, subheader, list, ...other
 // ----------------------------------------------------------------------
 
 type ProductItemProps = {
-  order: ItemProps;
+  order: OrderData;
 };
 
 function ProductItem({ order }: ProductItemProps) {
-  const { orderNumber, createdAt, totalAmount, totalQuantity, status } = order;
+  const { order_number, total_amount, products ,order_status,created_at} = order;
 
   return (
     <Stack direction="row" spacing={2}>
@@ -81,12 +82,37 @@ function ProductItem({ order }: ProductItemProps) {
       /> */}
 
       <ListItemText
-        primary={<Stack direction="row" justifyContent="space-between"><span>Order number: <Link sx={{ color: 'text.primary', typography: 'subtitle2' }}>{orderNumber}</Link></span> <Label variant="soft" color={(status === 'completed' && 'success') || (status === 'pending' && 'warning') || (status === 'cancelled' && 'error') || 'default'}>{status}</Label> </Stack>}
-        secondary={<Stack direction="row" justifyContent="space-between">
-          <Box component="span" >{totalQuantity} items</Box>
-          <Box component="span" >{new Date(createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</Box>
-          <Box component="span" >{fCurrency(totalAmount)}</Box>
-        </Stack>
+        primary={
+          <Stack direction="row" justifyContent="space-between">
+            <span>
+              Order number:{' '}
+              <Link sx={{ color: 'text.primary', typography: 'subtitle2' }}>{order_number}</Link>
+            </span>{' '}
+            <Label
+              variant="soft"
+              color={
+                (order_status === 'completed' && 'success') ||
+                (order_status === 'pending' && 'warning') ||
+                (order_status === 'cancelled' && 'error') ||
+                'default'
+              }
+            >
+              {order_status}
+            </Label>{' '}
+          </Stack>
+        }
+        secondary={
+          <Stack direction="row" justifyContent="space-between">
+            {/* <Box component="span">{totalQuantity} items</Box> */}
+            <Box component="span">
+              {new Date(created_at).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </Box>
+            <Box component="span">{fCurrency(total_amount)}</Box>
+          </Stack>
         }
         primaryTypographyProps={{
           noWrap: true,
@@ -95,7 +121,6 @@ function ProductItem({ order }: ProductItemProps) {
           mt: 0.5,
         }}
       />
-
     </Stack>
   );
 }

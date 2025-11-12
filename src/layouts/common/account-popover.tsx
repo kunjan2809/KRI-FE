@@ -27,10 +27,10 @@ const OPTIONS = [
     label: 'Home',
     linkTo: '/',
   },
-  {
-    label: 'Profile',
-    linkTo: paths.dashboard.user.root,
-  },
+  // {
+  //   label: 'Profile',
+  //   linkTo: paths.dashboard.user.root,
+  // },
   {
     label: 'Settings',
     linkTo: paths.dashboard.user.account,

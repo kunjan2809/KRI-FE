@@ -21,10 +21,9 @@ import { INUserItem } from 'src/types/user';
 
 import UserCardList from '../user-card-list';
 import UserCardSkeleton from '../user-card-skeleton';
+import { useGetUserStatus } from 'src/api/analytics';
 
 // ----------------------------------------------------------------------
-
-
 
 export default function UserCardsView() {
   const settings = useSettingsContext();
@@ -32,16 +31,13 @@ export default function UserCardsView() {
   const [filters, setFilters] = useState({ status: 'all' });
   const token = useAuthToken();
   const [page, setPage] = useState<number>(1);
-  const handleFilterStatus = useCallback(
-    (event: React.SyntheticEvent, newValue: string) => {
-      setFilters({ status: newValue });
-    },
-    []
-  );
+  const handleFilterStatus = useCallback((event: React.SyntheticEvent, newValue: string) => {
+    setFilters({ status: newValue });
+  }, []);
 
   const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
-  }
+  };
 
   const params = {
     status_filter: filters.status === 'all' ? [] : [filters.status],
@@ -51,16 +47,14 @@ export default function UserCardsView() {
   };
 
   const { data: apiUsers, isLoading } = useGetUsers(params, token as string);
+  const { usercount } = useGetUserStatus(token as string);
   const users = apiUsers?.users || [];
+
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <CustomBreadcrumbs
         heading="Users"
-        links={[
-          { name: 'Dashboard', href: paths.dashboard.root },
-          { name: 'User' },
-        ]}
-
+        links={[{ name: 'Dashboard', href: paths.dashboard.root }, { name: 'User' }]}
         sx={{ mb: { xs: 3, md: 5 } }}
       />
 
@@ -79,6 +73,7 @@ export default function UserCardsView() {
             iconPosition="end"
             value={tab.value}
             label={tab.label}
+            onClick={() => setPage(1)}
             icon={
               <Label
                 variant={
@@ -90,9 +85,11 @@ export default function UserCardsView() {
                   'default'
                 }
               >
-                {['active', 'banned'].includes(tab.value)
-                  ? users.filter((user: INUserItem) => user.status === tab.value).length
-                  : users.length}
+                {usercount && tab.value === 'active'
+                  ? usercount?.active_users
+                  : tab.value === 'banned'
+                    ? usercount?.banned_users
+                    : usercount?.total_users}
               </Label>
             }
           />
@@ -118,7 +115,7 @@ export default function UserCardsView() {
           <UserCardList users={users} />
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
             <Pagination
-              count={apiUsers?.total_pages}
+              count={apiUsers?.pagination?.total_pages}
               page={page}
               onChange={handlePageChange}
             />

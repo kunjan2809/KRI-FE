@@ -87,8 +87,6 @@ export default function ProductDetailsPage() {
 
   const productId = params.id as string;
 
-  console.log('selectedSize', selectedSize, '===', selectedColor);
-
   const getProductDataById = async () => {
     if (productId) {
       try {
@@ -112,7 +110,6 @@ export default function ProductDetailsPage() {
           }
         }
       } catch (err) {
-        console.log('err--', err);
         const errorMessage = err instanceof Error ? err.message : 'Failed to fetch product';
         enqueueSnackbar(errorMessage, { variant: 'error' });
       } finally {
@@ -269,7 +266,7 @@ export default function ProductDetailsPage() {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                       <Rating value={totalRating} precision={0.1} readOnly />
                       <Typography variant="body2" color="text.secondary">
-                        {totalRating} ({totalReviews} reviews)
+                        {totalRating.toFixed(2)} ({totalReviews} reviews)
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
                         • {productData.sold} sold

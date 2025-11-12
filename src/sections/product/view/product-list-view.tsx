@@ -3,10 +3,13 @@
 import isEqual from 'lodash/isEqual';
 import { useState, useEffect, useCallback } from 'react';
 
+import { Box } from '@mui/material';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
+import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
+import Typography from '@mui/material/Typography';
 import {
   DataGrid,
   GridColDef,
@@ -28,19 +31,18 @@ import { RouterLink } from 'src/routes/components';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
-import { deleteProduct, patchFeaturedStatus, useGetProducts } from 'src/api/product';
+import { useAuthToken } from 'src/auth/hooks';
 import { PRODUCT_STOCK_OPTIONS } from 'src/_mock';
+import { deleteProduct, patchFeaturedStatus, useGetProducts } from 'src/api/product';
 
+import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import { useSnackbar } from 'src/components/snackbar';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
-import Alert from '@mui/material/Alert';
-import Typography from '@mui/material/Typography';
 
 import { IProductTableFilters, IProductTableFilterValue } from 'src/types/product';
-import { useAuthToken } from 'src/auth/hooks';
 
 import ProductTableToolbar from '../product-table-toolbar';
 import ProductTableFiltersResult from '../product-table-filters-result';
@@ -51,8 +53,6 @@ import {
   RenderCellProduct,
   RenderCellCreatedAt,
 } from '../product-table-row';
-import { Box } from '@mui/material';
-import Label from 'src/components/label';
 
 // ----------------------------------------------------------------------
 
@@ -98,6 +98,7 @@ export default function ProductListView() {
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(20);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState<string>('');
   const [deleteRowIds, setDeleteRowIds] = useState<string[]>([]);
 

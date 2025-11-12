@@ -83,29 +83,29 @@ export function ProductCardSkeleton({ sx, rowCount = 1, colCount = 4, ...other }
 
 // product slider skeleton 
 
-export function ProductSuggestionSlider({sx, rowCount = 2, colCount = 4, ...other }:productCardSkeleton) {
+export function ProductSuggestionSlider({ sx, rowCount = 2, colCount = 4, ...other }: productCardSkeleton) {
   console.log('rowCount', rowCount)
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
       <Grid spacing={3}>
         {[...Array(rowCount)].map((_) => (
           <Grid xs={12} sm={6} md={4} lg={3} spacing={6} {...other} sx={{ mb: 4 }}>
-           <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', gap: '25px' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', gap: '25px' }}>
               {[...Array(colCount)].map((data) => (
-               <Card sx={{ width: '100%', height: '100%', paddingBottom: '4px' }}>
-              <Skeleton sx={{ height: 200 }} animation="wave" variant="rectangular" />
-              <CardContent>
-                <Skeleton animation="wave" sx={{ height: 24, width: 0.5 }} style={{ marginBottom: 10 }} />
-                <Skeleton animation="wave" sx={{ height: 20, width: 0.4 }} style={{ marginBottom: 12 }} />
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }} style={{ marginBottom: 10 }}>
-                  <Skeleton animation="wave" sx={{ height: 24, width: 0.3 }} />
-                  <Skeleton animation="wave" sx={{ height: 20, width: 0.3 }} />
-                </Box>
-              </CardContent>
-              <CardActions sx={{ display: 'flex', justifyContent: 'center' }}>
-                <Skeleton animation="wave" variant="rectangular" sx={{ height: 36, width: '90%', borderRadius: '10px' }} />
-              </CardActions>
-            </Card>
+                <Card sx={{ width: '100%', height: '100%', paddingBottom: '4px' }}>
+                  <Skeleton sx={{ height: 200 }} animation="wave" variant="rectangular" />
+                  <CardContent>
+                    <Skeleton animation="wave" sx={{ height: 24, width: 0.5 }} style={{ marginBottom: 10 }} />
+                    <Skeleton animation="wave" sx={{ height: 20, width: 0.4 }} style={{ marginBottom: 12 }} />
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }} style={{ marginBottom: 10 }}>
+                      <Skeleton animation="wave" sx={{ height: 24, width: 0.3 }} />
+                      <Skeleton animation="wave" sx={{ height: 20, width: 0.3 }} />
+                    </Box>
+                  </CardContent>
+                  <CardActions sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Skeleton animation="wave" variant="rectangular" sx={{ height: 36, width: '90%', borderRadius: '10px' }} />
+                  </CardActions>
+                </Card>
               ))}
             </Box>
           </Grid>
@@ -154,6 +154,68 @@ export function ProductCartPageSkeleton({ sx, ...other }: Grid2Props) {
     </Container>
   );
 }
+
+// order page skelton
+
+export function OrderListSkeleton({ sx, ...other }: Grid2Props) {
+  return (
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Grid container spacing={4} sx={{ mt: 4 }}>
+        {/* <Grid item xs={12} sm={12} md={12} lg={6} gap={2}> */}
+        {[...Array(4)].map((_, index) => (
+          <Grid xs={12} sm={12} md={12} lg={6} >
+            <Card key={index} sx={{ p: 3 }}>
+              <Grid container spacing={3}>
+
+                <Grid xs={12}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <Box sx={{ flex: 1 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <Skeleton animation="wave" sx={{ height: 24, width: 0.4,mb:'30px' }} />
+
+                        <Skeleton animation="wave" sx={{ height: 24, width: 0.2 }} />
+
+                      </Box>
+                      {/* <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                              {item.order_items}
+                            </Typography> */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                        <Skeleton animation="wave" sx={{ height: 22, width: 0.5 }} />
+
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                        <Skeleton animation="wave" sx={{ height: 22, width: 0.3 }} />
+
+
+                      </Box>
+
+                      {/* Price */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Skeleton animation="wave" sx={{ height: 22, width: 0.3 }} />
+
+                      </Box>
+
+
+                      {/* Action Links */}
+                      <Box sx={{ display: 'flex', gap: 2, justifyContent: 'end' }}>
+                        <Skeleton animation="wave" sx={{ height: 28, width: 0.2 }} />
+
+                      </Box>
+                    </Box>
+                  </Box>
+                </Grid>
+              </Grid>
+            </Card>
+          </Grid>
+        )
+        )}
+        {/* </Grid> */}
+      </Grid>
+
+    </Container>
+  );
+}
+
 export function ProductSkeleton({ sx, ...other }: Grid2Props) {
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>

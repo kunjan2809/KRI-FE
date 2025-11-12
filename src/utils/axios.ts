@@ -119,7 +119,14 @@ export const endpoints = {
      all:'/api/cart',
      add:'/api/cart/add',
      remove:'/api/cart/remove',
-     update:'/api/cart/update'
+     update:'/api/cart/update',
+     place:'/api/orders/place'
+
+  },
+  shipment:{
+  add:"/api/addresses",
+  getAll:'/api/addresses',
+  getDefault:'/api/addresses/default'
   },
   image: {
     product: '/api/images/product/',
@@ -127,6 +134,7 @@ export const endpoints = {
   },
   order: {
     all: '/api/orders/admin/all',
+    updateStatus:'/api/orders/',
     details: '/api/orders/admin/details/',
     delivery: '/api/orders/admin/delivery/',
     create: '/api/orders/admin/create/',

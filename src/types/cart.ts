@@ -93,3 +93,29 @@ export interface CartSummary {
   cart_total: number
   items_count: number
 }
+
+// shipment address get all 
+
+
+export interface ShipmentAddressResponse{
+  addresses: Address[]
+  count: number
+}
+
+export interface Address {
+  _id: string
+  user_id: string
+  full_name: string
+  mobile_number: string
+  address_line_1: string
+  address_line_2: string
+  landmark: string
+  city: string
+  state: string
+  postal_code: string
+  country: string
+  is_default: boolean
+  formatted_address: string
+  created_at: string
+  edited_at: string,
+}

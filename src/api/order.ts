@@ -11,7 +11,9 @@ import {
   IOrderUpdateRequest, 
   IOrderStatus, 
   IOrderPaymentStatus, 
-  IOrderDeliveryUpdate 
+  IOrderDeliveryUpdate, 
+  IOrderItemTableData,
+  Order
 } from 'src/types/order';
 
 // ----------------------------------------------------------------------
@@ -19,7 +21,7 @@ import {
 interface GetOrdersParams {
   page?: number;
   limit?: number;
-  status?: string;
+  order_status?: string;
   payment_status?: string;
   start_date?: string;
   end_date?: string;
@@ -28,11 +30,30 @@ interface GetOrdersParams {
   sort_order?: 'asc' | 'desc';
 }
 
+export async function getUserAllOrders(token: string) {
+  const baseUrl = BASE_API;
+  const URL = `${baseUrl}${endpoints.order.updateStatus}`;
+
+  const response = await fetch(URL, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorDetails = await response.json();
+    throw new Error(errorDetails.message || 'Error updating order');
+  }
+
+  return response.json();
+}
 export function useGetOrders(params: GetOrdersParams = {}) {
   const {
     page = 1,
     limit = 20,
-    status = '',
+    order_status = '',
     payment_status = '',
     start_date = '',
     end_date = '',
@@ -40,7 +61,6 @@ export function useGetOrders(params: GetOrdersParams = {}) {
     sort_by = 'created_at',
     sort_order = 'desc'
   } = params;
-
   const token = useAuthToken();
   const baseUrl = BASE_API;
 
@@ -51,8 +71,8 @@ export function useGetOrders(params: GetOrdersParams = {}) {
   queryParams.append('sort_by', sort_by);
   queryParams.append('sort_order', sort_order);
 
-  if (status) {
-    queryParams.append('status', status);
+  if (order_status) {
+    queryParams.append('order_status', order_status);
   }
 
   if (payment_status) {
@@ -88,7 +108,7 @@ export function useGetOrders(params: GetOrdersParams = {}) {
 
   const memoizedValue = useMemo(
     () => ({
-      orders: (data?.data?.orders as IOrderItem[]) || [],
+      orders: (data?.data?.orders as Order[]) || [],
       pagination: data?.data?.pagination || null,
       filters: data?.data?.filters || null,
       sorting: data?.data?.sorting || null,
@@ -236,7 +256,7 @@ export async function getOrderById(orderId: string, token: string) {
 
 export async function updateOrderStatus(orderId: string, orderStatus: IOrderStatus, token: string) {
   const baseUrl = BASE_API;
-  const URL = `${baseUrl}${endpoints.order.details}${orderId}/status`;
+  const URL = `${baseUrl}${endpoints.order.updateStatus}${orderId}/status`;
 
   const response = await fetch(URL, {
     method: 'PATCH',
@@ -304,6 +324,7 @@ export async function updateOrderDelivery(orderId: string, deliveryData: IOrderD
 // ----------------------------------------------------------------------
 
 export async function deleteOrder(orderId: string, token: string) {
+
   const baseUrl = BASE_API;
   const URL = `${baseUrl}${endpoints.order.delete}${orderId}`;
 

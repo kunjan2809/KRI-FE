@@ -28,7 +28,7 @@ export function RenderCellPrice({ params }: ParamsProps) {
   );
 }
 
-export function RenderCellPublish({ params }: ParamsProps) {
+export function RenderCellPublish({ params }: ParamsProps)  {
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center',height:'100%' }}>
     <Label variant="soft" color={(params.row.status === 'published' && 'info') || 'default'}>

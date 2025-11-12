@@ -54,7 +54,6 @@ function formatDate(dateString: string) {
   const options = { year: 'numeric', month: 'long', day: 'numeric' };
   return date.toLocaleDateString('en-US', options);
 }
-
 // ----------------------------------------------------------------------
 
 const OrderDetails = () => {
@@ -108,7 +107,7 @@ const OrderDetails = () => {
       </Container>
     );
   }
-
+  
   return (
     <Box>
       {/* Hero Section */}
@@ -272,6 +271,15 @@ const OrderDetails = () => {
 
 // ----------------------------------------------------------------------
 
+
+interface OrderSummaryProps {
+  orderTotal: number;
+  orderStatus: string;
+  paymentMethod: string;
+  shippingMethod: string;
+  estimatedDelivery: string;
+  actualDelivery: string;
+}
 const OrderSummary = ({
   orderTotal,
   orderStatus,
@@ -294,14 +302,8 @@ const OrderSummary = ({
         <Grid container spacing={4}>
           <Grid item xs={12} md={6}>
             <Stack spacing={2}>
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  py: 1,
-                }}
-              >
+
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 1 }}>
                 <Typography color="text.secondary">Order Total</Typography>
                 <Typography fontWeight="medium">{formatPrice(orderTotal)}</Typography>
               </Box>
@@ -344,30 +346,18 @@ const OrderSummary = ({
           </Grid>
           <Grid item xs={12} md={6}>
             <Stack spacing={2}>
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  py: 1,
-                }}
-              >
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 1 }}>
                 <Typography color="text.secondary">Shipping Method</Typography>
                 <Typography>{shippingMethod}</Typography>
               </Box>
               <Divider />
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  py: 1,
-                }}
-              >
+
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 1 }}>
                 <Typography color="text.secondary">Estimated Delivery</Typography>
                 <Typography>{estimatedDelivery}</Typography>
               </Box>
               <Divider />
+
               {orderStatus === 'shipped' && (
                 <Box
                   sx={{
@@ -396,6 +386,7 @@ const OrderSummary = ({
 
 // ----------------------------------------------------------------------
 
+
 const OrderTracking = ({
   timelineSteps,
   order,
@@ -414,6 +405,7 @@ const OrderTracking = ({
       <CardHeader title="Order Tracking" />
       <CardContent>
         <Box sx={{ position: 'relative' }}>
+
           <Grid container spacing={2} justifyContent="start">
             {timeLine.map((step, index) => {
               const isCompleted = index <= currentStepIndex;
@@ -479,6 +471,7 @@ const OrderTracking = ({
 
 // ----------------------------------------------------------------------
 
+
 const OrderItems = ({
   orderItems,
   orderStatus,
@@ -491,7 +484,6 @@ const OrderItems = ({
   const [isOrderReturn, setIsOrderReturn] = useState<boolean>(false);
   const [orderItemId, setOrderItemId] = useState<string | null>(null);
   const [orderId, setOrderId] = useState<string | null>(null);
-
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -618,3 +610,4 @@ const OrderItems = ({
 };
 
 export default OrderDetails;
+

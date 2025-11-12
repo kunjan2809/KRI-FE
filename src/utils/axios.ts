@@ -3,6 +3,7 @@ import axios, { AxiosRequestConfig } from 'axios';
 import { BASE_API } from 'src/config-global';
 import { SESSION_ACCESS_TOKEN, SESSION_USER_DATA } from './constants';
 
+
 // ----------------------------------------------------------------------
 
 const axiosInstance = axios.create({ baseURL: BASE_API });
@@ -100,6 +101,8 @@ export const endpoints = {
     search: '/api/post/search',
   },
   product: {
+    productAll:'/api/products/all',
+    productSuggestion:'/api/products/suggestions',
     list: '/api/product/list',
     details: '/api/products/details/',
     search: '/api/product/search',
@@ -114,6 +117,21 @@ export const endpoints = {
     addVariations: '/api/products/admin/:productId/variations',
     editVariations: '/api/products/admin/:productId/variations/:variationId',
     deleteVariations: '/api/products/admin/:productId/variations/:variationId',
+    featuredtStatus:'/api/products/admin/featured'
+  
+  },
+  cart:{
+     all:'/api/cart',
+     add:'/api/cart/add',
+     remove:'/api/cart/remove',
+     update:'/api/cart/update',
+     place:'/api/orders/place'
+
+  },
+  shipment:{
+  add:"/api/addresses",
+  getAll:'/api/addresses',
+  getDefault:'/api/addresses/default'
     suggestions: '/api/products/suggestions/'
   },
   image: {
@@ -122,6 +140,7 @@ export const endpoints = {
   },
   order: {
     all: '/api/orders/admin/all',
+    updateStatus:'/api/orders/',
     details: '/api/orders/admin/details/',
     delivery: '/api/orders/admin/delivery/',
     create: '/api/orders/admin/create/',
@@ -141,6 +160,11 @@ export const endpoints = {
     add: '/api/category/add',
     edit: '/api/category/edit',
     delete: '/api/category/delete',
+  },
+  wishlist:{
+    all:'/api/wishlist',
+    add:'/api/wishlist/add',
+    remove:'/api/wishlist/remove',
   },
   newsletter: {
     subscribe: '/api/leads/subscribe',

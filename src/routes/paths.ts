@@ -48,6 +48,13 @@ export const paths = {
       },
     },
     profile: '/profile',
+    orders: {
+      root: '/orders',
+      details: (id: string) => `/orders/${id}`,
+      demo: {
+        details: `/orders/${MOCK_ID}`,
+      },
+    },
     helpCenter: '/help-center',
     wishlist: '/wishlist',
   },

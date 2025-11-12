@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
@@ -69,9 +69,9 @@ const TABLE_HEAD = [
 ];
 
 const defaultFilters: IOrderTableFilters = {
-  status: [],
+  status: "",
   payment_status: [],
-  dateRange: [],
+  dateRange: { startDate: null, endDate: null },
   search: '',
 };
 
@@ -86,22 +86,25 @@ export default function OrderListView() {
   const confirm = useBoolean();
 
   const [filters, setFilters] = useState(defaultFilters);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(20);
+
+
 
   // API parameters
   const apiParams = {
     page: currentPage,
     limit: rowsPerPage,
-    status: filters.status.length > 0 ? filters.status[0] : '',
+    order_status: filters.status.length > 0 ? filters.status : '',
     payment_status: filters.payment_status.length > 0 ? filters.payment_status[0] : '',
-    start_date: filters.dateRange.length > 0 ? filters.dateRange[0] : '',
-    end_date: filters.dateRange.length > 1 ? filters.dateRange[1] : '',
-    search: filters.search,
+    start_date: filters.dateRange.startDate ? filters.dateRange.startDate.toISOString() : '',
+    end_date: filters.dateRange.endDate ? filters.dateRange.endDate.toISOString() : '',
+    search: debouncedSearchQuery,
     sort_by: table.orderBy as 'created_at' | 'total_amount' | 'order_status',
     sort_order: table.order as 'asc' | 'desc',
   };
-
   const {
     orders,
     ordersLoading,
@@ -115,13 +118,15 @@ export default function OrderListView() {
   const canReset =
     filters.status.length > 0 ||
     filters.payment_status.length > 0 ||
-    filters.dateRange.length > 0 ||
+    filters.dateRange.startDate ||
+    filters.dateRange.endDate ||
     !!filters.search;
 
   const notFound = ordersEmpty && canReset;
 
   const handleFilters = useCallback(
     (name: string, value: IOrderTableFilterValue) => {
+      console.log(name, value)
       setCurrentPage(1);
       setFilters((prevState) => ({
         ...prevState,
@@ -133,6 +138,7 @@ export default function OrderListView() {
 
   const handleResetFilters = useCallback(() => {
     setFilters(defaultFilters);
+    setDebouncedSearchQuery('')
     setCurrentPage(1);
   }, []);
 
@@ -166,6 +172,7 @@ export default function OrderListView() {
     }
   }, [token, enqueueSnackbar, table]);
 
+
   const handleViewRow = useCallback(
     (id: string) => {
       router.push(paths.dashboard.order.details(id));
@@ -195,6 +202,15 @@ export default function OrderListView() {
     []
   );
 
+  // Debounce search query to avoid too many API calls
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   return (
     <>
       <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -213,7 +229,6 @@ export default function OrderListView() {
             mb: { xs: 3, md: 5 },
           }}
         />
-
         <Card>
           <Tabs
             value={filters.status.length > 0 ? filters.status[0] : 'all'}
@@ -243,6 +258,7 @@ export default function OrderListView() {
                       'default'
                     }
                   >
+
                     {ordersLoading ? '...' :
                       tab.value === 'all' ? pagination?.total_orders || 0 :
                         orders.filter((order) => order.order_status === tab.value).length}
@@ -254,14 +270,17 @@ export default function OrderListView() {
 
           <OrderTableToolbar
             filters={filters}
+            setFilters={setFilters}
             onFilters={handleFilters}
-            //
+            searchQuery={searchQuery}
+            setSerachQuery={setSearchQuery}
             dateError={false}
           />
 
           {canReset && (
             <OrderTableFiltersResult
               filters={filters}
+              setFilters={setFilters}
               onFilters={handleFilters}
               //
               onResetFilters={handleResetFilters}
@@ -279,7 +298,7 @@ export default function OrderListView() {
               onSelectAllRows={(checked) =>
                 table.onSelectAllRows(
                   checked,
-                  orders.map((row) => row.id)
+                  orders.map((row) => row._id)
                 )
               }
               action={
@@ -303,7 +322,7 @@ export default function OrderListView() {
                   onSelectAllRows={(checked) =>
                     table.onSelectAllRows(
                       checked,
-                      orders.map((row) => row.id)
+                      orders.map((row) => row._id)
                     )
                   }
                 />
@@ -311,12 +330,12 @@ export default function OrderListView() {
                 <TableBody>
                   {orders.map((row) => (
                     <OrderTableRow
-                      key={row.id}
+                      key={row._id}
                       row={row}
-                      selected={table.selected.includes(row.id)}
-                      onSelectRow={() => table.onSelectRow(row.id)}
-                      onDeleteRow={() => handleDeleteRow(row.id)}
-                      onViewRow={() => handleViewRow(row.id)}
+                      selected={table.selected.includes(row._id)}
+                      onSelectRow={() => table.onSelectRow(row._id)}
+                      onDeleteRow={() => handleDeleteRow(row._id)}
+                      onViewRow={() => handleViewRow(row._id)}
                     />
                   ))}
 

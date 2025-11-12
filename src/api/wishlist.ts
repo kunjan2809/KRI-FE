@@ -1,9 +1,36 @@
-import { BASE_API } from "src/config-global";
-import { endpoints } from "src/utils/axios";
 
-export async function addWishlist(wishlist:{product_id:string}, token: string) {
-  const baseUrl = BASE_API;
-  const URL = `${baseUrl}${endpoints.wishlist.add}`;
+import { endpoints, } from 'src/utils/axios';
+
+import { BASE_API } from 'src/config-global';
+
+
+// ----------------------------------------------------------------------
+
+
+// get all wishlist iteam 
+export async function getAllWishlist(token: string) {
+
+  const URL = `${BASE_API}${endpoints.wishlist.all}`;
+
+  const response = await fetch(URL, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorDetails = await response.json();
+    throw new Error(errorDetails.message || 'Error fetching wishlist');
+  }
+  return response.json();
+}
+
+// add the wishlist 
+export async function addWishlist(productId: string, token: string) {
+
+  const URL = `${BASE_API}${endpoints.wishlist.add}`;
 
   const response = await fetch(URL, {
     method: 'POST',
@@ -11,7 +38,7 @@ export async function addWishlist(wishlist:{product_id:string}, token: string) {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify(wishlist),
+    body: JSON.stringify({ product_id: productId })
   });
 
   if (!response.ok) {
@@ -36,7 +63,7 @@ export async function removeWishlist(productId:string, token: string) {
 
   if (!response.ok) {
     const errorDetails = await response.json();
-    throw new Error(errorDetails.message || 'Error removing wishlist');
+    throw new Error(errorDetails.message || 'Failed To remove  wishlist');
   }
 
   return response.json();

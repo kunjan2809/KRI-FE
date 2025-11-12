@@ -260,40 +260,63 @@ export function ProductSkeleton({ sx, ...other }: Grid2Props) {
 
 // ----------------------------------------------------------------------
 
-export function ProductDetailsSkeleton({ ...other }: Grid2Props) {
+export function ProductDetailsLoading({ ...other }: Grid2Props) {
   return (
-    <Grid container spacing={8} {...other}>
-      <Grid xs={12} md={6} lg={7}>
-        <Skeleton sx={{ paddingTop: '100%' }} />
-      </Grid>
+    <Container maxWidth="xl" sx={{ py: 4 }}>
+      <Grid container spacing={6} {...other}>
+        <Grid xs={12} md={6}>
+          <Skeleton animation="wave" sx={{ height: 618 }} />
+        </Grid>
 
-      <Grid xs={12} md={6} lg={5}>
-        <Stack spacing={3}>
-          <Skeleton sx={{ height: 16, width: 48 }} />
-          <Skeleton sx={{ height: 16, width: 80 }} />
-          <Skeleton sx={{ height: 16, width: 0.5 }} />
-          <Skeleton sx={{ height: 16, width: 0.75 }} />
-          <Skeleton sx={{ height: 120 }} />
-        </Stack>
-      </Grid>
+        <Grid xs={12} md={6}>
+          <Stack spacing={3}>
+            <Skeleton animation="wave" sx={{ height: 16, width: 0.2 }} />
+            <Skeleton animation="wave" sx={{ height: 16, width: 0.4 }} />
+            <Skeleton animation="wave" sx={{ height: 16, width: 0.1 }} />
+            <Skeleton animation="wave" sx={{ height: 16, width: 0.1 }} />
+            <Skeleton animation="wave" sx={{ height: 120 }} />
+            <Skeleton animation="wave" sx={{ height: 16, width: 0.1 ,marginTop:'10px'}} />
+            <Box sx={{display:'flex',gap:'10px'}}>
+            <Skeleton animation="wave" sx={{ height: 30, width: 0.1 }} />
+            <Skeleton animation="wave" sx={{ height: 30, width: 0.1 }} />
+            </Box>
+            <Skeleton animation="wave" sx={{ height: 16, width: 0.1,marginTop:'10px' }} />
+            <Box sx={{display:'flex',gap:'10px'}}>
+            <Skeleton animation="wave" sx={{ height: 30, width: 0.1 }} />
+            <Skeleton animation="wave" sx={{ height: 30, width: 0.1 }} />
+            </Box>
+            <Skeleton animation="wave" sx={{ height: 16, width: 0.1 ,marginTop:'10px'}} />
+            <Box sx={{display:'flex',gap:'10px',alignItems:'center'}}>
+            <Skeleton animation="wave" sx={{ height: 16, width: 0.1 }} />
+            <Skeleton animation="wave" sx={{ height: 30, width: 0.1 }} />
+            <Skeleton animation="wave" sx={{ height: 16, width: 0.1 }} />
+            </Box>
+            <Box sx={{display:'flex',justifyContent:'space-between',width:'100%',marginTop:'20px'}}>
+            <Skeleton animation="wave" variant='rectangular' sx={{ height: 48, width: '49%',borderRadius:'10px' }} />
+            <Skeleton animation="wave" variant='rectangular' sx={{ height: 48, width: '49%',borderRadius:'10px' }} />
+            </Box>
 
-      <Grid xs={12}>
-        <Stack direction="row" alignItems="center">
-          {[...Array(3)].map((_, index) => (
-            <Stack
-              key={index}
-              spacing={2}
-              alignItems="center"
-              justifyContent="center"
-              sx={{ width: 1 }}
-            >
-              <Skeleton variant="circular" sx={{ width: 80, height: 80 }} />
-              <Skeleton sx={{ height: 16, width: 160 }} />
-              <Skeleton sx={{ height: 16, width: 80 }} />
-            </Stack>
-          ))}
-        </Stack>
+          </Stack>
+        </Grid>
+
+        {/* <Grid xs={12}>
+          <Stack direction="row" alignItems="center">
+            {[...Array(3)].map((_, index) => (
+              <Stack
+                key={index}
+                spacing={2}
+                alignItems="center"
+                justifyContent="center"
+                sx={{ width: 1 }}
+              >
+                <Skeleton variant="circular" sx={{ width: 80, height: 80 }} />
+                <Skeleton sx={{ height: 16, width: 160 }} />
+                <Skeleton sx={{ height: 16, width: 80 }} />
+              </Stack>
+            ))}
+          </Stack>
+        </Grid> */}
       </Grid>
-    </Grid>
+    </Container>
   );
 }

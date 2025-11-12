@@ -176,3 +176,30 @@ export function useGetDashboardAnalyticsYearlyOrders(token: string, year: string
 
     return memoizedValue;
 }
+export function useGetUserStatus(token: string) {
+    const baseUrl = BASE_API;
+    const URL = `${baseUrl}${endpoints.analytics.status}`;
+
+    const { data, isLoading, error, isValidating } = useSWR(
+        token ? { url: URL, token } : null,
+        apiProductFetcher,
+        {
+            revalidateOnFocus: false,
+            revalidateOnReconnect: false,
+            errorRetryCount: 3,
+            onError: (err) => {
+                console.error('useGetUserStatus error:', err);
+            }
+        });
+
+    const memoizedValue = useMemo(() => ({
+        usercount: data?.data as any,
+        userloading: isLoading,
+        userError: error,
+        userValidating: isValidating,
+    }),
+        [data?.data, error, isLoading, isValidating]
+    );
+
+    return memoizedValue;
+}

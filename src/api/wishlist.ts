@@ -1,6 +1,4 @@
 
-
-
 import { endpoints, } from 'src/utils/axios';
 
 import { BASE_API } from 'src/config-global';
@@ -45,14 +43,15 @@ export async function addWishlist(productId: string, token: string) {
 
   if (!response.ok) {
     const errorDetails = await response.json();
-    return errorDetails
+    throw new Error(errorDetails.message || 'Error adding wishlist');
   }
+
   return response.json();
 }
-// remove the wishlist
-export async function removeWishlist(productId: string, token: string) {
 
-  const URL = `${BASE_API}${endpoints.wishlist.remove}/${productId}`;
+export async function removeWishlist(productId:string, token: string) {
+  const baseUrl = BASE_API;
+  const URL = `${baseUrl}${endpoints.wishlist.remove}${productId}`;
 
   const response = await fetch(URL, {
     method: 'DELETE',
@@ -69,4 +68,3 @@ export async function removeWishlist(productId: string, token: string) {
 
   return response.json();
 }
-

@@ -111,7 +111,6 @@ export async function updateItemQuantity(cartItemId: string, token: string, quan
 export async function placeOrder( token: string,checkoutData:CheckoutPayload) {
 
   const URL = `${BASE_API}${endpoints.cart.place}`;
-
   const response = await fetch(URL, {
     method: 'POST',
     headers: {
@@ -188,19 +187,3 @@ export async function postNewAddress( token: string,address:AddNewAddressPayload
 
   return response.json();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

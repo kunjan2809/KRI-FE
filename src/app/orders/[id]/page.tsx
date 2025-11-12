@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Container,
@@ -15,468 +15,98 @@ import {
   Divider,
   Avatar,
   useTheme,
+  Skeleton,
 } from '@mui/material';
-import { styled, alpha } from '@mui/material/styles';
+import { alpha } from '@mui/material/styles';
 import Iconify from 'src/components/iconify';
 
 // Import Product.json data
-import productData from '../../../../Product.json';
+import { useGetOrderDetail } from 'src/api/order';
+import { IOrderDetailItem, Order } from 'src/types/order';
+import { paths } from 'src/routes/paths';
+import { useParams, useRouter } from 'src/routes/hooks';
+import { OrderDetailSkeleton } from 'src/sections/order/order-detail-skeleton';
+import OrderReturnRequestForm from 'src/sections/order/order-return-request-view';
+
+// ----------------------------------------------------------------------
+const statusOrder = ['pending', 'shipped', 'delivered', 'return'];
 
 // ----------------------------------------------------------------------
 
-// Custom styled components for icons
-const IconWrapper = styled(Box)(({ theme }) => ({
-  width: 20,
-  height: 20,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  color: 'currentColor',
-}));
-
-const MessageIcon = () => (
-  <IconWrapper>
-    <Box
-      component="span"
-      sx={{
-        width: 16,
-        height: 16,
-        border: '2px solid currentColor',
-        borderRadius: '50%',
-        position: 'relative',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          width: 8,
-          height: 8,
-          border: '2px solid currentColor',
-          borderTop: 'none',
-          borderLeft: 'none',
-          borderRadius: '0 0 8px 0',
-          top: 6,
-          left: 4,
-        },
-      }}
-    />
-  </IconWrapper>
-);
-
-const CheckIcon = () => (
-  <IconWrapper>
-    <Box
-      component="span"
-      sx={{
-        width: 16,
-        height: 16,
-        border: '2px solid currentColor',
-        borderRadius: '50%',
-        position: 'relative',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          width: 6,
-          height: 3,
-          border: '2px solid currentColor',
-          borderTop: 'none',
-          borderRight: 'none',
-          transform: 'rotate(-45deg)',
-          top: 4,
-          left: 3,
-        },
-      }}
-    />
-  </IconWrapper>
-);
-
-const PackageIcon = () => (
-  <IconWrapper>
-    <Box
-      component="span"
-      sx={{
-        width: 16,
-        height: 16,
-        border: '2px solid currentColor',
-        borderRadius: 1,
-        position: 'relative',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          width: 8,
-          height: 2,
-          border: '2px solid currentColor',
-          borderTop: 'none',
-          borderLeft: 'none',
-          borderRadius: '0 0 4px 0',
-          top: 2,
-          left: 2,
-        },
-      }}
-    />
-  </IconWrapper>
-);
-
-const TruckIcon = () => (
-  <IconWrapper>
-    <Box
-      component="span"
-      sx={{
-        width: 16,
-        height: 16,
-        border: '2px solid currentColor',
-        borderRadius: 1,
-        position: 'relative',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          width: 12,
-          height: 8,
-          border: '2px solid currentColor',
-          borderTop: 'none',
-          borderLeft: 'none',
-          borderRadius: '0 0 8px 0',
-          top: 2,
-          left: 2,
-        },
-        '&::after': {
-          content: '""',
-          position: 'absolute',
-          width: 4,
-          height: 4,
-          border: '2px solid currentColor',
-          borderTop: 'none',
-          borderLeft: 'none',
-          borderRadius: '0 0 4px 0',
-          top: 4,
-          left: 4,
-        },
-      }}
-    />
-  </IconWrapper>
-);
-
-const HomeIcon = () => (
-  <IconWrapper>
-    <Box
-      component="span"
-      sx={{
-        width: 16,
-        height: 16,
-        border: '2px solid currentColor',
-        borderRadius: '2px 2px 0 0',
-        position: 'relative',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          width: 8,
-          height: 8,
-          border: '2px solid currentColor',
-          borderTop: 'none',
-          borderLeft: 'none',
-          borderRadius: '0 0 8px 0',
-          top: 2,
-          left: 2,
-        },
-      }}
-    />
-  </IconWrapper>
-);
-
-const MapPinIcon = () => (
-  <IconWrapper>
-    <Box
-      component="span"
-      sx={{
-        width: 16,
-        height: 16,
-        border: '2px solid currentColor',
-        borderRadius: '50% 50% 50% 0',
-        transform: 'rotate(-45deg)',
-        position: 'relative',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          width: 6,
-          height: 6,
-          border: '2px solid currentColor',
-          borderTop: 'none',
-          borderLeft: 'none',
-          borderRadius: '0 0 6px 0',
-          top: 2,
-          left: 2,
-        },
-      }}
-    />
-  </IconWrapper>
-);
-
-const MailIcon = () => (
-  <IconWrapper>
-    <Box
-      component="span"
-      sx={{
-        width: 16,
-        height: 16,
-        border: '2px solid currentColor',
-        borderRadius: 1,
-        position: 'relative',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          width: 8,
-          height: 6,
-          border: '2px solid currentColor',
-          borderTop: 'none',
-          borderLeft: 'none',
-          borderRadius: '0 0 8px 0',
-          top: 2,
-          left: 2,
-        },
-      }}
-    />
-  </IconWrapper>
-);
-
-const PhoneIcon = () => (
-  <IconWrapper>
-    <Box
-      component="span"
-      sx={{
-        width: 16,
-        height: 16,
-        border: '2px solid currentColor',
-        borderRadius: '50%',
-        position: 'relative',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          width: 8,
-          height: 8,
-          border: '2px solid currentColor',
-          borderTop: 'none',
-          borderLeft: 'none',
-          borderRadius: '0 0 8px 0',
-          top: 2,
-          left: 2,
-        },
-      }}
-    />
-  </IconWrapper>
-);
-
-const HelpIcon = () => (
-  <IconWrapper>
-    <Box
-      component="span"
-      sx={{
-        width: 16,
-        height: 16,
-        border: '2px solid currentColor',
-        borderRadius: '50%',
-        position: 'relative',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          width: 8,
-          height: 8,
-          border: '2px solid currentColor',
-          borderTop: 'none',
-          borderLeft: 'none',
-          borderRadius: '0 0 8px 0',
-          top: 2,
-          left: 2,
-        },
-      }}
-    />
-  </IconWrapper>
-);
-
-const HeadphonesIcon = () => (
-  <IconWrapper>
-    <Box
-      component="span"
-      sx={{
-        width: 16,
-        height: 16,
-        border: '2px solid currentColor',
-        borderRadius: '50%',
-        position: 'relative',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          width: 8,
-          height: 8,
-          border: '2px solid currentColor',
-          borderTop: 'none',
-          borderLeft: 'none',
-          borderRadius: '0 0 8px 0',
-          top: 2,
-          left: 2,
-        },
-      }}
-    />
-  </IconWrapper>
-);
-
-const EyeIcon = () => (
-  <IconWrapper>
-    <Box
-      component="span"
-      sx={{
-        width: 16,
-        height: 16,
-        border: '2px solid currentColor',
-        borderRadius: '50%',
-        position: 'relative',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          width: 8,
-          height: 8,
-          border: '2px solid currentColor',
-          borderTop: 'none',
-          borderLeft: 'none',
-          borderRadius: '0 0 8px 0',
-          top: 2,
-          left: 2,
-        },
-      }}
-    />
-  </IconWrapper>
-);
-
-const RotateIcon = () => (
-  <IconWrapper>
-    <Box
-      component="span"
-      sx={{
-        width: 16,
-        height: 16,
-        border: '2px solid currentColor',
-        borderRadius: '50%',
-        position: 'relative',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          width: 8,
-          height: 8,
-          border: '2px solid currentColor',
-          borderTop: 'none',
-          borderLeft: 'none',
-          borderRadius: '0 0 8px 0',
-          top: 2,
-          left: 2,
-        },
-      }}
-    />
-  </IconWrapper>
-);
-
-// ----------------------------------------------------------------------
-
-interface OrderItem {
-  id: string;
-  name: string;
-  description: string;
-  quantity: number;
-  price: number;
-  image: string;
-  originalPrice: number;
-  metal: string;
+interface OrderSummaryProps {
+  orderTotal: number;
+  orderStatus: string;
+  paymentMethod: string;
+  shippingMethod: string;
+  estimatedDelivery: string;
+  actualDelivery: string;
 }
 
 interface TimelineStep {
   id: string;
   title: string;
-  date: string;
-  status: 'completed' | 'current' | 'pending';
+  status: 'pending' | 'shipped' | 'delivered' | 'return';
   icon: React.ReactNode;
 }
 
+function formatDate(dateString: string) {
+  const date = new Date(dateString);
+  const options = { year: 'numeric', month: 'long', day: 'numeric' };
+  return date.toLocaleDateString('en-US', options);
+}
 // ----------------------------------------------------------------------
 
 const OrderDetails = () => {
   const theme = useTheme();
-
-  // Use Product.json data for order items
-  const orderItems: OrderItem[] = [
-    {
-      id: productData[0].id,
-      name: productData[0].name,
-      description: productData[0].subDescription,
-      price: productData[0].price,
-      originalPrice: productData[0].priceSale || productData[0].price,
-      quantity: 1,
-      image: productData[0].coverUrl,
-      metal: productData[0].category,
-    },
-    {
-      id: productData[1].id,
-      name: productData[1].name,
-      description: productData[1].subDescription,
-      price: productData[1].price,
-      originalPrice: productData[1].priceSale || productData[1].price,
-      quantity: 2,
-      image: productData[1].coverUrl,
-      metal: productData[1].category,
-    },
-    {
-      id: productData[2].id,
-      name: productData[2].name,
-      description: productData[2].subDescription,
-      price: productData[2].price,
-      originalPrice: productData[2].priceSale || productData[2].price,
-      quantity: 1,
-      image: productData[2].coverUrl,
-      metal: productData[2].category,
-    },
-  ];
+  const params = useParams();
+  const router = useRouter();
+  const orderId = params.id as string;
 
   const timelineSteps: TimelineStep[] = [
     {
       id: '1',
       title: 'Order Placed',
-      date: 'June 20',
-      status: 'completed',
+      status: 'pending',
       icon: <Iconify icon="eva:shopping-cart-outline" />,
     },
+
     {
       id: '2',
-      title: 'Confirmed',
-      date: 'June 20',
-      status: 'completed',
-      icon: <Iconify icon="ant-design:check-circle-outlined" />,
-    },
-    {
-      id: '3',
-      title: 'Packed',
-      date: 'June 21',
-      status: 'completed',
-      icon: <Iconify icon="ant-design:border-outlined" />,
-    },
-    {
-      id: '4',
       title: 'Shipped',
-      date: 'June 22',
-      status: 'completed',
+      status: 'shipped',
       icon: <Iconify icon="eva:shopping-bag-outline" />,
     },
     {
-      id: '5',
-      title: 'Out for Delivery',
-      date: 'June 24',
-      status: 'completed',
-      icon: <Iconify icon="ant-design:truck-outlined" />,
-    },
-    {
-      id: '6',
+      id: '3',
       title: 'Delivered',
-      date: 'June 25',
-      status: 'completed',
+      status: 'delivered',
       icon: <Iconify icon="eva:home-outline" />,
+    },
+
+    {
+      id: '4',
+      title: 'Return',
+      status: 'return',
+      icon: <Iconify icon="tabler:truck-return" />,
     },
   ];
 
-  const orderTotal = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const { orderDetail, orderDetailError } = useGetOrderDetail(orderId);
+
+  if (orderDetailError) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 8, textAlign: 'center' }}>
+        <Typography variant="h4">Order not found</Typography>
+        <Button
+          variant="contained"
+          onClick={() => router.push(paths.user.orders.root)}
+          sx={{ mt: 2 }}
+        >
+          Back to Orders
+        </Button>
+      </Container>
+    );
+  }
   
   return (
     <Box>
@@ -494,149 +124,153 @@ const OrderDetails = () => {
             A Chapter Almost Complete
           </Typography>
           <Typography variant="h6" sx={{ opacity: 0.9, maxWidth: 800, mx: 'auto' }}>
-            The pieces you&apos;ve chosen are more than just jewelry, they&apos;re moments waiting to be lived.
-            Finalize your selection and let your story shine in lumière.
+            The pieces you&apos;ve chosen are more than just jewelry, they&apos;re moments waiting
+            to be lived. Finalize your selection and let your story shine in lumière.
           </Typography>
         </Container>
       </Box>
 
-      <div className="min-h-screen bg-white">
-        {/* Header Section */}
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+      {!orderDetail ? (
+        <OrderDetailSkeleton />
+      ) : (
+        <div className="min-h-screen bg-white">
+          {/* Header Section */}
+          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <Container maxWidth="lg" sx={{ py: 8 }}>
+              <Grid container spacing={4} alignItems="center" justifyContent="space-between">
+                <Grid item>
+                  <Typography
+                    variant="h3"
+                    component="h1"
+                    sx={{ fontWeight: 'bold', fontFamily: 'serif' }}
+                  >
+                    Order Details
+                  </Typography>
+
+                  {!orderDetail.order ? (
+                    <>
+                      <Skeleton animation="wave" sx={{ height: 22, width: 0.2 }} />
+                    </>
+                  ) : (
+                    <Typography variant="body1" color="text.secondary" sx={{ mt: 2 }}>
+                      Order ID: {orderDetail.order.order_number} • Placed on{' '}
+                      {formatDate(orderDetail.order.created_at)}
+                    </Typography>
+                  )}
+                </Grid>
+              </Grid>
+            </Container>
+          </Box>
+
           <Container maxWidth="lg" sx={{ py: 8 }}>
-            <Grid container spacing={4} alignItems="center" justifyContent="space-between">
-              <Grid item>
-                <Typography variant="h3" component="h1" sx={{ fontWeight: 'bold', fontFamily: 'serif' }}>
-                  Order Details
-                </Typography>
-                <Typography variant="body1" color="text.secondary" sx={{ mt: 2 }}>
-                  Order ID: #VDP-29834 • Placed on June 20, 2025
-                </Typography>
-              </Grid>
-              <Grid item>
-                <Stack direction="row" spacing={2}>
-                  <Button
-                    variant="contained"
-                    startIcon={<Iconify icon="eva:download-outline" />}
-                    sx={{ px: 3, py: 1.5 }}
-                  >
-                    Download Invoice
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    startIcon={<Iconify icon="eva:message-circle-outline" />}
-                    sx={{ px: 3, py: 1.5 }}
-                  >
-                    Contact Support
-                  </Button>
-                </Stack>
-              </Grid>
-            </Grid>
-          </Container>
-        </Box>
+            <Stack spacing={6}>
+              {/* Order Summary Card */}
 
-        <Container maxWidth="lg" sx={{ py: 8 }}>
-          <Stack spacing={6}>
-            {/* Order Summary Card */}
-            <OrderSummary
-              orderTotal={orderTotal}
-              orderStatus="Delivered"
-              paymentMethod="VISA **** 3284"
-              shippingMethod="Express / Insured Courier"
-              estimatedDelivery="June 25, 2025"
-              actualDelivery="June 25, 2025"
-            />
+              <OrderSummary
+                orderTotal={orderDetail.order.total_amount}
+                orderStatus={orderDetail.order.order_status}
+                paymentMethod={orderDetail.order.payment_status}
+                shippingMethod="Express / Insured Courier"
+                estimatedDelivery="June 25, 2025"
+                actualDelivery={orderDetail.order.delivered_at || 'June 25, 2025'}
+              />
 
-            {/* Order Tracking Timeline */}
-            <OrderTracking timelineSteps={timelineSteps} />
+              {/* Order Tracking Timeline */}
+              <OrderTracking timelineSteps={timelineSteps} order={orderDetail.order} />
 
-            {/* Items in Order */}
-            <OrderItems orderItems={orderItems} />
+              {/* Items in Order */}
+              <OrderItems
+                orderItems={orderDetail.order_items}
+                orderStatus={orderDetail.order.order_status}
+              />
+              {/* Delivery & Contact Info */}
+              <Grid container spacing={4}>
+                <Grid item xs={12} md={6}>
+                  <Card>
+                    <CardHeader title="Delivery Information" />
+                    <CardContent>
+                      <Stack spacing={3}>
+                        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                          <Iconify icon="ant-design:environment-outline" />
+                          <Box>
+                            <Typography variant="subtitle1" fontWeight="medium">
+                              {orderDetail.order.shipping_address_id.full_name}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                              {orderDetail.order.shipping_address_id.address_line_1}
+                              <br />
+                              {orderDetail.order.shipping_address_id.address_line_2}
+                              <br />
+                              {orderDetail.order.shipping_address_id.city}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Stack>
+                    </CardContent>
+                  </Card>
+                </Grid>
 
-            {/* Delivery & Contact Info */}
-            <Grid container spacing={4}>
-              <Grid item xs={12} md={6}>
-                <Card>
-                  <CardHeader title="Delivery Information" />
-                  <CardContent>
-                    <Stack spacing={3}>
-                      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
-                        <Iconify icon="ant-design:environment-outline" />
-                        <Box>
-                          <Typography variant="subtitle1" fontWeight="medium">
-                            Sarah Johnson
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                            242 Preston Rd,<br />
-                            Wynnum West QLD 4178,<br />
-                            Australia.
+                <Grid item xs={12} md={6}>
+                  <Card>
+                    <CardHeader title="Contact Information" />
+                    <CardContent>
+                      <Stack spacing={3}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                          <Iconify icon="eva:email-outline" />
+                          <Typography variant="body2" sx={{ wordBreak: 'break-all' }}>
+                            wynnum@actionindoorsportsqld.com.au
                           </Typography>
                         </Box>
-                      </Box>
-                    </Stack>
-                  </CardContent>
-                </Card>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                          <Iconify icon="eva:phone-outline" />
+                          <Typography variant="body2">+61733088011</Typography>
+                        </Box>
+                      </Stack>
+                    </CardContent>
+                  </Card>
+                </Grid>
               </Grid>
-
-              <Grid item xs={12} md={6}>
-                <Card>
-                  <CardHeader title="Contact Information" />
-                  <CardContent>
-                    <Stack spacing={3}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Iconify icon="eva:email-outline" />
-                        <Typography variant="body2" sx={{ wordBreak: 'break-all' }}>
-                          wynnum@actionindoorsportsqld.com.au
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Iconify icon="eva:phone-outline" />
-                        <Typography variant="body2">+61733088011</Typography>
-                      </Box>
-                    </Stack>
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
-
-            {/* Support Section */}
-            <Card sx={{ bgcolor: alpha(theme.palette.grey[100], 0.5) }}>
-              <CardContent sx={{ pt: 6 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
-                  <Iconify icon="eva:question-mark-circle-outline" />
-                  <Typography variant="h5" fontWeight="medium">
-                    Need Help?
+              {/* Support Section */}
+              <Card sx={{ bgcolor: alpha(theme.palette.grey[100], 0.5) }}>
+                <CardContent sx={{ pt: 6 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
+                    <Iconify icon="eva:question-mark-circle-outline" />
+                    <Typography variant="h5" fontWeight="medium">
+                      Need Help?
+                    </Typography>
+                  </Box>
+                  <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+                    Our customer support team is here to assist you with any questions about your
+                    order.
                   </Typography>
-                </Box>
-                <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-                  Our customer support team is here to assist you with any questions about your order.
-                </Typography>
-                <Stack direction="row" spacing={2} flexWrap="wrap">
-                  <Button
-                    variant="contained"
-                    startIcon={<Iconify icon="eva:headphones-outline" />}
-                    sx={{ px: 3, py: 1.5 }}
-                  >
-                    Contact Support
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    startIcon={<Iconify icon="eva:message-circle-outline" />}
-                    sx={{ px: 3, py: 1.5 }}
-                  >
-                    Request Assistance
-                  </Button>
-                </Stack>
-              </CardContent>
-            </Card>
-          </Stack>
-        </Container>
-      </div>
+                  <Stack direction="row" spacing={2} flexWrap="wrap">
+                    <Button
+                      variant="contained"
+                      startIcon={<Iconify icon="eva:headphones-outline" />}
+                      sx={{ px: 3, py: 1.5 }}
+                    >
+                      Contact Support
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      startIcon={<Iconify icon="eva:message-circle-outline" />}
+                      sx={{ px: 3, py: 1.5 }}
+                    >
+                      Request Assistance
+                    </Button>
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Stack>
+          </Container>
+        </div>
+      )}
     </Box>
   );
 };
 
 // ----------------------------------------------------------------------
+
 
 interface OrderSummaryProps {
   orderTotal: number;
@@ -646,7 +280,6 @@ interface OrderSummaryProps {
   estimatedDelivery: string;
   actualDelivery: string;
 }
-
 const OrderSummary = ({
   orderTotal,
   orderStatus,
@@ -655,7 +288,6 @@ const OrderSummary = ({
   estimatedDelivery,
   actualDelivery,
 }: OrderSummaryProps) => {
-  
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -670,23 +302,44 @@ const OrderSummary = ({
         <Grid container spacing={4}>
           <Grid item xs={12} md={6}>
             <Stack spacing={2}>
+
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 1 }}>
                 <Typography color="text.secondary">Order Total</Typography>
                 <Typography fontWeight="medium">{formatPrice(orderTotal)}</Typography>
               </Box>
               <Divider />
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 1 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  py: 1,
+                }}
+              >
                 <Typography color="text.secondary">Payment Method</Typography>
-                <Typography>{paymentMethod}</Typography>
+                <Typography>{paymentMethod.toUpperCase()}</Typography>
               </Box>
               <Divider />
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 1 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  py: 1,
+                }}
+              >
                 <Typography color="text.secondary">Order Status</Typography>
                 <Chip
                   label={orderStatus}
-                  color="success"
+                  color={
+                    (orderStatus === 'delivered' && 'success') ||
+                    (orderStatus === 'pending' && 'warning') ||
+                    (orderStatus === 'cancelled' && 'error') ||
+                    (orderStatus === 'shipped' && 'info') ||
+                    (orderStatus === 'return' && 'secondary') ||
+                    'default'
+                  }
                   size="small"
-                  icon={<Iconify icon="ant-design:check-circle-outlined" />}
                 />
               </Box>
             </Stack>
@@ -698,20 +351,31 @@ const OrderSummary = ({
                 <Typography>{shippingMethod}</Typography>
               </Box>
               <Divider />
+
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 1 }}>
                 <Typography color="text.secondary">Estimated Delivery</Typography>
                 <Typography>{estimatedDelivery}</Typography>
               </Box>
               <Divider />
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 1 }}>
-                <Typography color="text.secondary">Actual Delivery</Typography>
-                <Chip
-                  label={actualDelivery}
-                  color="success"
-                  size="small"
-                  icon={<Iconify icon="ant-design:check-circle-outlined" />}
-                />
-              </Box>
+
+              {orderStatus === 'shipped' && (
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    py: 1,
+                  }}
+                >
+                  <Typography color="text.secondary">Actual Delivery</Typography>
+                  <Chip
+                    label={actualDelivery}
+                    color="success"
+                    size="small"
+                    icon={<Iconify icon="ant-design:check-circle-outlined" />}
+                  />
+                </Box>
+              )}
             </Stack>
           </Grid>
         </Grid>
@@ -722,60 +386,82 @@ const OrderSummary = ({
 
 // ----------------------------------------------------------------------
 
-const OrderTracking = ({ timelineSteps }: { timelineSteps: TimelineStep[] }) => {
+
+const OrderTracking = ({
+  timelineSteps,
+  order,
+}: {
+  timelineSteps: TimelineStep[];
+  order: Order;
+}) => {
+  const currentStepIndex = statusOrder.indexOf(order.order_status);
+  const isReturn = order.order_status === 'return';
+  const orderTrakingLine = timelineSteps.length - (isReturn ? 1 : 2);
+
+  const timeLine = isReturn ? timelineSteps : timelineSteps.slice(0, -1);
+
   return (
     <Card>
       <CardHeader title="Order Tracking" />
       <CardContent>
         <Box sx={{ position: 'relative' }}>
-          <Grid container spacing={2} justifyContent="space-between" alignItems="center">
-            {timelineSteps.map((step, index) => (
-              <Grid item key={step.id} xs={12} sm={2}>
-                <Box sx={{ textAlign: 'center', position: 'relative' }}>
-                  <Box
-                    sx={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: '50%',
-                      bgcolor: step.status === 'completed' ? 'success.main' : 'grey.300',
-                      color: step.status === 'completed' ? 'white' : 'text.secondary',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      mx: 'auto',
-                      mb: 2,
-                      zIndex: 10,
-                      position: 'relative',
-                    }}
-                  >
-                    {step.icon}
-                  </Box>
-                  <Typography
-                    variant="body2"
-                    fontWeight="medium"
-                    color={step.status === 'completed' ? 'text.primary' : 'text.secondary'}
-                  >
-                    {step.title}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {step.date}
-                  </Typography>
-                  {index < timelineSteps.length - 1 && (
+
+          <Grid container spacing={2} justifyContent="start">
+            {timeLine.map((step, index) => {
+              const isCompleted = index <= currentStepIndex;
+              const isActive = index === currentStepIndex;
+              return (
+                <Grid item key={step.id} xs={12} sm={isReturn ? 3 : 4} sx={{ height: '100%' }}>
+                  <Box sx={{ textAlign: 'center', position: 'relative' }}>
                     <Box
                       sx={{
-                        position: 'absolute',
-                        top: 20,
-                        left: '50%',
-                        width: '100%',
-                        height: 2,
-                        bgcolor: step.status === 'completed' ? 'success.main' : 'grey.300',
-                        zIndex: 0,
+                        width: 40,
+                        height: 40,
+                        borderRadius: '50%',
+                        bgcolor: isCompleted ? 'success.main' : 'grey.300',
+                        color: isCompleted ? 'white' : 'text.secondary',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mx: 'auto',
+                        mb: 2,
+                        zIndex: 10,
+                        position: 'relative',
                       }}
-                    />
-                  )}
-                </Box>
-              </Grid>
-            ))}
+                    >
+                      {step.icon}
+                    </Box>
+                    <Typography
+                      variant="body2"
+                      fontWeight={isActive ? 'bold' : 'medium'}
+                      color={isCompleted ? 'text.primary' : 'text.secondary'}
+                    >
+                      {step.title}
+                    </Typography>
+                    {isActive && (
+                      <Typography variant="caption" color="success.main">
+                        {order.order_status === 'delivered'
+                          ? 'Delivered Successfully'
+                          : !isReturn && 'In Progress'}
+                      </Typography>
+                    )}
+                    {index < orderTrakingLine && (
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          top: 20,
+                          left: '50%',
+                          width: '100%',
+                          height: 2,
+                          bgcolor: isCompleted ? 'success.main' : 'grey.300',
+                          zIndex: 0,
+                        }}
+                      />
+                    )}
+                  </Box>
+                </Grid>
+              );
+            })}
           </Grid>
         </Box>
       </CardContent>
@@ -785,7 +471,19 @@ const OrderTracking = ({ timelineSteps }: { timelineSteps: TimelineStep[] }) => 
 
 // ----------------------------------------------------------------------
 
-const OrderItems = ({ orderItems }: { orderItems: OrderItem[] }) => {
+
+const OrderItems = ({
+  orderItems,
+  orderStatus,
+}: {
+  orderItems: IOrderDetailItem[];
+  orderStatus: string;
+}) => {
+  const router = useRouter();
+
+  const [isOrderReturn, setIsOrderReturn] = useState<boolean>(false);
+  const [orderItemId, setOrderItemId] = useState<string | null>(null);
+  const [orderId, setOrderId] = useState<string | null>(null);
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -793,85 +491,121 @@ const OrderItems = ({ orderItems }: { orderItems: OrderItem[] }) => {
     }).format(price);
   };
 
+  const handleProductClick = (productId: string) => {
+    router.push(paths.user.products.details(productId));
+  };
+
   return (
-    <Card>
-      <CardHeader title="Items in this Order" />
-      <CardContent>
-        <Stack spacing={3}>
-          {orderItems.map((item) => (
-            <Card key={item.id} sx={{ p: 3, '&:hover': { boxShadow: 2 } }}>
-              <Grid container spacing={3}>
-                <Grid item xs={12} sm={3}>
-                  <Box
-                    component="img"
-                    src={item.image}
-                    alt={item.name}
-                    sx={{
-                      width: '100%',
-                      height: 80,
-                      objectFit: 'cover',
-                      borderRadius: 1,
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={9}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <Box sx={{ flex: 1 }}>
-                      <Typography variant="h6" component="h3" sx={{ mb: 1, fontFamily: 'serif' }}>
-                        {item.name}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                        {item.description}
-                      </Typography>
-                      <Grid container spacing={2} alignItems="center">
-                        <Grid item>
-                          <Typography variant="body2" color="text.secondary">
-                            Quantity: {item.quantity}
+    <>
+      <Card>
+        <CardHeader title="Items in this Order" />
+        <CardContent>
+          <Stack spacing={3}>
+            {orderItems.map((item) => {
+              return (
+                <Card key={item._id} sx={{ p: 3, '&:hover': { boxShadow: 2 } }}>
+                  <Grid container spacing={3}>
+                    <Grid item xs={12} sm={3}>
+                      <Box
+                        component="img"
+                        src={item.primary_image.image_url}
+                        alt={item.product_id.name}
+                        sx={{
+                          width: '100%',
+                          height: 80,
+                          objectFit: 'cover',
+                          borderRadius: 1,
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={9}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-start',
+                        }}
+                      >
+                        <Box sx={{ flex: 1 }}>
+                          <Typography
+                            variant="h6"
+                            component="h3"
+                            sx={{ mb: 1, fontFamily: 'serif' }}
+                          >
+                            {item.product_id.name}
                           </Typography>
-                        </Grid>
-                        <Grid item>
-                          <Typography variant="body2" color="text.secondary">
-                            Price: {formatPrice(item.price)}{' '}
-                            <Box
-                              component="span"
-                              sx={{
-                                textDecoration: 'line-through',
-                                fontSize: '0.75rem',
-                                color: 'text.disabled',
+                          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                            {item.product_id.description}
+                          </Typography>
+                          <Grid container spacing={2} alignItems="center">
+                            <Grid item>
+                              <Typography variant="body2" color="text.secondary">
+                                Quantity: {item.quantity}
+                              </Typography>
+                            </Grid>
+                            <Grid item>
+                              <Typography variant="body2" color="text.secondary">
+                                Price: {formatPrice(item.price)}{' '}
+                                <Box
+                                  component="span"
+                                  sx={{
+                                    textDecoration: 'line-through',
+                                    fontSize: '0.75rem',
+                                    color: 'text.disabled',
+                                  }}
+                                >
+                                  {formatPrice(item.mrp)}
+                                </Box>
+                              </Typography>
+                            </Grid>
+                          </Grid>
+                        </Box>
+                        <Stack direction="row" spacing={1} sx={{ ml: 2 }}>
+                          {orderStatus === 'delivered' && (
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              startIcon={
+                                <Iconify icon="ant-design:undo-outline" sx={{ rotate: '90deg' }} />
+                              }
+                              sx={{ textTransform: 'none' }}
+                              onClick={() => {
+                                (setOrderId(item.order_id),
+                                  setOrderItemId(item._id),
+                                  setIsOrderReturn(true));
                               }}
                             >
-                              {formatPrice(item.originalPrice)}
-                            </Box>
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                    </Box>
-                    <Stack direction="row" spacing={1} sx={{ ml: 2 }}>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        startIcon={<Iconify icon="ant-design:undo-outline" sx={{ rotate: '90deg' }} />}
-                        sx={{ textTransform: 'none' }}
-                      >
-                        Request Return
-                      </Button>
-                      <Button
-                        variant="contained"
-                        size="small"
-                        startIcon={<Iconify icon="eva:eye-outline" />}
-                        sx={{ textTransform: 'none' }}
-                      >
-                        View Product
-                      </Button>
-                    </Stack>
-                  </Box>
-                </Grid>
-              </Grid>
-            </Card>
-          ))}
-        </Stack>
-      </CardContent>
-    </Card>
+                              Request Return
+                            </Button>
+                          )}
+                          <Button
+                            variant="contained"
+                            size="small"
+                            startIcon={<Iconify icon="eva:eye-outline" />}
+                            sx={{ textTransform: 'none' }}
+                            onClick={() => handleProductClick(item.product_id._id)}
+                          >
+                            View Product
+                          </Button>
+                        </Stack>
+                      </Box>
+                    </Grid>
+                  </Grid>
+                </Card>
+              );
+            })}
+          </Stack>
+        </CardContent>
+      </Card>
+      {orderItemId && orderId && (
+        <OrderReturnRequestForm
+          orderId={orderId}
+          orderItemId={orderItemId}
+          open={isOrderReturn}
+          onClose={() => setIsOrderReturn(false)}
+        />
+      )}
+    </>
   );
 };
 

@@ -13,10 +13,10 @@ export type IProductFilters = {
 // ----------------------------------------------------------------------
 
 export type IProductReviewNewForm = {
-  rating: number | null;
+  title: string;
+  rating: number;
   rating_description: string;
-  user_id: string;
-  product_id: string;
+  order_id?: string;
 };
 
 export type IProductReview = {
@@ -43,6 +43,11 @@ export type IProductItem = {
   sizes: string[];
   publish: string;
   coverUrl: string;
+  primary_image: {
+    image_url:string
+  };
+  mrp:string;
+  stock_quantity:number;
   images: string[];
   colors: string[];
   quantity: number;
@@ -107,7 +112,7 @@ export type IUploadProductImage = {
 export type IUploadReviewImage = {
   review_id?: string;
   image_url?: string;
-  file?: File;
+  file?: File[];
 };
 
 export type IProductCategory = {
@@ -175,20 +180,19 @@ export type IProductUpdateRequest = {
 };
 
 export interface EditProductRequest {
-  name: string
-  sku: string
-  description: string
-  product_description: string
-  price: string
-  mrp: string
-  discount_type: string | null
-  discount_rate: string | null
-  stock_quantity: string
-  weight: string
-  status: string
-  category_id: string
+  name: string;
+  sku: string;
+  description: string;
+  product_description: string;
+  price: string;
+  mrp: string;
+  discount_type: string | null;
+  discount_rate: string | null;
+  stock_quantity: string;
+  weight: string;
+  status: string;
+  category_id: string;
 }
-
 
 export type Pricing = {
   mrp: number;
@@ -253,10 +257,11 @@ export interface Product {
   featured: boolean
   in_stock: boolean
   low_stock: boolean
+  sold: number;
  is_in_wishlist:boolean
   created_at: string
   edited_at: string
-  category_id: string
+   category_id: CategoryId;
   category_name: string
   average_rating: number
   total_reviews: number
@@ -381,7 +386,6 @@ export interface WishlistItemApiResponse {
   data: Data
 }
 
-
 // recommande product interface
 
 export interface RecommandeApiResponse {
@@ -433,7 +437,6 @@ export interface Suggestion {
   id:string
 }
 
-
 export interface SuggestionPrimaryImage {
   _id: string
   product_id: string
@@ -444,5 +447,3 @@ export interface SuggestionPrimaryImage {
   created_at: string
   edited_at: string
 }
-
-

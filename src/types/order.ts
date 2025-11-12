@@ -154,10 +154,6 @@ export type IOrderFiltersResponse = {
   };
 };
 
-
-
-
-
 // get all of Admin orders 
 
 export type IOrderItemTableData = {
@@ -179,6 +175,12 @@ export type IOrderItemTableData = {
   tracking_number?: string;
 };
 
+//order detail
+
+export interface IOrdersDetail {
+  order: Order
+  order_items: IOrderDetailItem[]
+}
 
 export interface Order {
   _id: string
@@ -202,6 +204,7 @@ export interface UserId {
   last_name: string
   email: string
   profile_icon: any
+  mobile_number: string
 }
 
 export interface ShippingAddressId {
@@ -211,7 +214,6 @@ export interface ShippingAddressId {
   address_line_1: string
   address_line_2: string
   landmark: string
-  street:string
   city: string
   state: string
   postal_code: string
@@ -219,8 +221,9 @@ export interface ShippingAddressId {
   is_default: boolean
 }
 
-export interface OrderItem {
-  _id: string
+export interface IOrderDetailItem {
+ _id: string
+ id:string
   order_id: string
   product_id: ProductId
   variation_id: any
@@ -229,16 +232,38 @@ export interface OrderItem {
   quantity: number
   price: number
   __v: number
+  primary_image: PrimaryImage
+  mrp: number
+}
+
+export interface OrderItem {
+  _id: string
   total_value: number
   item_discount: number
   discount_percentage: number
   id: string
+  order_id: string
+  product_id: ProductId
+  variation_id: any
+  product_name_snapshot: string
+  product_price_snapshot: number
+  quantity: number
+  price: number
+  __v: number
+}
+
+export interface PrimaryImage {
+  _id: string
+  image_url: string
+  alt_text: string
+  is_primary: boolean
 }
 
 export interface ProductId {
   _id: string
   name: string
   sku: string
+  description: string
   discount_amount: number
   in_stock: boolean
   low_stock: boolean
@@ -246,10 +271,6 @@ export interface ProductId {
   is_deleted: boolean
   id: string
 }
-
-// userOrder types 
-
-
 
 export interface UserOrders {
   _id: string
@@ -267,7 +288,6 @@ export interface UserOrders {
   order_items: OrderItem[]
 }
 
-
 export interface OrderPagination {
   current_page: number
   total_pages: number
@@ -275,3 +295,9 @@ export interface OrderPagination {
   limit: number
 }
 
+export interface ReturnOrder {
+  order_item_id: string
+  reason: string
+  return_type: string
+  notes: string
+}

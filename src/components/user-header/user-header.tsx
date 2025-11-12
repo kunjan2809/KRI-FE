@@ -190,7 +190,7 @@ export default function UserHeader() {
   };
 
   const handleOrdersClick = () => {
-    router.push(paths.user.cart);
+    router.push(paths.user.orderDetails);
   };
 
   const handleProfileClick = () => {

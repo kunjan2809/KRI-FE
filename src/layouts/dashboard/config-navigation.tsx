@@ -82,12 +82,12 @@ export function useNavData() {
           },
 
           // INVOICE
-          {
-            title: 'Invoices',
-            path: paths.dashboard.invoice.root,
-            icon: ICONS.invoice,
+          // {
+          //   title: 'Invoices',
+          //   path: paths.dashboard.invoice.root,
+          //   icon: ICONS.invoice,
 
-          },
+          // },
 
           // USER
           {

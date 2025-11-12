@@ -96,9 +96,17 @@ export function ReviewLoading({ ...other }: Grid2Props) {
           >
             <Skeleton animation="wave" sx={{ height: 24, width: 0.3 }} />
             <Skeleton animation="wave" sx={{ height: 20, width: 1 }} />
-            <Box sx={{display:'flex',gap:'10px'}}>
-            <Skeleton animation="wave" variant='rectangular' sx={{ height: 64, width: 64,borderRadius:'5px' }} />
-            <Skeleton animation="wave" variant='rectangular' sx={{ height: 64, width: 64,borderRadius:'5px' }} />
+            <Box sx={{ display: 'flex', gap: '10px' }}>
+              <Skeleton
+                animation="wave"
+                variant="rectangular"
+                sx={{ height: 64, width: 64, borderRadius: '5px' }}
+              />
+              <Skeleton
+                animation="wave"
+                variant="rectangular"
+                sx={{ height: 64, width: 64, borderRadius: '5px' }}
+              />
             </Box>
           </Box>
         </Grid>

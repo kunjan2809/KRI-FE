@@ -21,7 +21,6 @@ export default function EcommerceCurrentBalance({
   ...other
 }: Props) {
   const totalAmount = currentBalance - sentAmount;
-
   return (
     <Card sx={{ p: 3, ...sx }} {...other}>
       <Typography variant="subtitle2" gutterBottom>

@@ -162,3 +162,73 @@ export type INUserItem = {
 export type IUserStatus = {
   status: string;
 };
+
+export interface UserAddress {
+  _id: string
+  user_id: string
+  full_name: string
+  mobile_number: string
+  address_line_1: string
+  address_line_2: string
+  landmark: string
+  city: string
+  state: string
+  postal_code: string
+  country: string
+  is_default: boolean
+  formatted_address: string
+  created_at: string
+  edited_at: string
+}
+
+
+export interface AddAddress {
+  full_name: string
+  mobile_number: string
+  address_line_1: string
+  address_line_2?: string
+  landmark?: string | null
+  city: string
+  state: string
+  postal_code: string
+  country: string
+  is_default: boolean
+}
+
+
+export interface UserPersonalInfo {
+  first_name: string
+  last_name: string
+  email:string
+  mobile_number:string
+}
+
+export interface GetUserInfoRes {
+  success: boolean
+  data: GetUserInfoData
+}
+
+export interface GetUserInfoData {
+  user: GetUserInfo
+}
+
+export interface GetUserInfo {
+  id:string
+  first_name: string
+  last_name: string
+  email: string
+  mobile_number: string
+  profile_icon: string
+  is_admin: boolean
+  full_name: string
+  created_at: string
+  edited_at: string
+  status:string
+}
+
+export interface GetUserInfoKey {
+   first_name: string
+  last_name: string
+  email: string
+  mobile_number: string
+}

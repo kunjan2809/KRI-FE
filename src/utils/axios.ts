@@ -69,11 +69,15 @@ export const endpoints = {
   kanban: '/api/kanban',
   calendar: '/api/calendar',
   auth: {
+    profile:'/api/auth/profile',
     me: '/api/auth/me',
     login: '/api/auth/login',
     register: '/api/auth/register',
     signup: '/api/auth/signup',
     forgetPassword: '/api/auth/forget-password',
+    getUserAddress: '/api/addresses',
+    resetPassword:'/api/auth/reset-password',
+    changePassword:'/api/auth/change-password'
   },
   analytics: {
     dashboard: '/api/analytics/dashboard/',
@@ -82,6 +86,7 @@ export const endpoints = {
     categories: '/api/analytics/categories/',
     revenue: '/api/analytics/revenue/',
     yearlyOrders: '/api/analytics/yearly/',
+    status:'/api/analytics/users/status'
   },
   mail: {
     list: '/api/mail/list',
@@ -96,7 +101,7 @@ export const endpoints = {
   },
   product: {
     list: '/api/product/list',
-    details: '/api/product/details',
+    details: '/api/products/details/',
     search: '/api/product/search',
     all: '/api/products/admin/all',
     create: '/api/products/admin/add',
@@ -108,7 +113,8 @@ export const endpoints = {
     featured: '/api/products/featured',
     addVariations: '/api/products/admin/:productId/variations',
     editVariations: '/api/products/admin/:productId/variations/:variationId',
-    deleteVariations: '/api/products/admin/:productId/variations/:variationId'
+    deleteVariations: '/api/products/admin/:productId/variations/:variationId',
+    suggestions: '/api/products/suggestions/'
   },
   image: {
     product: '/api/images/product/',
@@ -123,6 +129,8 @@ export const endpoints = {
     delete: '/api/orders/admin/delete/',
     statistics: '/api/orders/admin/statistics',
     export: '/api/orders/admin/export',
+    orderDetails: '/api/orders/',
+    returnRequest:'/api/orders/:orderId/return'
   },
   user: {
     all: '/api/users/admin/all',
@@ -137,4 +145,20 @@ export const endpoints = {
   newsletter: {
     subscribe: '/api/leads/subscribe',
   },
+  cart:{
+    add: '/api/cart/add'
+  },
+  reviews:{
+    add:'/api/reviews/product/',
+    all: '/api/reviews/product/',
+  },
+  wishlist:{
+    add:'/api/wishlist/add',
+    remove:'/api/wishlist/remove/'
+  },
+  shipping:{
+    add:'/api/addresses',
+    delete:'/api/addresses/',
+    edit:'/api/addresses/'
+  }
 };

@@ -24,7 +24,7 @@ import {
 import { alpha, styled } from '@mui/material/styles';
 
 import { useGetCategories } from 'src/api/category';
-import LoginPopup from 'src/app/landing/loginPopup/LoginPopup';
+import LoginPopup from 'src/app/landing/loginPopup/AuthPopup';
 import { useAuthContext } from 'src/auth/hooks/use-auth-context';
 import Iconify from 'src/components/iconify';
 import Logo from 'src/components/logo';
@@ -190,7 +190,7 @@ export default function UserHeader() {
   };
 
   const handleOrdersClick = () => {
-    router.push(paths.user.cart);
+    router.push(paths.user.orderDetails);
   };
 
   const handleProfileClick = () => {

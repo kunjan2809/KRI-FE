@@ -745,7 +745,7 @@ export default function ProductUpdateForm({ productId, currentProduct }: Props) 
           label="Publish immediately"
           sx={{ flexGrow: 1, pl: 3 }}
         />
-
+       
         <LoadingButton
           type="submit"
           variant="contained"

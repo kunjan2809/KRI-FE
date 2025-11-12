@@ -1,16 +1,19 @@
 import useSWR from 'swr';
 import { useMemo } from 'react';
 
+import { endpoints, apiFetcher, apiProductFetcher } from 'src/utils/axios';
+
 import { BASE_API } from 'src/config-global';
-import { apiFetcher, endpoints, apiProductFetcher } from 'src/utils/axios';
 import { useAuthToken } from 'src/auth/hooks';
 
 import {
   IProductItem,
-  IProductQuantity,
   IProductStatus,
-  IProductCraeteVariation,
+  IProductQuantity,
+  IUploadReviewImage,
   EditProductRequest,
+  IProductCraeteVariation,
+  Suggestion,
   ProductDetailsRoot,
   SuggestionRoot,
 } from 'src/types/product';
@@ -26,6 +29,97 @@ interface GetProductsParams {
   sort_by?: 'created_at' | 'name' | 'price' | 'stock_quantity' | 'sku';
   sort_order?: 'asc' | 'desc';
 }
+
+// parmas for productPage
+export interface GetProductParama {
+  search?: string;
+  min_price?: number | null;
+  max_price?: number | null;
+  color?: string;
+  size?: string;
+  category_id?: string | null;
+  newest_first?: boolean;
+  price_sort?: string;
+  highest_rated?: boolean;
+  page?: number;
+  limit?: number;
+  include_wishlist_status?: boolean;
+}
+
+export async function getProduct(token: string, parmas: GetProductParama = {}) {
+  const {
+    page = 1,
+    limit = 20,
+    min_price = 0,
+    max_price = 1000,
+    price_sort = '',
+    highest_rated,
+    newest_first,
+    category_id = "",
+    color = "",
+    search=""
+  } = parmas;
+
+
+  // Build query string with parameters
+  const Params = new URLSearchParams();
+  Params.append('page', page.toString());
+  Params.append('limit', limit.toString());
+  Params.append('price_sort', price_sort);
+  Params.append('color', color);
+  Params.append('min_price', min_price!.toString());
+  Params.append('max_price', max_price!.toString());
+
+  if(search){
+    Params.append('search',search)
+  }
+  
+  if (category_id) {
+    Params.append('category_id', category_id.toString());
+  }
+  if (newest_first) {
+    Params.append('newest_first', newest_first.toString());
+  }
+  if (highest_rated) {
+    Params.append('highest_rated', highest_rated.toString());
+  }
+  
+  const URL = `${BASE_API}${endpoints.product.productAll}?${Params.toString()}`;
+  console.log("params send",Params.toString())
+  const response = await fetch(URL, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+
+    },
+  });
+  if (!response.ok) {
+    const errorDetails = await response.json()
+    throw new Error(errorDetails.message || 'Error fetching product');
+  }
+  return response.json()
+}
+
+export async function ProductSuggestion(token: string, productId: string) {
+
+  const URL = `${BASE_API}${endpoints.product.productSuggestion}/${productId}`;
+
+  const response = await fetch(URL, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorDetails = await response.json();
+    throw new Error(errorDetails.message || 'Failed To remove  wishlist');
+  }
+  return response.json();
+}
+
 
 export function useGetProducts(params: GetProductsParams = {}) {
   const {
@@ -103,8 +197,6 @@ export function useGetProducts(params: GetProductsParams = {}) {
       reFetchProducts,
     ]
   );
-
-
 
   return memoizedValue;
 }
@@ -353,7 +445,7 @@ export async function updateProductStatus(
 }
 
 export async function uploadProductImage(
-  imageData:{
+  imageData: {
     product_id: string;
     is_primary: boolean;
     file: File;
@@ -453,7 +545,7 @@ export function useGetFeaturedProducts() {
 
   const memoizedValue = useMemo(
     () => ({
-      featuredProducts: (data?.data?.products as IProductItem[]) || [],
+      featuredProducts: (data?.data?.products as Suggestion[]) || [],
       totalProducts: data?.data?.total_products || 0,
       featuredProductsLoading: isLoading,
       featuredProductsError: error,
@@ -466,6 +558,29 @@ export function useGetFeaturedProducts() {
   return memoizedValue;
 }
 
+   export  const patchFeaturedStatus = async (token:string,productId:string, newStatus:boolean) => {
+      try {
+        const response = await fetch(`${BASE_API}${endpoints.product.featuredtStatus}/${productId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+             Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({featured:newStatus}),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const updatedProduct = await response.json();
+        // Optionally, update the local state of your table data
+        // to reflect the change without refetching all data.
+        console.log('Product updated:', updatedProduct);
+      } catch (error) {
+        console.error('Error updating featured status:', error);
+      }
+    };
 export async function getProductById(productId: string, token: string) {
   const baseUrl = BASE_API;
   const URL = `${baseUrl}${endpoints.product.detailsById}${productId}`;

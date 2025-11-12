@@ -1,5 +1,10 @@
+import { useState } from 'react';
+
+import { useTheme } from '@mui/material/styles';
 import { Card, CardMedia, CardContent, Typography, Box, Button } from '@mui/material'
+
 import Iconify from 'src/components/iconify'
+
 import { useTheme } from '@mui/material/styles';
 import { useState } from 'react';
 import { Suggestion } from 'src/types/product';
@@ -12,7 +17,7 @@ const formatPrice = (price: number) => new Intl.NumberFormat('en-US', {
 interface RecommendedProductsCardProps {
     product: Suggestion;
     addToCart: (productId: string) => void;
-    addToWishlist: (productId: string,wishlist:boolean) => void;
+    addToWishlist: (productId:string,wishlist:boolean) => void;
     showWishlistButton?: boolean;
 }
 
@@ -20,7 +25,6 @@ const RecommendedProductsCard = ({ product, addToCart, addToWishlist, showWishli
     const theme = useTheme();
     const [animate, setAnimate] = useState(false);
     const [wishlist, setWishlist] = useState(product.wishlist);
-
     const handleClick = () => {
         setAnimate(true);
         setWishlist(!wishlist);
@@ -61,6 +65,7 @@ const RecommendedProductsCard = ({ product, addToCart, addToWishlist, showWishli
                 image={product.image}
                 alt={product.name}
                 sx={{ objectFit: 'cover' }}
+               
             />
 
             {/* <Button

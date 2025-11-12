@@ -28,33 +28,35 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-
+import { Address, CartItem } from 'src/types/cart';
 import Iconify from 'src/components/iconify';
-
+import { updateItemQuantity, removeItemFromCart, getAllAddress, getDefalutAddress, postNewAddress, placeOrder, CheckoutPayload } from 'src/api/cart';
+import { useAuthToken } from 'src/auth/hooks';
+import { aW } from '@fullcalendar/core/internal-common';
 // ----------------------------------------------------------------------
 
-interface CartItem {
-  id: string;
-  name: string;
-  description: string;
-  material: string;
-  price: number;
-  quantity: number;
-  image: string;
-}
+// interface CartItem {
+//   id: string;
+//   name: string;
+//   description: string;
+//   material: string;
+//   price: number;
+//   quantity: number;
+//   image: string;
+// }
 
-interface Address {
-  id: string;
-  type: 'home' | 'office' | 'other';
-  name: string;
-  phone: string;
-  address: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  country: string;
-  isDefault: boolean;
-}
+// interface Address {
+//   id: string;
+//   type: 'home' | 'office' | 'other';
+//   name: string;
+//   phone: string;
+//   address: string;
+//   city: string;
+//   state: string;
+//   zipCode: string;
+//   country: string;
+//   isDefault: boolean;
+// }
 
 interface CheckoutPopupProps {
   open: boolean;
@@ -88,8 +90,7 @@ const onlinePaymentMethods = [
 // Mock addresses - in real app, this would come from user profile/API
 const mockAddresses: Address[] = [
   {
-    id: '1',
-    type: 'home',
+    _id: '6911971dfe0528591906684c',
     name: 'John Doe',
     phone: '+1 234 567 8900',
     address: '123 Main Street, Apt 4B',
@@ -100,8 +101,7 @@ const mockAddresses: Address[] = [
     isDefault: true,
   },
   {
-    id: '2',
-    type: 'office',
+    _id: '2',
     name: 'John Doe',
     phone: '+1 234 567 8900',
     address: '456 Business Ave, Floor 10',
@@ -120,20 +120,22 @@ export default function CheckoutPopup({
   onUpdateCart,
   onCheckoutComplete,
 }: CheckoutPopupProps) {
+  const token = useAuthToken()
   const [activeStep, setActiveStep] = useState(0);
   const [localCartData, setLocalCartData] = useState<CartItem[]>(cartData);
-  const [selectedAddress, setSelectedAddress] = useState<Address | null>(mockAddresses[0]);
+  const [alladdress, setAllAddresses] = useState<Address[]>([])
+  const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<string>('');
   const [onlinePaymentMethod, setOnlinePaymentMethod] = useState<string>('');
+  const [isAddNewAddress, setIsAddNewAddress] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [newAddress, setNewAddress] = useState<Partial<Address>>({
-    type: 'home',
-    name: '',
-    phone: '',
-    address: '',
+    full_name: '',
+    mobile_number: '',
+    address_line_1: '',
     city: '',
     state: '',
-    zipCode: '',
+    postal_code: '',
     country: 'United States',
   });
   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
@@ -147,10 +149,33 @@ export default function CheckoutPopup({
     cardholderName: '',
   });
 
+
+  const fecthAllAddressApi = async () => {
+    try {
+      const response = await getAllAddress(token)
+      setAllAddresses(response.data.addresses)
+      const defaultAddress = await getDefalutAddress(token)
+      setSelectedAddress(defaultAddress.data.address)
+    } catch (error) {
+      console.log("somting went wrong", error)
+    }
+
+  }
+  useEffect(() => {
+    if (token) {
+      fecthAllAddressApi()
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token])
+
+
   // Update local cart data when cartData prop changes
   useEffect(() => {
     setLocalCartData(cartData);
   }, [cartData]);
+
+
 
   const formatPrice = (price: number) => new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -204,23 +229,24 @@ export default function CheckoutPopup({
   };
 
   // Calculate totals
-  const subtotal = localCartData.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const shipping = subtotal > 2000 ? 0 : 50;
-  const tax = subtotal * 0.08;
+  const subtotal = localCartData.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+  const shipping = 0;
+  const tax = 0;
   const total = subtotal + shipping + tax;
 
-  const updateQuantity = (itemId: string, newQuantity: number) => {
+  const updateQuantity = async (itemId: string, newQuantity: number) => {
     if (newQuantity < 1) return;
-
     const updatedCart = localCartData.map(item =>
       item.id === itemId ? { ...item, quantity: newQuantity } : item
     );
+    await updateItemQuantity(itemId, token, newQuantity)
     setLocalCartData(updatedCart);
     onUpdateCart(updatedCart);
   };
 
-  const removeItem = (itemId: string) => {
+  const removeItem = async (itemId: string) => {
     const updatedCart = localCartData.filter(item => item.id !== itemId);
+    await removeItemFromCart(itemId, token)
     setLocalCartData(updatedCart);
     onUpdateCart(updatedCart);
   };
@@ -258,64 +284,75 @@ export default function CheckoutPopup({
     onClose();
   };
 
-  const addNewAddress = () => {
+  const addNewAddress = async () => {
+    setIsAddNewAddress(true)
     const address: Address = {
-      id: Date.now().toString(),
       ...newAddress,
       isDefault: false,
     } as Address;
 
     // In real app, save to backend
+    try {
+      const res = await postNewAddress(token, address)
+      if (res.success) {
+        setIsAddNewAddress(false)
+        fecthAllAddressApi()
+      }
+
+    } catch (error) {
+      console.log('somting went wrong', error)
+    } finally {
+      setIsAddNewAddress(false)
+    }
+
+
     setSelectedAddress(address);
     setShowNewAddressForm(false);
     setNewAddress({
-      type: 'home',
-      name: '',
-      phone: '',
-      address: '',
+      full_name: '',
+      mobile_number: '',
+      address_line_1: '',
       city: '',
       state: '',
-      zipCode: '',
+      postal_code: '',
       country: 'United States',
     });
   };
 
   const handleCheckout = async () => {
     setIsProcessing(true);
+    const orderData: CheckoutPayload = {
+      cart_item_ids: localCartData.map((value) => value.id),
+      shipping_address_id: selectedAddress!._id,
+      payment_method: paymentMethod,
 
-    // Simulate payment processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    const orderData = {
-      items: localCartData,
-      address: selectedAddress,
-      paymentMethod,
-      onlinePaymentMethod: paymentMethod !== 'cod' ? onlinePaymentMethod : null,
-      paymentDetails: (() => {
-        if (paymentMethod === 'upi') {
-          return { upiId };
-        }
-        if (paymentMethod === 'credit' || paymentMethod === 'debit') {
-          return {
-            cardNumber: cardDetails.cardNumber.replace(/\s/g, '').slice(-4).padStart(cardDetails.cardNumber.replace(/\s/g, '').length, '*'),
-            cardholderName: cardDetails.cardholderName,
-            expiryDate: cardDetails.expiryDate,
-          };
-        }
-        return null;
-      })(),
-      totals: {
-        subtotal,
-        shipping,
-        tax,
-        total,
-      },
-      orderId: `ORD-${Date.now()}`,
-      status: 'confirmed',
+      // onlinePaymentMethod: paymentMethod !== 'cod' ? onlinePaymentMethod : null,
+      // paymentDetails: (() => {
+      //   if (paymentMethod === 'upi') {
+      //     return { upiId };
+      //   }
+      //   if (paymentMethod === 'credit' || paymentMethod === 'debit') {
+      //     return {
+      //       cardNumber: cardDetails.cardNumber.replace(/\s/g, '').slice(-4).padStart(cardDetails.cardNumber.replace(/\s/g, '').length, '*'),
+      //       cardholderName: cardDetails.cardholderName,
+      //       expiryDate: cardDetails.expiryDate,
+      //     };
+      //   }
+      //   return null;
+      // })(),
     };
-
-    onCheckoutComplete(orderData);
-    setIsProcessing(false);
+    try {
+      const res = await placeOrder(token, orderData)
+      if (res.success) {
+        setIsProcessing(false);
+        onCheckoutComplete(orderData);
+      }
+    } catch (error) {
+      console.log('error', error)
+    } finally {
+      setIsProcessing(false);
+    }
+    
     handleClose();
   };
 
@@ -341,20 +378,20 @@ export default function CheckoutPopup({
                         <CardMedia
                           component="img"
                           height="80"
-                          image={item.image}
-                          alt={item.name}
+                          image={item.product.primary_image?.image_url}
+                          alt={item.product.name}
                           sx={{ objectFit: 'cover', borderRadius: 1 }}
                         />
                       </Grid>
                       <Grid item xs={6}>
                         <Typography variant="subtitle1" fontWeight="bold">
-                          {item.name}
+                          {item.product.name}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          {item.material}
+                          {item.product.category.name}
                         </Typography>
                         <Typography variant="h6" color="primary.main" sx={{ mt: 1 }}>
-                          {formatPrice(item.price * item.quantity)}
+                          {formatPrice(item.product.price * item.quantity)}
                         </Typography>
                       </Grid>
                       <Grid item xs={3}>
@@ -425,178 +462,202 @@ export default function CheckoutPopup({
             <Typography variant="h6" sx={{ mb: 3 }}>
               Select Delivery Address
             </Typography>
+            {alladdress.length === 0 ? (
+              <Alert severity="warning" sx={{ mb: 2 }}>
+                Your address is empty. Please add address before checkout.
+              </Alert>
+            ) : (
+              <Stack spacing={2}>
 
-            <Stack spacing={2}>
-              {mockAddresses.map((address) => (
-                <Card
-                  key={address.id}
-                  sx={{
-                    p: 2,
-                    boxShadow: 'none',
-                    cursor: 'pointer',
-                    border: selectedAddress?.id === address.id ? 2 : 1,
-                    borderColor: selectedAddress?.id === address.id ? 'primary.main' : 'grey.300',
-                  }}
-                  onClick={() => setSelectedAddress(address)}
-                >
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                        <Typography variant="subtitle1" fontWeight="bold">
-                          {address.name}
-                        </Typography>
-                        <Chip
+                {alladdress.map((address) => {
+                  console.log('')
+                  return (
+                    <Card
+                      key={address._id}
+                      sx={{
+                        p: 2,
+                        boxShadow: 'none',
+                        cursor: 'pointer',
+                        border: selectedAddress?._id === address._id ? 2 : 1,
+                        borderColor: selectedAddress?._id === address._id ? 'primary.main' : 'grey.300',
+                      }}
+                      onClick={() => setSelectedAddress(address)}
+                    >
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <Box>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                            <Typography variant="subtitle1" fontWeight="bold">
+                              {address.full_name}
+                            </Typography>
+                            {/* <Chip
                           label={address.type}
                           size="small"
                           color={address.type === 'home' ? 'primary' : 'secondary'}
+                        /> */}
+                            {address.is_default && (
+                              <Chip label="Default" size="small" color="success" />
+                            )}
+                          </Box>
+                          <Typography variant="body2" color="text.secondary">
+                            {address.formatted_address}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {address.city}, {address.state} {address.postal_code}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {address.country}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {address.mobile_number}
+                          </Typography>
+                        </Box>
+                        <Radio
+                          checked={selectedAddress?._id === address._id}
+                          onChange={() => setSelectedAddress(address)}
                         />
-                        {address.isDefault && (
-                          <Chip label="Default" size="small" color="success" />
-                        )}
                       </Box>
-                      <Typography variant="body2" color="text.secondary">
-                        {address.address}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {address.city}, {address.state} {address.zipCode}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {address.country}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {address.phone}
-                      </Typography>
-                    </Box>
-                    <Radio
-                      checked={selectedAddress?.id === address.id}
-                      onChange={() => setSelectedAddress(address)}
-                    />
-                  </Box>
-                </Card>
-              ))}
+                    </Card>
+                  )
+                })}
 
-              <Button
-                variant="outlined"
-                startIcon={<Iconify icon="eva:plus-outline" />}
-                onClick={() => setShowNewAddressForm(true)}
-                sx={{ alignSelf: 'flex-start' }}
-              >
-                Add New Address
-              </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<Iconify icon="eva:plus-outline" />}
+                  onClick={() => setShowNewAddressForm(true)}
+                  sx={{ alignSelf: 'flex-start' }}
+                >
+                  Add New Address
+                </Button>
 
-              {showNewAddressForm && (
-                <Card sx={{ p: 3, mt: 2, boxShadow: 'none' }}>
-                  <Typography variant="h6" sx={{ mb: 2 }}>
-                    Add New Address
-                  </Typography>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6}>
-                      <Box sx={{ width: '100%' }}>
-                        <Typography variant="subtitle2" fontWeight="medium" >
-                          Full Name
-                        </Typography>
-                        <TextField
-                          fullWidth
-                          placeholder="Full Name"
-                          size="small"
-                          value={newAddress.name}
-                          onChange={(e) => setNewAddress({ ...newAddress, name: e.target.value })}
-                        />
-                      </Box>
+                {showNewAddressForm && (
+                  <Card sx={{ p: 3, mt: 2, boxShadow: 'none' }}>
+                    <Typography variant="h6" sx={{ mb: 2 }}>
+                      Add New Address
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <Box sx={{ width: '100%' }}>
+                          <Typography variant="subtitle2" fontWeight="medium" >
+                            Full Name
+                          </Typography>
+                          <TextField
+                            fullWidth
+                            placeholder="Full Name"
+                            size="small"
+                            value={newAddress.full_name}
+                            onChange={(e) => setNewAddress({ ...newAddress, full_name: e.target.value })}
+                          />
+                        </Box>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Box sx={{ width: '100%' }}>
+                          <Typography variant="subtitle2" fontWeight="medium" >
+                            Phone Number
+                          </Typography>
+                          <TextField
+                            fullWidth
+                            placeholder="Phone Number"
+                            size="small"
+                            value={newAddress.mobile_number}
+                            onChange={(e) => setNewAddress({ ...newAddress, mobile_number: e.target.value })}
+                          />
+                        </Box>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Box sx={{ width: '100%' }}>
+                          <Typography variant="subtitle2" fontWeight="medium" >
+                            Address
+                          </Typography>
+                          <TextField
+                            fullWidth
+                            placeholder="Address"
+                            size="small"
+                            multiline
+                            rows={2}
+                            value={newAddress.address_line_1}
+                            onChange={(e) => setNewAddress({ ...newAddress, address_line_1: e.target.value })}
+                          />
+                        </Box>
+                      </Grid>
+                      <Grid item xs={12} sm={4}>
+                        <Box sx={{ width: '100%' }}>
+                          <Typography variant="subtitle2" fontWeight="medium" >
+                            City
+                          </Typography>
+                          <TextField
+                            fullWidth
+                            placeholder="City"
+                            size="small"
+                            value={newAddress.city}
+                            onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
+                          />
+                        </Box>
+                      </Grid>
+                      <Grid item xs={12} sm={4}>
+                        <Box sx={{ width: '100%' }}>
+                          <Typography variant="subtitle2" fontWeight="medium" >
+                            State
+                          </Typography>
+                          <TextField
+                            fullWidth
+                            placeholder="State"
+                            size="small"
+                            value={newAddress.state}
+                            onChange={(e) => setNewAddress({ ...newAddress, state: e.target.value })}
+                          />
+                        </Box>
+                      </Grid>
+                      <Grid item xs={12} sm={4}>
+                        <Box sx={{ width: '100%' }}>
+                          <Typography variant="subtitle2" fontWeight="medium" >
+                            ZIP Code
+                          </Typography>
+                          <TextField
+                            fullWidth
+                            placeholder="ZIP Code"
+                            size="small"
+                            value={newAddress.postal_code}
+                            onChange={(e) => setNewAddress({ ...newAddress, postal_code: e.target.value })}
+                          />
+                        </Box>
+                      </Grid>
+                      {/* <Grid item xs={12} sm={4}>
+                        <Box sx={{ width: '100%' }}>
+                          <Typography variant="subtitle2" fontWeight="medium" >
+                            Country
+                          </Typography>
+                          <TextField
+                            fullWidth
+                            placeholder="Country"
+                            size="small"
+                            value={newAddress.country}
+                            onChange={(e) => setNewAddress({ ...newAddress, country: e.target.value })}
+                          />
+                        </Box>
+                      </Grid> */}
+                      <Grid item xs={12}>
+                        <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                          <Button
+                            variant="contained"
+                            onClick={addNewAddress}
+                            disabled={!newAddress.address_line_1 || !newAddress.mobile_number || !newAddress.address_line_1 || isAddNewAddress}
+                          >
+                            Add Address
+                          </Button>
+                          <Button
+                            variant="outlined"
+                            onClick={() => setShowNewAddressForm(false)}
+                          >
+                            Cancel
+                          </Button>
+                        </Box>
+                      </Grid>
                     </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Box sx={{ width: '100%' }}>
-                        <Typography variant="subtitle2" fontWeight="medium" >
-                          Phone Number
-                        </Typography>
-                        <TextField
-                          fullWidth
-                          placeholder="Phone Number"
-                          size="small"
-                          value={newAddress.phone}
-                          onChange={(e) => setNewAddress({ ...newAddress, phone: e.target.value })}
-                        />
-                      </Box>
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Box sx={{ width: '100%' }}>
-                        <Typography variant="subtitle2" fontWeight="medium" >
-                          Address
-                        </Typography>
-                        <TextField
-                          fullWidth
-                          placeholder="Address"
-                          size="small"
-                          multiline
-                          rows={2}
-                          value={newAddress.address}
-                          onChange={(e) => setNewAddress({ ...newAddress, address: e.target.value })}
-                        />
-                      </Box>
-                    </Grid>
-                    <Grid item xs={12} sm={4}>
-                      <Box sx={{ width: '100%' }}>
-                        <Typography variant="subtitle2" fontWeight="medium" >
-                          City
-                        </Typography>
-                        <TextField
-                          fullWidth
-                          placeholder="City"
-                          size="small"
-                          value={newAddress.city}
-                          onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
-                        />
-                      </Box>
-                    </Grid>
-                    <Grid item xs={12} sm={4}>
-                      <Box sx={{ width: '100%' }}>
-                        <Typography variant="subtitle2" fontWeight="medium" >
-                          State
-                        </Typography>
-                        <TextField
-                          fullWidth
-                          placeholder="State"
-                          size="small"
-                          value={newAddress.state}
-                          onChange={(e) => setNewAddress({ ...newAddress, state: e.target.value })}
-                        />
-                      </Box>
-                    </Grid>
-                    <Grid item xs={12} sm={4}>
-                      <Box sx={{ width: '100%' }}>
-                        <Typography variant="subtitle2" fontWeight="medium" >
-                          ZIP Code
-                        </Typography>
-                        <TextField
-                          fullWidth
-                          placeholder="ZIP Code"
-                          size="small"
-                          value={newAddress.zipCode}
-                          onChange={(e) => setNewAddress({ ...newAddress, zipCode: e.target.value })}
-                        />
-                      </Box>
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-                        <Button
-                          variant="contained"
-                          onClick={addNewAddress}
-                          disabled={!newAddress.name || !newAddress.phone || !newAddress.address}
-                        >
-                          Add Address
-                        </Button>
-                        <Button
-                          variant="outlined"
-                          onClick={() => setShowNewAddressForm(false)}
-                        >
-                          Cancel
-                        </Button>
-                      </Box>
-                    </Grid>
-                  </Grid>
-                </Card>
-              )}
-            </Stack>
+                  </Card>
+                )}
+              </Stack>
+            )}
+
           </Box>
         );
 
@@ -685,7 +746,7 @@ export default function CheckoutPopup({
                   </Box>
                 </Stack>
                 <Typography variant="body2" color="text.secondary">
-                  Delivery to: {selectedAddress?.address}, {selectedAddress?.city}
+                  Delivery to: {selectedAddress?.formatted_address}, {selectedAddress?.city}
                 </Typography>
               </Card>
             </Box>

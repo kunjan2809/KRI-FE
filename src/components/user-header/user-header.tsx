@@ -190,7 +190,7 @@ export default function UserHeader() {
   };
 
   const handleOrdersClick = () => {
-    router.push(paths.user.orderDetails);
+    router.push(paths.user.orders.root);
   };
 
   const handleProfileClick = () => {

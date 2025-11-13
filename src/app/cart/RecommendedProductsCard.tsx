@@ -12,7 +12,7 @@ const formatPrice = (price: number) => new Intl.NumberFormat('en-US', {
 
 interface RecommendedProductsCardProps {
     product: Suggestion;
-    addToCart: (productId: string) => void;
+    addToCart: (productId: string,variationId?:string) => void;
     addToWishlist: (productId:string,wishlist:boolean) => void;
     showWishlistButton?: boolean;
 }
@@ -58,7 +58,7 @@ const RecommendedProductsCard = ({ product, addToCart, addToWishlist, showWishli
             <CardMedia
                 component="img"
                 height="200"
-                image={product.image}
+                image={product.image ? product.image :"https://nraasmart.orderz.app/images/item_placeholder.jpg"}
                 alt={product.name}
                 sx={{ objectFit: 'cover' }}
                
@@ -139,7 +139,7 @@ const RecommendedProductsCard = ({ product, addToCart, addToWishlist, showWishli
                 <Button
                     variant="outlined"
                     fullWidth
-                    onClick={() => addToCart(product.id)}
+                    onClick={() => addToCart(product.id,product.variations[0]?._id)}
                     startIcon={<Iconify icon="eva:shopping-cart-outline" />}
                 >
                     Add to Cart

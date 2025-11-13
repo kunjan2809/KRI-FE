@@ -11,6 +11,7 @@ import {
   Card,
   CardContent,
   CardHeader,
+  Chip,
   Container,
   Divider,
   Grid,
@@ -70,6 +71,8 @@ const ProfilePage = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [confirmationDelete, setConfirmationDelete] = useState<boolean>(false);
   const [confirmationLogout, setConfirmationLogout] = useState<boolean>(false);
+  const [defaultToggle, setDefaultToggle] = useState(false);
+
   const { logout } = useAuthContext();
 
   const getUserAddress = async () => {
@@ -103,10 +106,8 @@ const ProfilePage = () => {
 
   const handleInputChange = (field: keyof GetUserInfo, value: string) => {
     if (user) {
-      setUser((prev) => ({
-        ...prev,
-        [field]: value,
-      }));
+      const changeUser = { ...user, [field]: value };
+      setUser(changeUser);
     }
   };
 
@@ -152,11 +153,21 @@ const ProfilePage = () => {
   const handleOpenAdd = () => {
     setCurrentAddress(null);
     setOpenDialog(true);
+    if (addresses && addresses.length === 0) {
+      setDefaultToggle(true);
+    } else {
+      setDefaultToggle(false);
+    }
   };
 
-  const handleOpenEdit = (address: UserAddress) => {
-    setCurrentAddress(address);
+  const handleOpenEdit = (currentAddress: UserAddress) => {
+    setCurrentAddress(currentAddress);
     setOpenDialog(true);
+    if (addresses && addresses.length === 1) {
+      setDefaultToggle(true);
+    } else {
+      setDefaultToggle(false);
+    }
   };
 
   const handleLogout = async () => {
@@ -171,6 +182,10 @@ const ProfilePage = () => {
   const date = user && new Date(user.created_at);
   const monthName = date && date.toLocaleString('default', { month: 'long' });
   const year = date && date.getFullYear();
+
+  useEffect(() => {
+    if (addresses && addresses.length === 0) setDefaultToggle(true);
+  }, [addresses]);
 
   return (
     <>
@@ -374,7 +389,16 @@ const ProfilePage = () => {
                           <Grid key={address._id} item xs={12} sm={6}>
                             <Card sx={{ borderRadius: 2 }}>
                               <CardHeader
-                                title={address.full_name}
+                                title={
+                                  <Box sx={{ display: 'flex', gap: '10px' }}>
+                                    <Typography variant="h6" component="span">
+                                      {address.full_name}
+                                    </Typography>
+                                    {address.is_default && (
+                                      <Chip label="Default" size="small" color="success" />
+                                    )}
+                                  </Box>
+                                }
                                 action={
                                   <Stack direction="row" spacing={1}>
                                     <Button
@@ -450,6 +474,8 @@ const ProfilePage = () => {
                       onClose={handleClose}
                       currentAddress={currentAddress}
                       onSuccess={getUserAddress}
+                      defaultToggle={defaultToggle}
+                      setDefaultToggle={setDefaultToggle}
                     />
                   </CardContent>
                 </Card>
@@ -525,4 +551,3 @@ const ProfilePage = () => {
 };
 
 export default ProfilePage;
-

@@ -268,9 +268,11 @@ export interface Product {
   available_colors: string[];
   available_sizes: string[];
   primary_image: ProductPrimaryImage;
-  variations: Variation[];
+  images: ProductPrimaryImage[];
   searchScore: number;
+    variations: Variation[];
 }
+
 export interface ProductPrimaryImage {
   _id: string;
   product_id: string;

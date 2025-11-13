@@ -87,7 +87,6 @@ const onlinePaymentMethods = [
   { value: 'amex', label: 'American Express', icon: 'logos:american-express' },
 ];
 
-
 export default function CheckoutPopup({
   open,
   onClose,
@@ -445,7 +444,6 @@ export default function CheckoutPopup({
               <Stack spacing={2}>
 
                 {alladdress.map((address) => {
-                  console.log('')
                   return (
                     <Card
                       key={address._id}

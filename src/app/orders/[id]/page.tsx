@@ -51,8 +51,11 @@ interface TimelineStep {
 
 function formatDate(dateString: string) {
   const date = new Date(dateString);
-  const options = { year: 'numeric', month: 'long', day: 'numeric' };
-  return date.toLocaleDateString('en-US', options);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 }
 // ----------------------------------------------------------------------
 
@@ -545,7 +548,7 @@ const OrderItems = ({
                             </Grid>
                             <Grid item>
                               <Typography variant="body2" color="text.secondary">
-                                Price: {formatPrice(item.price)}{' '}
+                                Price: {formatPrice(item.product_id.price)}{' '}
                                 <Box
                                   component="span"
                                   sx={{
@@ -554,7 +557,7 @@ const OrderItems = ({
                                     color: 'text.disabled',
                                   }}
                                 >
-                                  {formatPrice(item.mrp)}
+                                  {formatPrice(item.product_id.price)}
                                 </Box>
                               </Typography>
                             </Grid>

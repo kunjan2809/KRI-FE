@@ -7,7 +7,11 @@ import axios, { endpoints } from 'src/utils/axios';
 import { AuthContext } from './auth-context';
 import { setSession } from './utils';
 import { AuthUserType, ActionMapType, AuthStateType } from '../../types';
-import { SESSION_ACCESS_TOKEN, SESSION_DATA_RENEWAL_TOKEN, SESSION_USER_DATA } from 'src/utils/constants';
+import {
+  SESSION_ACCESS_TOKEN,
+  SESSION_DATA_RENEWAL_TOKEN,
+  SESSION_USER_DATA,
+} from 'src/utils/constants';
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'next/navigation';
 
@@ -107,7 +111,7 @@ export function AuthProvider({ children }: Props) {
         const userData = localStorage.getItem(SESSION_USER_DATA);
         const dataRenewalToken = localStorage.getItem(SESSION_DATA_RENEWAL_TOKEN);
         const isTimeMoreThanTwoMinutes = dataRenewalToken && new Date(dataRenewalToken).getTime() > Date.now() - 2 * 60 * 1000;
-        
+
         if (userData && !isTimeMoreThanTwoMinutes) {
           dispatch({
             type: Types.INITIAL,
@@ -182,7 +186,7 @@ export function AuthProvider({ children }: Props) {
       },
     });
 
-    router.push(paths.dashboard.root);
+    if (user.is_admin) router.push(paths.dashboard.root);
   }, []);
 
   // REGISTER
@@ -221,26 +225,26 @@ export function AuthProvider({ children }: Props) {
   // FORGET PASSWORD
   const forgetPassword = useCallback(
     async (email: string) => {
-      const data = {
-        email,
-      };
+    const data = {
+      email,
+    };
 
-      const res = await axios.post(endpoints.auth.forgetPassword, data);
+    const res = await axios.post(endpoints.auth.forgetPassword, data);
 
-      const { data: responseData } = res.data;
-      const { token } = responseData;
+    const { data: responseData } = res.data;
+    const { token } = responseData;
 
-      setSession(token);
-      localStorage.setItem(SESSION_ACCESS_TOKEN, token);
+    setSession(token);
+    localStorage.setItem(SESSION_ACCESS_TOKEN, token);
 
-      dispatch({
-        type: Types.FORGET_PASSWORD,
-        payload: {
-          user: {
-            accessToken: token,
-          },
+    dispatch({
+      type: Types.FORGET_PASSWORD,
+      payload: {
+        user: {
+          accessToken: token,
         },
-      });
+      },
+    });
     },
     []
   );

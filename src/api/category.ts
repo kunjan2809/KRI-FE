@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 
 import { endpoints, apiFetcher } from 'src/utils/axios';
 import { BASE_API } from 'src/config-global';
+import { VariationOption } from 'src/types/category';
 
 // ----------------------------------------------------------------------
 
@@ -110,4 +111,31 @@ export async function updateCategory(categoryId: string, category: { name: strin
   }
 
   return response.json();
+}
+
+// 
+export function useGetVariation() {
+  const URL = `${BASE_API}${endpoints.category.variation}`;
+
+  const { data, isLoading, error, isValidating } = useSWR(URL, apiFetcher, {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    errorRetryCount: 3,
+    onError: (err) => {
+      console.error('useGetCategories error:', err);
+    },
+  });
+
+  const memoizedValue = useMemo(
+    () => ({
+      variation: (data?.data as VariationOption) || [],
+      variationLoading: isLoading,
+      variationError: error,
+      variationValidating: isValidating,
+      variationEmpty: !isLoading && !data?.data,
+    }),
+    [data?.data, isLoading, error, isValidating]
+  );
+
+  return memoizedValue;
 }

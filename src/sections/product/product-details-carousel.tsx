@@ -80,10 +80,10 @@ interface IProductImg {
 
 export default function ProductDetailsCarousel({ product }: Props) {
   const theme = useTheme();
-
   const slides = product.images.map((img: string) => ({
     src: img,
   }));
+  
 
   const lightbox = useLightBox(slides);
 

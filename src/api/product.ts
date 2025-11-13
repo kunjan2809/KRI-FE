@@ -56,24 +56,26 @@ export async function getProduct(token: string, parmas: GetProductParama = {}) {
     highest_rated,
     newest_first,
     category_id = "",
-    color = "",
-    search=""
+    color,
+    search = ""
   } = parmas;
-
 
   // Build query string with parameters
   const Params = new URLSearchParams();
   Params.append('page', page.toString());
   Params.append('limit', limit.toString());
   Params.append('price_sort', price_sort);
-  Params.append('color', color);
+   if (color) {
+    color?.split(',').map((col) => Params.append('color', col))
+  }
+
   Params.append('min_price', min_price!.toString());
   Params.append('max_price', max_price!.toString());
 
-  if(search){
-    Params.append('search',search)
+  if (search) {
+    Params.append('search', search)
   }
-  
+
   if (category_id) {
     Params.append('category_id', category_id.toString());
   }
@@ -83,9 +85,9 @@ export async function getProduct(token: string, parmas: GetProductParama = {}) {
   if (highest_rated) {
     Params.append('highest_rated', highest_rated.toString());
   }
-  
+
   const URL = `${BASE_API}${endpoints.product.productAll}?${Params.toString()}`;
-  console.log("params send",Params.toString())
+  console.log("params send", Params.toString())
   const response = await fetch(URL, {
     method: 'GET',
     headers: {
@@ -558,29 +560,29 @@ export function useGetFeaturedProducts() {
   return memoizedValue;
 }
 
-   export  const patchFeaturedStatus = async (token:string,productId:string, newStatus:boolean) => {
-      try {
-        const response = await fetch(`${BASE_API}${endpoints.product.featuredtStatus}/${productId}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-             Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({featured:newStatus}),
-        });
+export const patchFeaturedStatus = async (token: string, productId: string, newStatus: boolean) => {
+  try {
+    const response = await fetch(`${BASE_API}${endpoints.product.featuredtStatus}/${productId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ featured: newStatus }),
+    });
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
 
-        const updatedProduct = await response.json();
-        // Optionally, update the local state of your table data
-        // to reflect the change without refetching all data.
-        console.log('Product updated:', updatedProduct);
-      } catch (error) {
-        console.error('Error updating featured status:', error);
-      }
-    };
+    const updatedProduct = await response.json();
+    // Optionally, update the local state of your table data
+    // to reflect the change without refetching all data.
+    console.log('Product updated:', updatedProduct);
+  } catch (error) {
+    console.error('Error updating featured status:', error);
+  }
+};
 export async function getProductById(productId: string, token: string) {
   const baseUrl = BASE_API;
   const URL = `${baseUrl}${endpoints.product.detailsById}${productId}`;

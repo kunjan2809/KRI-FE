@@ -24,6 +24,8 @@ interface LoginPopupProps {
   open: boolean;
   onClose: () => void;
   isSignup: boolean;
+  title?: string;
+  description?: string;
   setIsSignup: React.Dispatch<React.SetStateAction<boolean>>;
   setIsEmailVerification: React.Dispatch<React.SetStateAction<boolean>>;
   setUserEmail: React.Dispatch<React.SetStateAction<string>>;
@@ -40,6 +42,8 @@ const Login = ({
   setIsEmailVerification,
   setUserEmail,
   isSignup,
+  title,
+  description,
 }: LoginPopupProps) => {
   const theme = useTheme();
   const { login } = useAuthContext();
@@ -120,11 +124,16 @@ const Login = ({
 
   const renderForm = (
     <Stack spacing={2.5}>
-      <Typography variant="h3" sx={{ maxWidth: 480, textAlign: 'center' }}>
-        {(() => {
-          return 'Hi, Welcome back';
-        })()}
-      </Typography>
+      <Stack>
+        <Typography variant="h3" sx={{ maxWidth: 480, textAlign: 'center' }}>
+          {title ? title : 'Hi, Welcome back'}
+        </Typography>
+        {description && (
+          <Typography variant="h6" sx={{ maxWidth: 480, textAlign: 'center' }}>
+            {description ? description : 'Please login for proceed'}
+          </Typography>
+        )}
+      </Stack>
       <Box sx={{ width: '100%' }}>
         <Typography variant="subtitle2" fontWeight="medium">
           Email Address

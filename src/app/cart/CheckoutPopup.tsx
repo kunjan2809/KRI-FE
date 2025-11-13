@@ -87,32 +87,6 @@ const onlinePaymentMethods = [
   { value: 'amex', label: 'American Express', icon: 'logos:american-express' },
 ];
 
-// Mock addresses - in real app, this would come from user profile/API
-const mockAddresses: Address[] = [
-  {
-    _id: '6911971dfe0528591906684c',
-    name: 'John Doe',
-    phone: '+1 234 567 8900',
-    address: '123 Main Street, Apt 4B',
-    city: 'New York',
-    state: 'NY',
-    zipCode: '10001',
-    country: 'United States',
-    isDefault: true,
-  },
-  {
-    _id: '2',
-    name: 'John Doe',
-    phone: '+1 234 567 8900',
-    address: '456 Business Ave, Floor 10',
-    city: 'New York',
-    state: 'NY',
-    zipCode: '10002',
-    country: 'United States',
-    isDefault: false,
-  },
-];
-
 export default function CheckoutPopup({
   open,
   onClose,
@@ -470,7 +444,6 @@ export default function CheckoutPopup({
               <Stack spacing={2}>
 
                 {alladdress.map((address) => {
-                  console.log('')
                   return (
                     <Card
                       key={address._id}

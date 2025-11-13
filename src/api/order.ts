@@ -11,15 +11,19 @@ import {
   IOrderUpdateRequest, 
   IOrderStatus, 
   IOrderPaymentStatus, 
-  IOrderDeliveryUpdate 
+  IOrderDeliveryUpdate, 
+  IOrderItemTableData,
+  Order,
+  ReturnOrder,
 } from 'src/types/order';
+import { OrderData } from 'src/types/analytics';
 
 // ----------------------------------------------------------------------
 
 interface GetOrdersParams {
   page?: number;
   limit?: number;
-  status?: string;
+  order_status?: string;
   payment_status?: string;
   start_date?: string;
   end_date?: string;
@@ -28,19 +32,37 @@ interface GetOrdersParams {
   sort_order?: 'asc' | 'desc';
 }
 
+export async function getUserAllOrders(token: string) {
+  const baseUrl = BASE_API;
+  const URL = `${baseUrl}${endpoints.order.updateStatus}`;
+
+  const response = await fetch(URL, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorDetails = await response.json();
+    throw new Error(errorDetails.message || 'Error updating order');
+  }
+
+  return response.json();
+}
 export function useGetOrders(params: GetOrdersParams = {}) {
   const {
     page = 1,
     limit = 20,
-    status = '',
+    order_status = '',
     payment_status = '',
     start_date = '',
     end_date = '',
     search = '',
     sort_by = 'created_at',
-    sort_order = 'desc'
+    sort_order = 'desc',
   } = params;
-
   const token = useAuthToken();
   const baseUrl = BASE_API;
 
@@ -51,8 +73,8 @@ export function useGetOrders(params: GetOrdersParams = {}) {
   queryParams.append('sort_by', sort_by);
   queryParams.append('sort_order', sort_order);
 
-  if (status) {
-    queryParams.append('status', status);
+  if (order_status) {
+    queryParams.append('order_status', order_status);
   }
 
   if (payment_status) {
@@ -84,11 +106,12 @@ export function useGetOrders(params: GetOrdersParams = {}) {
       onError: (err) => {
         console.error('useGetOrders error:', err);
       },
-    });
+    }
+  );
 
   const memoizedValue = useMemo(
     () => ({
-      orders: (data?.data?.orders as IOrderItem[]) || [],
+      orders: (data?.data?.orders as Order[]) || [],
       pagination: data?.data?.pagination || null,
       filters: data?.data?.filters || null,
       sorting: data?.data?.sorting || null,
@@ -97,7 +120,15 @@ export function useGetOrders(params: GetOrdersParams = {}) {
       ordersValidating: isValidating,
       ordersEmpty: !isLoading && !data?.data?.orders?.length,
     }),
-    [data?.data?.orders, data?.data?.pagination, data?.data?.filters, data?.data?.sorting, error, isLoading, isValidating]
+    [
+      data?.data?.orders,
+      data?.data?.pagination,
+      data?.data?.filters,
+      data?.data?.sorting,
+      error,
+      isLoading,
+      isValidating,
+    ]
   );
 
   return memoizedValue;
@@ -119,8 +150,9 @@ export function useGetOrder(orderId: string) {
       errorRetryCount: 3,
       onError: (err) => {
         console.error('useGetOrder error:', err);
-      }
-    });
+      },
+    }
+  );
 
   const memoizedValue = useMemo(
     () => ({
@@ -137,28 +169,69 @@ export function useGetOrder(orderId: string) {
 
 // ----------------------------------------------------------------------
 
-export function useSearchOrders(query: string) {
-  const URL = query ? [endpoints.order.all, { params: { search: query } }] : '';
+interface GetOrderParams {
+  page?: number;
+  limit?: number;
+  order_status?: 'pending' | 'shipped' | 'cancelled' | 'delivered' | 'return';
+  payment_status?: 'paid' | 'cod' | 'unpaid' | 'refunded';
+  search?: string;
+  sort_by?: 'created_at' | 'total_amount' | 'order_status' | 'payment_status' | 'order_number';
+  sort_order?: 'asc' | 'desc';
+}
 
-  const { data, isLoading, error, isValidating } = useSWR(URL, apiFetcher, {
-    keepPreviousData: true,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-    errorRetryCount: 3,
-    onError: (err) => {
-      console.error('useSearchOrders error:', err);
+export function useSearchOrders({ sort_by, sort_order }: GetOrderParams) {
+  const token = useAuthToken();
+  const baseUrl = BASE_API;
+
+  // Build query string with parameters
+  const queryParams = new URLSearchParams();
+  if (sort_by && sort_order) {
+    queryParams.append('sort_by', sort_by);
+    queryParams.append('sort_order', sort_order);
+  }
+
+  const URL = `${baseUrl}${endpoints.order.all}?${queryParams.toString()}`;
+
+  const { data, isLoading, error, isValidating, mutate } = useSWR(
+    token ? { url: URL, token } : null,
+    apiProductFetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      errorRetryCount: 3,
+
+      onError: (err) => {
+        console.error('useSearchOrders error:', err);
+      },
     }
-  });
+  );
+
+  const reFetchOrders = () => {
+    mutate({ url: URL, token });
+  };
 
   const memoizedValue = useMemo(
     () => ({
-      searchResults: (data?.results as IOrderItem[]) || [],
-      searchLoading: isLoading,
-      searchError: error,
-      searchValidating: isValidating,
-      searchEmpty: !isLoading && !data?.results?.length,
+      searchOrders: (data?.data?.orders as OrderData[]) || [],
+      pagination: data?.data?.pagination || null,
+      filters: data?.data?.filters || null,
+      sorting: data?.data?.sorting || null,
+      ordersLoading: isLoading,
+      ordersError: error,
+      ordersValidating: isValidating,
+      ordersEmpty: !isLoading && !data?.data?.orders?.length,
+      reFetchOrders: () => reFetchOrders(),
     }),
-    [data?.results, error, isLoading, isValidating]
+    [
+      data?.data?.orders,
+      data?.data?.pagination,
+      data?.data?.filters,
+      data?.data?.sorting,
+      error,
+      isLoading,
+      isValidating,
+      reFetchOrders,
+    ]
   );
 
   return memoizedValue;
@@ -236,7 +309,7 @@ export async function getOrderById(orderId: string, token: string) {
 
 export async function updateOrderStatus(orderId: string, orderStatus: IOrderStatus, token: string) {
   const baseUrl = BASE_API;
-  const URL = `${baseUrl}${endpoints.order.details}${orderId}/status`;
+  const URL = `${baseUrl}${endpoints.order.updateStatus}${orderId}/status`;
 
   const response = await fetch(URL, {
     method: 'PATCH',
@@ -257,7 +330,11 @@ export async function updateOrderStatus(orderId: string, orderStatus: IOrderStat
 
 // ----------------------------------------------------------------------
 
-export async function updateOrderPaymentStatus(orderId: string, paymentStatus: IOrderPaymentStatus, token: string) {
+export async function updateOrderPaymentStatus(
+  orderId: string,
+  paymentStatus: IOrderPaymentStatus,
+  token: string
+) {
   const baseUrl = BASE_API;
   const URL = `${baseUrl}${endpoints.order.details}${orderId}/payment-status`;
 
@@ -280,7 +357,11 @@ export async function updateOrderPaymentStatus(orderId: string, paymentStatus: I
 
 // ----------------------------------------------------------------------
 
-export async function updateOrderDelivery(orderId: string, deliveryData: IOrderDeliveryUpdate, token: string) {
+export async function updateOrderDelivery(
+  orderId: string,
+  deliveryData: IOrderDeliveryUpdate,
+  token: string
+) {
   const baseUrl = BASE_API;
   const URL = `${baseUrl}${endpoints.order.delivery}${orderId}`;
 
@@ -304,6 +385,7 @@ export async function updateOrderDelivery(orderId: string, deliveryData: IOrderD
 // ----------------------------------------------------------------------
 
 export async function deleteOrder(orderId: string, token: string) {
+
   const baseUrl = BASE_API;
   const URL = `${baseUrl}${endpoints.order.delete}${orderId}`;
 
@@ -325,14 +407,17 @@ export async function deleteOrder(orderId: string, token: string) {
 
 // ----------------------------------------------------------------------
 
-export async function getOrderStatistics(token: string, params: {
-  start_date?: string;
-  end_date?: string;
-  status?: string;
-} = {}) {
+export async function getOrderStatistics(
+  token: string,
+  params: {
+    start_date?: string;
+    end_date?: string;
+    status?: string;
+  } = {}
+) {
   const baseUrl = BASE_API;
   const queryParams = new URLSearchParams();
-  
+
   if (params.start_date) queryParams.append('start_date', params.start_date);
   if (params.end_date) queryParams.append('end_date', params.end_date);
   if (params.status) queryParams.append('status', params.status);
@@ -357,16 +442,19 @@ export async function getOrderStatistics(token: string, params: {
 
 // ----------------------------------------------------------------------
 
-export async function exportOrders(token: string, params: {
-  format?: 'csv' | 'excel' | 'pdf';
-  start_date?: string;
-  end_date?: string;
-  status?: string;
-  payment_status?: string;
-} = {}) {
+export async function exportOrders(
+  token: string,
+  params: {
+    format?: 'csv' | 'excel' | 'pdf';
+    start_date?: string;
+    end_date?: string;
+    status?: string;
+    payment_status?: string;
+  } = {}
+) {
   const baseUrl = BASE_API;
   const queryParams = new URLSearchParams();
-  
+
   if (params.format) queryParams.append('format', params.format);
   if (params.start_date) queryParams.append('start_date', params.start_date);
   if (params.end_date) queryParams.append('end_date', params.end_date);
@@ -388,4 +476,58 @@ export async function exportOrders(token: string, params: {
   }
 
   return response.blob();
+}
+
+export function useGetOrderDetail(orderId: string) {
+  const token = useAuthToken();
+  const baseUrl = BASE_API;
+  const URL = orderId ? `${baseUrl}${endpoints.order.orderDetails}${orderId}` : '';
+
+  const { data, isLoading, error, isValidating } = useSWR(
+    token && orderId ? { url: URL, token } : null,
+    apiProductFetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      errorRetryCount: 3,
+      onError: (err) => {
+        console.error('useGetOrderdetail error:', err);
+      },
+    }
+  );
+
+  const memoizedValue = useMemo(
+    () => ({
+      orderDetail: data?.data as IOrdersDetail,
+      orderDetailLoading: isLoading,
+      orderDetailError: error,
+      orderDetailValidating: isValidating,
+    }),
+    [data?.data, error, isLoading, isValidating]
+  );
+
+  return memoizedValue;
+}
+export async function createReturnRequest(
+  orderId: string,
+  returnOrder: ReturnOrder,
+  token: string
+) {
+  const baseUrl = BASE_API;
+  const URL = `${baseUrl}${endpoints.order.returnRequest.replace(':orderId', `${orderId}`)}`;
+  const response = await fetch(URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+      body: JSON.stringify(returnOrder),
+  });
+
+  if (!response.ok) {
+    const errorDetails = await response.json();
+    throw new Error(errorDetails.message || 'Error create return request');
+  }
+
+  return response.json();
 }

@@ -1,135 +1,119 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
 import {
   Box,
-  Container,
-  Typography,
   Grid,
   Card,
-  CardMedia,
-  Button,
-  IconButton,
-  TextField,
-  Divider,
   Stack,
+  Button,
+  Divider,
+  Container,
+  CardMedia,
+  TextField,
+  Typography,
+  IconButton,
 } from '@mui/material';
-import { useRouter } from 'src/routes/hooks';
+
 import { paths } from 'src/routes/paths';
+import { useRouter } from 'src/routes/hooks';
+
 import Iconify from 'src/components/iconify';
-
+import { useSnackbar } from 'src/components/snackbar';
 // ----------------------------------------------------------------------
 
-// Import Product.json data
-import productData from '../../../Product.json';
-import RecommendedProductsCard from './RecommendedProductsCard';
+import { useAuthToken } from 'src/auth/hooks';
+import { ProductSuggestion } from 'src/api/product';
+import { addWishlist,removeWishlist} from 'src/api/wishlist';
+import { AddToCart, getAllCartProducts, removeItemFromCart, updateItemQuantity } from 'src/api/cart';
+
+import { ProductCartPageSkeleton, ProductSuggestionSlider } from 'src/sections/product/product-skeleton';
+
+import { CartItem, } from 'src/types/cart';
+import { Suggestion } from 'src/types/product';
+
 import CheckoutPopup from './CheckoutPopup';
+import RecommendedProductsCard from './RecommendedProductsCard';
 
-// Convert Product.json data to cart items format
-const cartItems = [
-  {
-    id: productData[0].id,
-    name: productData[0].name,
-    description: productData[0].subDescription,
-    material: productData[0].category,
-    price: productData[0].price,
-    quantity: 1,
-    image: productData[0].coverUrl,
-  },
-  {
-    id: productData[1].id,
-    name: productData[1].name,
-    description: productData[1].subDescription,
-    material: productData[1].category,
-    price: productData[1].price,
-    quantity: 2,
-    image: productData[1].coverUrl,
-  },
-  {
-    id: productData[2].id,
-    name: productData[2].name,
-    description: productData[2].subDescription,
-    material: productData[2].category,
-    price: productData[2].price,
-    image: productData[2].coverUrl,
-    quantity: 1,
-  },
-];
-
-// Use Product.json data for recommended products
-const recommendedProducts = [
-  {
-    id: productData[3].id,
-    name: productData[3].name,
-    collection: productData[3].category,
-    price: productData[3].price,
-    originalPrice: productData[3].priceSale || productData[3].price,
-    image: productData[3].coverUrl,
-    wishlist: productData[3].wishlist,
-  },
-  {
-    id: productData[4].id,
-    name: productData[4].name,
-    collection: productData[4].category,
-    price: productData[4].price,
-    originalPrice: productData[4].priceSale || productData[4].price,
-    image: productData[4].coverUrl,
-    wishlist: productData[4].wishlist,
-  },
-  {
-    id: productData[5].id,
-    name: productData[5].name,
-    collection: productData[5].category,
-    price: productData[5].price,
-    originalPrice: productData[5].priceSale || productData[5].price,
-    image: productData[5].coverUrl,
-    wishlist: productData[5].wishlist,
-  },
-  {
-    id: productData[6].id,
-    name: productData[6].name,
-    collection: productData[6].category,
-    price: productData[6].price,
-    originalPrice: productData[6].priceSale || productData[6].price,
-    image: productData[6].coverUrl,
-    wishlist: productData[6].wishlist,
-  },
-];
-
-// ----------------------------------------------------------------------
 
 export default function CartPage() {
+
+  const { enqueueSnackbar } = useSnackbar()
+  const token = useAuthToken()
   const router = useRouter();
-  const [cartData, setCartData] = useState(cartItems);
+
+
+  const [cartData, setCartData] = useState<CartItem[]>([])
+  const [isCartDataLoading, setIsCartDataLoading] = useState(true)
+  const [isRecommandDataLoading, setIsRecommandDataLoading] = useState(true)
+  const [recommendations, setRecommendations] = useState<Suggestion[]>([])
   const [promoCode, setPromoCode] = useState('');
   const [checkoutOpen, setCheckoutOpen] = useState(false);
 
-  const updateQuantity = (itemId: string, newQuantity: number) => {
-    if (newQuantity < 1) return;
 
+
+  const addToCart = async (productId: string) => {
+
+    try {
+      const response = await AddToCart(token, productId)
+      if (response.success) {
+        enqueueSnackbar(response.message, { variant: "success" })
+        fetchCartProduct()
+      }
+    } catch (error) {
+      console.log("Somthing want wrong", error)
+    }
+  };
+   const handleAddWishlist = async (productId:string,wishlist:boolean) => {
+        if (wishlist) {
+            await removeWishlist(productId, token)
+        } else {
+            await addWishlist(productId, token)
+        }
+    };
+
+
+  const updateQuantity = async (itemId: string, newQuantity: number) => {
+    if (newQuantity < 1) return;
     setCartData(prev =>
       prev.map(item =>
         item.id === itemId ? { ...item, quantity: newQuantity } : item
       )
     );
+    try {
+      await updateItemQuantity(itemId, token, newQuantity)
+    } catch (error) {
+      enqueueSnackbar(error, { variant: "error" })
+    }
+    
   };
 
-  const removeItem = (itemId: string) => {
-    setCartData(prev => prev.filter(item => item.id !== itemId));
+  const removeItem = async (itemId: string) => {
+    setCartData(prev =>
+      prev.filter(item => item.id !== itemId)
+    )
+    try {
+      await removeItemFromCart(itemId, token)
+    } catch (error) {
+      console.log("falied to remove", error);
+    }
   };
 
-  const saveForLater = (itemId: string) => {
-    // Handle save for later functionality
-    console.log('Save for later:', itemId);
-  };
-
-  const addToWishlist = (itemId: string) => {
-    // Handle add to wishlist functionality
-    console.log('Add to wishlist:', itemId);
+  const addToWishlist = async (productId: string) => {
+    try {
+      const response = await addWishlist(productId, token)
+      if (response.success) {
+        enqueueSnackbar(response.message, { variant: "success" })
+      } else {
+        enqueueSnackbar(response.message, { variant: "error" })
+      }
+    } catch (error) {
+      console.log("Something went wrong", error);
+    }
   };
 
   const applyPromoCode = () => {
-    // Handle promo code application
     console.log('Applying promo code:', promoCode);
   };
 
@@ -140,18 +124,15 @@ export default function CartPage() {
   const handleCheckoutComplete = (orderData: any) => {
     console.log('Order completed:', orderData);
     // Handle successful checkout - could redirect to order confirmation page
-    router.push('/order-details');
+    router.push(paths.user.orders.root);
   };
 
-  const addToCart = (productId: string) => {
-    // Handle adding recommended product to cart
-    console.log('Adding to cart:', productId);
-  };
+
 
   // Calculate totals
-  const subtotal = cartData.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const shipping = subtotal > 2000 ? 0 : 50; // Free shipping over $2000
-  const tax = subtotal * 0.08; // 8% tax
+  const subtotal = cartData.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+  const shipping =0; // Free shipping over $2000
+  const tax = 0
   const total = subtotal + shipping + tax;
 
   const formatPrice = (price: number) => new Intl.NumberFormat('en-US', {
@@ -159,7 +140,46 @@ export default function CartPage() {
     currency: 'USD',
   }).format(price);
 
-  if (cartData.length === 0) {
+
+  const fetchCartProduct = async () => {
+    setIsCartDataLoading(true)
+    setIsRecommandDataLoading(true)
+
+    try {
+      const cartResponse = await getAllCartProducts(token)
+      const items: CartItem[] = cartResponse.data.cart_items
+      setCartData(items)
+      setIsCartDataLoading(false)
+      if (items && items.length > 0) {
+        const productid = items[0].product.id
+        const response = await ProductSuggestion(token, productid)
+        if (response.success) {
+          setRecommendations(response.data.suggestions)
+          setIsRecommandDataLoading(false)
+        }
+
+      } else {
+        setRecommendations([])
+        setIsCartDataLoading(false)
+        setIsRecommandDataLoading(false)
+      }
+
+    } catch (error) {
+      console.log('error', error)
+    } finally {
+      setIsCartDataLoading(false)
+      setIsRecommandDataLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (token) {
+      fetchCartProduct()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token])
+
+  if (cartData.length === 0 && !isCartDataLoading) {
     return (
       <Container maxWidth="lg" sx={{ py: 8, textAlign: 'center' }}>
         <Typography variant="h3" component="h1" sx={{ mb: 3 }}>
@@ -179,6 +199,7 @@ export default function CartPage() {
       </Container>
     );
   }
+
 
   return (
     <Box>
@@ -211,207 +232,203 @@ export default function CartPage() {
           <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
             Review your selections before checking out.
           </Typography>
-
-          <Grid container spacing={4}>
-            {/* Left Column - Cart Items */}
-            <Grid item xs={12} lg={8}>
-              <Stack spacing={3}>
-                {cartData.map((item) => (
-                  <Card key={item.id} sx={{ p: 3, border: '1px solid #e0e0e0', boxShadow: 'none' }}>
-                    <Grid container spacing={3}>
-                      <Grid item xs={12} sm={3}>
-                        <CardMedia
-                          component="img"
-                          height="120"
-                          image={item.image}
-                          alt={item.name}
-                          sx={{ objectFit: 'cover', borderRadius: 1 }}
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={9}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                          <Box sx={{ flex: 1 }}>
-                            <Typography variant="h6" component="h3" sx={{ mb: 1 }}>
-                              {item.name}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                              {item.description}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                              {item.material}
-                            </Typography>
-
-                            {/* Quantity Controls */}
-                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                              <IconButton
-                                size="small"
-                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                sx={{ width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                              >
-                                <Iconify icon="eva:minus-outline" />
-                              </IconButton>
-                              <TextField
-                                value={item.quantity}
-                                onChange={(e) => updateQuantity(item.id, parseInt(e.target.value, 10) || 1)}
-                                size="small"
-                                sx={{ width: 60, mx: 1 }}
-                                inputProps={{ style: { textAlign: 'center' } }}
-                              />
-                              <IconButton
-                                size="small"
-                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                sx={{ width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                              >
-                                <Iconify icon="eva:plus-outline" />
-                              </IconButton>
-                            </Box>
-
-                            {/* Price */}
-                            <Typography variant="h6" color="primary.main" fontWeight="bold">
-                              {formatPrice(item.price * item.quantity)}
-                            </Typography>
-                            {item.quantity > 1 && (
-                              <Typography variant="body2" color="text.secondary">
-                                {formatPrice(item.price)} each
+          {isCartDataLoading ? <ProductCartPageSkeleton /> :
+            <Grid container spacing={4}>
+              {/* Left Column - Cart Items */}
+              <Grid item xs={12} lg={8}>
+                <Stack spacing={3}>
+                  {cartData.map((item) => (
+                    <Card key={item.id} sx={{ p: 3, border: '1px solid #e0e0e0', boxShadow: 'none' }}>
+                      <Grid container spacing={3}>
+                        <Grid item xs={12} sm={3}>
+                          <CardMedia
+                            component="img"
+                            height="120"
+                            image={item.product.primary_image?.image_url}
+                            alt={item.product.name}
+                            sx={{ objectFit: 'cover', borderRadius: 1 }}
+                          />
+                        </Grid>
+                        <Grid item xs={12} sm={9}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                            <Box sx={{ flex: 1 }}>
+                              <Typography variant="h6" component="h3" sx={{ mb: 1 }}>
+                                {item.product.name}
                               </Typography>
-                            )}
+                              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                                {item.product.description}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                                {item.product.category.name}
+                              </Typography>
 
-                            {/* Action Links */}
-                            <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-                              <Button
-                                variant="text"
-                                size="small"
-                                onClick={() => saveForLater(item.id)}
-                                sx={{ textTransform: 'none', color: 'text.secondary' }}
-                              >
-                                Save for later
-                              </Button>
-                              <Button
-                                variant="text"
-                                size="small"
-                                onClick={() => addToWishlist(item.id)}
-                                sx={{ textTransform: 'none', color: 'text.secondary' }}
-                              >
-                                Add to wishlist
-                              </Button>
+                              {/* Quantity Controls */}
+                              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                                <IconButton
+                                  size="small"
+                                  onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                  sx={{ width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                >
+                                  <Iconify icon="eva:minus-outline" />
+                                </IconButton>
+                                <TextField
+                                  value={item.quantity}
+                                  onChange={(e) => updateQuantity(item.id, parseInt(e.target.value, 10) || 1)}
+                                  size="small"
+                                  sx={{ width: 60, mx: 1 }}
+                                  inputProps={{ style: { textAlign: 'center' } }}
+                                />
+                                <IconButton
+                                  size="small"
+                                  onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                  sx={{ width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                >
+                                  <Iconify icon="eva:plus-outline" />
+                                </IconButton>
+                              </Box>
+
+                              {/* Price */}
+                              <Typography variant="h6" color="primary.main" fontWeight="bold">
+                                {formatPrice(item.product.price * item.quantity)}
+                              </Typography>
+                              {item.quantity > 1 && (
+                                <Typography variant="body2" color="text.secondary">
+                                  {formatPrice(item.product.price)} each
+                                </Typography>
+                              )}
+
+                              {/* Action Links */}
+                              <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+
+                                <Button
+                                  variant="text"
+                                  size="small"
+                                  onClick={() => addToWishlist(item.product.id)}
+                                  sx={{ textTransform: 'none', color: 'text.secondary' }}
+                                >
+                                  Add to wishlist
+                                </Button>
+                              </Box>
                             </Box>
+
+                            {/* Remove Button */}
+                            <IconButton
+                              onClick={() => removeItem(item.id)}
+                              sx={{ color: 'text.secondary' }}
+                            >
+                              ×
+                            </IconButton>
                           </Box>
-
-                          {/* Remove Button */}
-                          <IconButton
-                            onClick={() => removeItem(item.id)}
-                            sx={{ color: 'text.secondary' }}
-                          >
-                            ×
-                          </IconButton>
-                        </Box>
+                        </Grid>
                       </Grid>
-                    </Grid>
+                    </Card>
+                  ))}
+
+                  {/* Promo Code */}
+                  <Card sx={{ p: 3, border: '1px solid #e0e0e0', boxShadow: 'none' }}>
+                    <Typography variant="h6" sx={{ mb: 2 }}>
+                      Have a promo code?
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                      <TextField
+                        fullWidth
+                        placeholder="Enter promo code"
+                        value={promoCode}
+                        onChange={(e) => setPromoCode(e.target.value)}
+                        size="small"
+                      />
+                      <Button
+                        variant="outlined"
+                        onClick={applyPromoCode}
+                        sx={{ px: 3 }}
+                      >
+                        Apply
+                      </Button>
+                    </Box>
                   </Card>
-                ))}
+                </Stack>
+              </Grid>
 
-                {/* Promo Code */}
-                <Card sx={{ p: 3, border: '1px solid #e0e0e0', boxShadow: 'none' }}>
-                  <Typography variant="h6" sx={{ mb: 2 }}>
-                    Have a promo code?
+              {/* Right Column - Order Summary */}
+
+              <Grid item xs={12} lg={4}>
+
+                <Card sx={{ p: 3, position: 'sticky', top: 20, border: '1px solid #e0e0e0', boxShadow: 'none' }}>
+                  <Typography variant="h5" component="h3" sx={{ mb: 3, fontWeight: 'bold' }}>
+                    Order Summary
                   </Typography>
-                  <Box sx={{ display: 'flex', gap: 2 }}>
-                    <TextField
-                      fullWidth
-                      placeholder="Enter promo code"
-                      value={promoCode}
-                      onChange={(e) => setPromoCode(e.target.value)}
-                      size="small"
-                    />
-                    <Button
-                      variant="outlined"
-                      onClick={applyPromoCode}
-                      sx={{ px: 3 }}
-                    >
-                      Apply
-                    </Button>
+
+                  <Stack spacing={2} sx={{ mb: 3 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography>Subtotal</Typography>
+                      <Typography>{formatPrice(subtotal)}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography>Estimated Shipping</Typography>
+                      <Typography color="success.main">
+                        {shipping === 0 ? 'Free' : formatPrice(shipping)}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography>Tax</Typography>
+                      <Typography>{formatPrice(tax)}</Typography>
+                    </Box>
+                  </Stack>
+
+                  <Divider sx={{ my: 2 }} />
+
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
+                    <Typography variant="h6" fontWeight="bold">
+                      Total
+                    </Typography>
+                    <Typography variant="h6" fontWeight="bold">
+                      {formatPrice(total)}
+                    </Typography>
                   </Box>
+
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    size="large"
+                    onClick={handleCheckout}
+                    sx={{
+                      py: 1.5,
+                      bgcolor: 'grey.800',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1,
+                      '&:hover': { bgcolor: 'grey.900' },
+                    }}
+                  >
+                    <Iconify icon="eva:lock-outline" />
+                    Proceed to Secure Checkout
+                  </Button>
+
+                  {/* Guarantees */}
+                  <Stack spacing={1} sx={{ mt: 3 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Iconify icon="eva:lock-fill" sx={{ color: '#161C24', width: 16, height: 16 }} />
+                      <Typography variant="body2" color="text.secondary">
+                        Secure Payment
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Iconify icon="eva:refresh-fill" sx={{ color: '#161C24', width: 16, height: 16 }} />
+                      <Typography variant="body2" color="text.secondary">
+                        Free returns within 14 days
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Iconify icon="eva:car-fill" sx={{ color: '#161C24', width: 16, height: 16 }} />
+                      <Typography variant="body2" color="text.secondary">
+                        Free shipping on orders over $2,000
+                      </Typography>
+                    </Box>
+                  </Stack>
                 </Card>
-              </Stack>
-            </Grid>
+              </Grid>
 
-            {/* Right Column - Order Summary */}
-            <Grid item xs={12} lg={4}>
-              <Card sx={{ p: 3, position: 'sticky', top: 20, border: '1px solid #e0e0e0', boxShadow: 'none' }}>
-                <Typography variant="h5" component="h3" sx={{ mb: 3, fontWeight: 'bold' }}>
-                  Order Summary
-                </Typography>
-
-                <Stack spacing={2} sx={{ mb: 3 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Typography>Subtotal</Typography>
-                    <Typography>{formatPrice(subtotal)}</Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Typography>Estimated Shipping</Typography>
-                    <Typography color="success.main">
-                      {shipping === 0 ? 'Free' : formatPrice(shipping)}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Typography>Tax</Typography>
-                    <Typography>{formatPrice(tax)}</Typography>
-                  </Box>
-                </Stack>
-
-                <Divider sx={{ my: 2 }} />
-
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-                  <Typography variant="h6" fontWeight="bold">
-                    Total
-                  </Typography>
-                  <Typography variant="h6" fontWeight="bold">
-                    {formatPrice(total)}
-                  </Typography>
-                </Box>
-
-                <Button
-                  variant="contained"
-                  fullWidth
-                  size="large"
-                  onClick={handleCheckout}
-                  sx={{
-                    py: 1.5,
-                    bgcolor: 'grey.800',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1,
-                    '&:hover': { bgcolor: 'grey.900' },
-                  }}
-                >
-                  <Iconify icon="eva:lock-outline" />
-                  Proceed to Secure Checkout
-                </Button>
-
-                {/* Guarantees */}
-                <Stack spacing={1} sx={{ mt: 3 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Iconify icon="eva:lock-fill" sx={{ color: 'success.main', width: 16, height: 16 }} />
-                    <Typography variant="body2" color="text.secondary">
-                      Secure Payment
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Iconify icon="eva:refresh-fill" sx={{ color: 'success.main', width: 16, height: 16 }} />
-                    <Typography variant="body2" color="text.secondary">
-                      Free returns within 14 days
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Iconify icon="eva:car-fill" sx={{ color: 'success.main', width: 16, height: 16 }} />
-                    <Typography variant="body2" color="text.secondary">
-                      Free shipping on orders over $2,000
-                    </Typography>
-                  </Box>
-                </Stack>
-              </Card>
-            </Grid>
-          </Grid>
+            </Grid>}
         </Box>
 
         {/* Product Recommendations */}
@@ -419,49 +436,26 @@ export default function CartPage() {
           <Typography variant="h3" component="h2" sx={{ mb: 4, fontWeight: 'bold' }}>
             Complete Your Look With These Gems
           </Typography>
-          <Grid container spacing={3}>
-            {recommendedProducts.map((product) => (
-              <Grid item xs={12} sm={6} md={3} key={product.id}>
-                {/* <Card sx={{ height: '100%' }}>
-                  <CardMedia
-                    component="img"
-                    height="200"
-                    image={product.image}
-                    alt={product.name}
-                    sx={{ objectFit: 'cover' }}
-                  />
-                  <CardContent sx={{ p: 2 }}>
-                    <Typography variant="h6" component="h3" sx={{ mb: 1, fontSize: '1rem' }}>
-                      {product.name}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                      {product.collection}
-                    </Typography>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                      <Typography variant="h6" color="primary.main" fontWeight="bold">
-                        {formatPrice(product.price)}
-                      </Typography>
-                      {product.originalPrice && (
-                        <Typography variant="body2" color="text.secondary" sx={{ textDecoration: 'line-through' }}>
-                          {formatPrice(product.originalPrice)}
-                        </Typography>
-                      )}
-                    </Box>
-                    <Button
-                      variant="outlined"
-                      fullWidth
-                      size="small"
-                      onClick={() => addToCart(product.id)}
-                      startIcon={<Iconify icon="eva:shopping-cart-outline" />}
-                    >
-                      Add to Cart
-                    </Button>
-                  </CardContent>
-                </Card> */}
-                <RecommendedProductsCard product={product} addToCart={addToCart} addToWishlist={() => { }} />
-              </Grid>
-            ))}
-          </Grid>
+          {isRecommandDataLoading ? <ProductSuggestionSlider rowCount={1} /> : <Grid container spacing={3}>
+            {recommendations.map((product) => {
+              const suggestion={
+                ...product,
+                 id:product._id,
+                 name:product.name,
+                 image:product.primary_image?.image_url,
+                 collection:product.category.name,
+                 price:product.price,
+                 originalPrice:product.mrp,
+                 wishlist:product.is_in_wishlist
+              }
+            return(
+
+                <Grid item xs={12} sm={6} md={3} key={product._id}>
+                  <RecommendedProductsCard product={suggestion} addToCart={addToCart} addToWishlist={handleAddWishlist} />
+                </Grid>
+              )
+            })}
+          </Grid>}
         </Box>
       </Container>
 

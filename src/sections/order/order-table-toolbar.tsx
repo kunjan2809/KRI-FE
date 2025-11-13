@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { Dispatch, SetStateAction, useCallback } from 'react';
 
 import Stack from '@mui/material/Stack';
 import MenuItem from '@mui/material/MenuItem';
@@ -6,44 +6,66 @@ import TextField from '@mui/material/TextField';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { formHelperTextClasses } from '@mui/material/FormHelperText';
-
 import Iconify from 'src/components/iconify';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
 
 import { IOrderTableFilters, IOrderTableFilterValue } from 'src/types/order';
+import { fDate } from 'src/utils/format-time';
 
 // ----------------------------------------------------------------------
 
 type Props = {
   filters: IOrderTableFilters;
   onFilters: (name: string, value: IOrderTableFilterValue) => void;
-  //
+  setFilters:Dispatch<SetStateAction<IOrderTableFilters>>
+  searchQuery:string
+ setSerachQuery:(value:string)=>void
   dateError: boolean;
 };
 
-export default function OrderTableToolbar({ filters, onFilters, dateError }: Props) {
+export default function OrderTableToolbar({ filters, setFilters ,onFilters, dateError,setSerachQuery,searchQuery}: Props) {
+ 
   const popover = usePopover();
 
   const handleFilterName = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      onFilters('name', event.target.value);
+       setSerachQuery(event.target.value)
     },
-    [onFilters]
+    [setSerachQuery]
   );
 
   const handleFilterStartDate = useCallback(
     (newValue: Date | null) => {
-      onFilters('startDate', newValue);
+       if(!newValue) return 
+
+    setFilters((prevFilters) => ({
+    ...prevFilters,
+      dateRange:{
+       ...prevFilters.dateRange,
+       startDate:newValue
+      }
+  }));
+      
     },
-    [onFilters]
+    [setFilters]
   );
 
   const handleFilterEndDate = useCallback(
     (newValue: Date | null) => {
-      onFilters('endDate', newValue);
+      if(!newValue) return 
+         setFilters((prevFilters) => ({
+    ...prevFilters,
+      dateRange:{
+       ...prevFilters.dateRange,
+       endDate:newValue
+      }
+  }));
+      
     },
-    [onFilters]
+    [setFilters]
   );
 
   return (
@@ -62,7 +84,7 @@ export default function OrderTableToolbar({ filters, onFilters, dateError }: Pro
       >
         <DatePicker
           label="Start date"
-          value={filters.startDate}
+          value={filters.dateRange.startDate}
           onChange={handleFilterStartDate}
           slotProps={{
             textField: {
@@ -73,10 +95,10 @@ export default function OrderTableToolbar({ filters, onFilters, dateError }: Pro
             maxWidth: { md: 200 },
           }}
         />
-
+  <LocalizationProvider adapterLocale={AdapterDateFns} >
         <DatePicker
           label="End date"
-          value={filters.endDate}
+          value={filters.dateRange.endDate}
           onChange={handleFilterEndDate}
           slotProps={{
             textField: {
@@ -93,11 +115,11 @@ export default function OrderTableToolbar({ filters, onFilters, dateError }: Pro
             },
           }}
         />
-
+</LocalizationProvider>
         <Stack direction="row" alignItems="center" spacing={2} flexGrow={1} sx={{ width: 1 }}>
           <TextField
             fullWidth
-            value={filters.name}
+            value={searchQuery}
             onChange={handleFilterName}
             placeholder="Search customer or order number..."
             InputProps={{

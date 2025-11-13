@@ -82,7 +82,6 @@ type Props = {
 };
 
 export default function ProductUpdateForm({ productId, currentProduct }: Props) {
-  console.log('currentProduct', currentProduct);
   const router = useRouter();
   const mdUp = useResponsive('up', 'md');
   const { enqueueSnackbar } = useSnackbar();
@@ -222,7 +221,6 @@ export default function ProductUpdateForm({ productId, currentProduct }: Props) 
   } = methods;
 
   const values = watch();
-  console.log('values', values)
 
   // Initialize form with current product data
   useEffect(() => {
@@ -747,7 +745,7 @@ export default function ProductUpdateForm({ productId, currentProduct }: Props) 
           label="Publish immediately"
           sx={{ flexGrow: 1, pl: 3 }}
         />
-
+       
         <LoadingButton
           type="submit"
           variant="contained"

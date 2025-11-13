@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+
 import {
   Container,
   Typography,
@@ -17,22 +18,27 @@ import {
   Alert,
   Snackbar,
 } from '@mui/material';
-import { useRouter } from 'src/routes/hooks';
-import { paths } from 'src/routes/paths';
 
-// Import Product.json data
-import { IProductItem } from 'src/types/product';
-import Iconify from 'src/components/iconify';
-import productData from '../../../Product.json';
-import ProductCarousel from './carousel/Carousel';
-import HeroSection from './HeroSection/HeroSection';
+import { paths } from 'src/routes/paths';
+import { useRouter } from 'src/routes/hooks';
 
 import { useGetFeaturedProducts } from 'src/api/product';
 import { subscribeToNewsletter } from 'src/api/newsletter';
-import bracelet from '../../../public/assets/categories/bresslet.jpg';
-import necklace from '../../../public/assets/categories/nackless.jpg';
+
+import Iconify from 'src/components/iconify';
+
+import { ProductSuggestionSlider} from 'src/sections/product/product-skeleton';
+
+// Import Product.json data
+import { Suggestion } from 'src/types/product';
+
+import productData from '../../../Product.json';
+import ProductCarousel from './carousel/Carousel';
+import HeroSection from './HeroSection/HeroSection';
 import ring from '../../../public/assets/categories/ring.jpg';
 import watch from '../../../public/assets/categories/watch.png';
+import bracelet from '../../../public/assets/categories/bresslet.jpg';
+import necklace from '../../../public/assets/categories/nackless.jpg';
 import earrings from '../../../public/assets/categories/earrings.jpg';
 
 // ----------------------------------------------------------------------
@@ -61,61 +67,10 @@ export default function LandingPage() {
     severity: 'success' as 'success' | 'error',
   });
 
-  const { featuredProducts } = useGetFeaturedProducts();
+  const {featuredProducts,featuredProductsError,featuredProductsLoading,featuredProductsValidating,totalProducts } = useGetFeaturedProducts();
 
 
   // Use Product.json data for recommended products
-  const recommendedProducts: IProductItem[] = [
-    {
-      id: productData[3].id,
-      name: productData[3].name,
-      collection: productData[3].category,
-      price: productData[3].price,
-      originalPrice: productData[3].priceSale || productData[3].price,
-      image: productData[3].coverUrl,
-    },
-    {
-      id: productData[4].id,
-      name: productData[4].name,
-      collection: productData[4].category,
-      price: productData[4].price,
-      originalPrice: productData[4].priceSale || productData[4].price,
-      image: productData[4].coverUrl,
-    },
-    {
-      id: productData[5].id,
-      name: productData[5].name,
-      collection: productData[5].category,
-      price: productData[5].price,
-      originalPrice: productData[5].priceSale || productData[5].price,
-      image: productData[5].coverUrl,
-    },
-    {
-      id: productData[6].id,
-      name: productData[6].name,
-      collection: productData[6].category,
-      price: productData[6].price,
-      originalPrice: productData[6].priceSale || productData[6].price,
-      image: productData[6].coverUrl,
-    },
-    {
-      id: productData[7].id,
-      name: productData[7].name,
-      collection: productData[7].category,
-      price: productData[7].price,
-      originalPrice: productData[7].priceSale || productData[7].price,
-      image: productData[7].coverUrl,
-    },
-    {
-      id: productData[8].id,
-      name: productData[8].name,
-      collection: productData[8].category,
-      price: productData[8].price,
-      originalPrice: productData[8].priceSale || productData[8].price,
-      image: productData[8].coverUrl,
-    },
-  ];
-
 
   // Email validation function
   const validateEmail = (emailAddress: string): boolean => {
@@ -124,7 +79,7 @@ export default function LandingPage() {
   };
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
+    const {value} = e.target;
     setEmail(value);
 
     // Clear error when user starts typing
@@ -205,6 +160,7 @@ export default function LandingPage() {
     currency: 'USD',
   }).format(price);
 
+  
   return (
     <>
       <HeroSection />
@@ -337,18 +293,19 @@ export default function LandingPage() {
               View All →
             </Button>
           </Box>
-          <Box sx={{ mb: 4, position: 'relative' }}>
+          
+       {featuredProductsLoading ? <ProductSuggestionSlider/>:<> <Box sx={{ mb: 4, position: 'relative' }}>
             <ProductCarousel
-              products={recommendedProducts as IProductItem[]}
+              products={featuredProducts as Suggestion[]}
               direction="right"
             />
           </Box>
           <Box sx={{ mb: 4, position: 'relative' }}>
             <ProductCarousel
-              products={recommendedProducts as IProductItem[]}
+              products={featuredProducts as Suggestion[]}
               direction="left"
-            />
-          </Box>
+            /> 
+          </Box> </>}
         </Box>
 
         {/* Call to Action Section */}
@@ -434,7 +391,7 @@ export default function LandingPage() {
                     sx={{
                       width: '96px',
                       height: '2px',
-                      background: (theme) => `linear-gradient(to right, #212B36, #fff)`,
+                      background: () => `linear-gradient(to right, #212B36, #fff)`,
                     }}
                   />
                 </Box>
@@ -590,7 +547,7 @@ export default function LandingPage() {
                   {/* Main Image */}
                   <Box
                     component="img"
-                    src="https://media.istockphoto.com/id/2150594029/photo/diamond-jewelry-ring-earing-luxury-jewellery-fashion.jpg?s=612x612&w=0&k=20&c=vhQvedhjArl0EMg7vQ1osFgguKg_Il5K9YVX9asC6pI="
+                    src="https://robinsonsjewelers.com/cdn/shop/articles/why-minimalist-jewelry-is-more-than-just-a-trend-its-a-movement_20250804012401_20250804.jpg?v=1755027908"
                     alt="Elegant jewelry collection featuring delicate necklaces and bracelets"
                     sx={{
                       width: '100%',

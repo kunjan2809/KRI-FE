@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { Dispatch, SetStateAction, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
@@ -15,23 +15,23 @@ import { IOrderTableFilters, IOrderTableFilterValue } from 'src/types/order';
 
 type Props = StackProps & {
   filters: IOrderTableFilters;
+  setFilters:Dispatch<SetStateAction<IOrderTableFilters>>
   onFilters: (name: string, value: IOrderTableFilterValue) => void;
-  //
+  
   onResetFilters: VoidFunction;
-  //
+ 
   results: number;
 };
 
 export default function OrderTableFiltersResult({
   filters,
+  setFilters,
   onFilters,
-  //
   onResetFilters,
-  //
   results,
   ...other
 }: Props) {
-  const shortLabel = shortDateLabel(filters.startDate, filters.endDate);
+  const shortLabel = shortDateLabel(filters.dateRange.startDate, filters.dateRange.endDate);
 
   const handleRemoveKeyword = useCallback(() => {
     onFilters('name', '');
@@ -42,9 +42,15 @@ export default function OrderTableFiltersResult({
   }, [onFilters]);
 
   const handleRemoveDate = useCallback(() => {
-    onFilters('startDate', null);
-    onFilters('endDate', null);
-  }, [onFilters]);
+    setFilters((prevFilters)=>({
+      ...prevFilters,
+      dateRange:{
+       startDate:null,
+       endDate:null
+      }
+
+    }))
+  }, [setFilters]);
 
   return (
     <Stack spacing={1.5} {...other}>
@@ -56,13 +62,13 @@ export default function OrderTableFiltersResult({
       </Box>
 
       <Stack flexGrow={1} spacing={1} direction="row" flexWrap="wrap" alignItems="center">
-        {filters.status !== 'all' && (
+        {filters.status!== 'all' && (
           <Block label="Status:">
             <Chip size="small" label={filters.status} onDelete={handleRemoveStatus} />
           </Block>
         )}
 
-        {filters.startDate && filters.endDate && (
+        {(filters.dateRange.startDate || filters.dateRange.endDate) && (
           <Block label="Date:">
             <Chip size="small" label={shortLabel} onDelete={handleRemoveDate} />
           </Block>

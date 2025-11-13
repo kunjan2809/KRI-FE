@@ -9,6 +9,7 @@ import { fCurrency } from 'src/utils/format-number';
 
 import Scrollbar from 'src/components/scrollbar';
 import Label from 'src/components/label';
+import { fontWeight, width } from '@mui/system';
 
 // ----------------------------------------------------------------------
 
@@ -24,19 +25,27 @@ type ItemProps = {
 interface Props extends CardProps {
   title?: string;
   subheader?: string;
-  list: ItemProps[];
 }
 
-export default function EcommerceLatestInvoices({ title, subheader, list, ...other }: Props) {
+export default function EcommerceLatestInvoices({ title, subheader, ...other }: Props) {
   return (
     <Card {...other}>
       <CardHeader title={title} subheader={subheader} />
 
       <Scrollbar>
         <Stack spacing={3} sx={{ p: 3, minWidth: 360 }}>
-          {list.map((invoice) => (
-            <ProductItem key={invoice.id} invoice={invoice} />
-          ))}
+          <ListItemText
+            primary={
+              <Stack direction="row" justifyContent="space-between">
+                <span style={{fontWeight:'bolder',textAlign:'center',width:'100%',padding:'10px'}}>
+                  No data available
+                </span>
+              </Stack>
+            }
+            primaryTypographyProps={{
+              noWrap: true,
+            }}
+          />
         </Stack>
       </Scrollbar>
     </Card>
@@ -53,18 +62,35 @@ function ProductItem({ invoice }: ProductItemProps) {
   const { invoiceNumber, price, date, status } = invoice;
   return (
     <Stack direction="row" spacing={2}>
-
-
       <ListItemText
-        primary={<Stack direction="row" justifyContent="space-between"><span>Invoice number: <Link sx={{ color: 'text.primary', typography: 'subtitle2' }}>{invoiceNumber}</Link></span> <Label variant="soft" color={(status === 'paid' && 'success') || (status === 'out of date' && 'error') || 'default'}>{status}</Label> </Stack>}
+        primary={
+          <Stack direction="row" justifyContent="space-between">
+            <span>
+              Invoice number:{' '}
+              <Link sx={{ color: 'text.primary', typography: 'subtitle2' }}>{invoiceNumber}</Link>
+            </span>{' '}
+            <Label
+              variant="soft"
+              color={
+                (status === 'paid' && 'success') ||
+                (status === 'out of date' && 'error') ||
+                'default'
+              }
+            >
+              {status}
+            </Label>{' '}
+          </Stack>
+        }
         secondary={
           <Stack direction="row" justifyContent="space-between">
-            <Box component="span" >
-              {new Date(date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+            <Box component="span">
+              {new Date(date).toLocaleDateString('en-US', {
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric',
+              })}
             </Box>
-            <Box component="span" >
-              {fCurrency(price)}
-            </Box>
+            <Box component="span">{fCurrency(price)}</Box>
           </Stack>
         }
         primaryTypographyProps={{
@@ -74,7 +100,6 @@ function ProductItem({ invoice }: ProductItemProps) {
           mt: 0.5,
         }}
       />
-
     </Stack>
   );
 }

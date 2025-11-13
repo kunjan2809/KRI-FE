@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
@@ -10,24 +12,28 @@ import Checkbox from '@mui/material/Checkbox';
 import TableCell from '@mui/material/TableCell';
 import IconButton from '@mui/material/IconButton';
 import ListItemText from '@mui/material/ListItemText';
+import { Select, SelectChangeEvent } from '@mui/material';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
 import { fCurrency } from 'src/utils/format-number';
 import { fDate, fTime } from 'src/utils/format-time';
+import { getDummyAvtarUrl } from 'src/utils/avtarData';
+
+import { useAuthToken } from 'src/auth/hooks';
+import { updateOrderStatus } from 'src/api/order';
 
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
 
-import { IOrderItem } from 'src/types/order';
-import { getDummyAvtarUrl } from 'src/utils/avtarData';
+import { Order, ShippingAddressId } from 'src/types/order';
 
 // ----------------------------------------------------------------------
 
 type Props = {
-  row: IOrderItem;
+  row: Order;
   selected: boolean;
   onViewRow: VoidFunction;
   onSelectRow: VoidFunction;
@@ -41,12 +47,46 @@ export default function OrderTableRow({
   onSelectRow,
   onDeleteRow,
 }: Props) {
-  const { products, order_status, _id, customer_info, total_amount, shipping_address, created_at } = row;
+
+  const { user_id, order_status, _id, total_amount, shipping_address_id, created_at, order_items, order_number } = row;
   const confirm = useBoolean();
 
   const collapse = useBoolean();
 
   const popover = usePopover();
+  const token = useAuthToken()
+
+  const [status, setStatus] = useState<string>(order_status);
+  const [editingCell, setEditingCell] = useState<{ rowId: string, filed: string } | null>(null);
+
+
+  const handleStatusChange = async (newStatus: string, orderId: string) => {
+    try {
+      await updateOrderStatus(orderId, { order_status: newStatus }, token)
+      setStatus(newStatus)
+    } catch (error) {
+      console.log("Sommthing went wrong", error)
+    }
+    setEditingCell(null)
+  }
+
+  const addressData = (data: ShippingAddressId) => {
+    const addressParts = [
+      data?.address_line_1,
+      data?.address_line_2,
+      data?.landmark,
+      data?.street,
+      data?.city,
+      data?.state,
+      data?.postal_code,
+      data?.country
+    ];
+
+    const filtered = addressParts.filter(part => part && part.trim() !== '');
+
+    return filtered.length > 0 ? filtered.join(', ') : '-';
+  };
+
 
   const renderPrimary = (
     <TableRow hover selected={selected}>
@@ -68,18 +108,20 @@ export default function OrderTableRow({
         </Box>
       </TableCell>
 
-      <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
-        <Avatar alt={`${customer_info.first_name} ${customer_info.last_name}`} src={getDummyAvtarUrl(customer_info.profile_icon).avatarUrl} sx={{ mr: 2 }} />
+      <TableCell>
+        <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+          <Avatar alt={`${user_id?.first_name} ${user_id?.last_name}`} src={getDummyAvtarUrl(user_id?.profile_icon).avatarUrl} sx={{ mr: 2 }} />
 
-        <ListItemText
-          primary={`${customer_info.first_name} ${customer_info.last_name}`}
-          secondary={customer_info.email}
-          primaryTypographyProps={{ typography: 'body2' }}
-          secondaryTypographyProps={{
-            component: 'span',
-            color: 'text.disabled',
-          }}
-        />
+          <ListItemText
+            primary={`${user_id?.first_name} ${user_id?.last_name}`}
+            secondary={user_id?.email}
+            primaryTypographyProps={{ typography: 'body2' }}
+            secondaryTypographyProps={{
+              component: 'span',
+              color: 'text.disabled',
+            }}
+          />
+        </Box>
       </TableCell>
 
       <TableCell>
@@ -95,25 +137,43 @@ export default function OrderTableRow({
         />
       </TableCell>
 
-      <TableCell align="center"> {shipping_address?.street}, {shipping_address?.city}, {shipping_address?.state}, {shipping_address?.postal_code}, {shipping_address?.country} </TableCell>
-      <TableCell align="center"> {products.reduce((acc, item) => acc + item.quantity, 0)} </TableCell>
+      <TableCell align="center" sx={{ width: '100%' }}>{addressData(shipping_address_id)}</TableCell>
+      <TableCell align="center"> {order_items.reduce((acc, item) => acc + item.quantity, 0)} </TableCell>
 
-      <TableCell> {fCurrency(products.reduce((acc, item) => acc + item.unit_price * item.quantity, 0))} </TableCell>
+      <TableCell> {fCurrency(total_amount)} </TableCell>
 
-      <TableCell>
-        <Label
-          variant="soft"
-          color={
-            (order_status === 'shipped' && 'success') ||
-            (order_status === 'pending' && 'warning') ||
-            (order_status === 'cancelled' && 'error') ||
-            (order_status === 'delivered' && 'success') ||
-            (order_status === 'return' && 'error') ||
-            'default'
-          }
-        >
-          {order_status}
-        </Label>
+      <TableCell
+        onClick={() => setEditingCell({ rowId: _id, filed: order_status })}
+      >
+        {editingCell && editingCell.rowId === _id && editingCell.filed === order_status ? (
+          <Select
+            value={status}
+            onChange={(event) => handleStatusChange(event.target.value, _id)}
+            autoFocus
+            onBlur={() => setEditingCell(null)} // Exit edit on blur
+          >
+            <MenuItem value="pending">Pending</MenuItem>
+            <MenuItem value="shipped">Shipped</MenuItem>
+            <MenuItem value="delivered">Delivered</MenuItem>
+            <MenuItem value="cancelled">Cancelled</MenuItem>
+            <MenuItem value="return">Return</MenuItem>
+          </Select>
+        ) : (
+          <Label
+            variant="soft"
+            color={
+              (status === 'shipped' && 'info') ||
+              (status === 'pending' && 'warning') ||
+              (status === 'cancelled' && 'error') ||
+              (status === 'delivered' && 'success') ||
+              (status === 'return' && 'secondary') ||
+              'default'
+            }
+          >
+            {status}
+          </Label>
+        )}
+
       </TableCell>
 
       <TableCell align="right" sx={{ px: 1, whiteSpace: 'nowrap' }}>
@@ -133,7 +193,7 @@ export default function OrderTableRow({
           <Iconify icon="eva:more-vertical-fill" />
         </IconButton>
       </TableCell>
-    </TableRow>
+    </TableRow >
   );
 
   const renderSecondary = (
@@ -146,42 +206,45 @@ export default function OrderTableRow({
           sx={{ bgcolor: 'background.neutral' }}
         >
           <Stack component={Paper} sx={{ m: 1.5 }}>
-            {products?.map((item) => (
-              <Stack
-                key={item.product_id}
-                direction="row"
-                alignItems="center"
-                sx={{
-                  p: (theme) => theme.spacing(1.5, 2, 1.5, 1.5),
-                  '&:not(:last-of-type)': {
-                    borderBottom: (theme) => `solid 2px ${theme.palette.background.neutral}`,
-                  },
-                }}
-              >
-                <Avatar
-                  src={item.product_image}
-                  variant="rounded"
-                  sx={{ width: 48, height: 48, mr: 2 }}
-                />
-
-                <ListItemText
-                  primary={item.product_name}
-                  secondary={item.product_sku}
-                  primaryTypographyProps={{
-                    typography: 'body2',
+            {order_items?.map((item) => {
+              const { name, sku } = item.product_id
+              return (
+                <Stack
+                  key={_id}
+                  direction="row"
+                  alignItems="center"
+                  sx={{
+                    p: (theme) => theme.spacing(1.5, 2, 1.5, 1.5),
+                    '&:not(:last-of-type)': {
+                      borderBottom: (theme) => `solid 2px ${theme.palette.background.neutral}`,
+                    },
                   }}
-                  secondaryTypographyProps={{
-                    component: 'span',
-                    color: 'text.disabled',
-                    mt: 0.5,
-                  }}
-                />
+                >
+                  <Avatar
+                    src={name}
+                    variant="rounded"
+                    sx={{ width: 48, height: 48, mr: 2 }}
+                  />
 
-                <Box>x{item.quantity}</Box>
+                  <ListItemText
+                    primary={name}
+                    secondary={order_number}
+                    primaryTypographyProps={{
+                      typography: 'body2',
+                    }}
+                    secondaryTypographyProps={{
+                      component: 'span',
+                      color: 'text.disabled',
+                      mt: 0.5,
+                    }}
+                  />
 
-                <Box sx={{ width: 110, textAlign: 'right' }}>{fCurrency(item.unit_price)}</Box>
-              </Stack>
-            ))}
+                  <Box>x{item.quantity}</Box>
+
+                  <Box sx={{ width: 110, textAlign: 'right' }}>{fCurrency(item.price)}</Box>
+                </Stack>
+              )
+            })}
           </Stack>
         </Collapse>
       </TableCell>

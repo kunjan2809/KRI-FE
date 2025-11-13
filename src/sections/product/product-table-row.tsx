@@ -5,6 +5,7 @@ import Avatar from '@mui/material/Avatar';
 import { GridCellParams } from '@mui/x-data-grid';
 import ListItemText from '@mui/material/ListItemText';
 import LinearProgress from '@mui/material/LinearProgress';
+import ListItem from '@mui/material/ListItem';
 
 import { fCurrency } from 'src/utils/format-number';
 import { fTime, fDate } from 'src/utils/format-time';
@@ -20,35 +21,45 @@ type ParamsProps = {
 };
 
 export function RenderCellPrice({ params }: ParamsProps) {
-  return <>{fCurrency(params.row.price)}</>;
+  return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+      {fCurrency(params.row.price)}
+    </Box>
+  );
 }
 
-export function RenderCellPublish({ params }: ParamsProps) {
+export function RenderCellPublish({ params }: ParamsProps)  {
   return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center',height:'100%' }}>
     <Label variant="soft" color={(params.row.status === 'published' && 'info') || 'default'}>
       {params.row.status}
     </Label>
+    </Box>
   );
 }
 
 export function RenderCellCreatedAt({ params }: ParamsProps) {
   return (
-    <ListItemText
-      primary={fDate(params.row.created_at)}
-      secondary={fTime(params.row.created_at)}
-      primaryTypographyProps={{ typography: 'body2', noWrap: true }}
-      secondaryTypographyProps={{
-        mt: 0.5,
-        component: 'span',
-        typography: 'caption',
-      }}
-    />
+    <ListItem
+      sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}
+    >
+      <ListItemText
+        primary={fDate(params.row.created_at)}
+        secondary={fTime(params.row.created_at)}
+        primaryTypographyProps={{ typography: 'body2', noWrap: true }}
+        secondaryTypographyProps={{
+          mt: 0.5,
+          component: 'span',
+          typography: 'caption',
+        }}
+      />
+    </ListItem>
   );
 }
 
 export function RenderCellStock({ params }: ParamsProps) {
   const stockQuantity = params.row.stock_quantity || 0;
-  
+
   // Determine stock level and color
   const getStockLevel = () => {
     if (stockQuantity === 0) return { level: 'Out of Stock', color: 'error' as const };
@@ -59,29 +70,32 @@ export function RenderCellStock({ params }: ParamsProps) {
   const { level, color } = getStockLevel();
 
   return (
-    <Stack sx={{ typography: 'caption', color: 'text.secondary' }}>
-      <LinearProgress
-        value={stockQuantity === 0 ? 0 : Math.min((stockQuantity / 100) * 100, 100)}
-        variant="determinate"
-        color={color as 'error' | 'warning' | 'success'}
-        sx={{ mb: 1, height: 6, maxWidth: 80 }}
-      />
-      <Box sx={{ fontWeight: 'medium' }}>
-        {stockQuantity ?? ''} units
-      </Box>
-    </Stack>
+    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+      <Stack sx={{ typography: 'caption', color: 'text.secondary' }}>
+        <LinearProgress
+          value={stockQuantity === 0 ? 0 : Math.min((stockQuantity / 100) * 100, 100)}
+          variant="determinate"
+          color={color as 'error' | 'warning' | 'success'}
+          sx={{ mb: 1, height: 6, maxWidth: 80 }}
+        />
+        <Box sx={{ fontWeight: 'medium' }}>{stockQuantity ?? ''} units</Box>
+      </Stack>
+    </Box>
   );
 }
 
 export function RenderCellProduct({ params }: ParamsProps) {
   const router = useRouter();
-  const imageUrl = params.row.all_images?.find((image: any) => image.is_primary)?.image_url|| params.row.all_images?.[0]?.image_url || params.row.coverUrl;    
+  const imageUrl =
+    params.row.all_images?.find((image: any) => image.is_primary)?.image_url ||
+    params.row.all_images?.[0]?.image_url ||
+    params.row.coverUrl;
 
   const handleNavigate = () => {
     router.push(paths.user.products.details(params.row._id));
-  }
+  };
   return (
-    <Stack direction="row" alignItems="center" sx={{ py: 2, width: 1, }}>
+    <Stack direction="row" alignItems="center" sx={{ py: 2, width: 1 }}>
       <Avatar
         alt={params.row.name}
         src={imageUrl}

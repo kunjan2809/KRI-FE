@@ -7,18 +7,20 @@ import ListItemText from '@mui/material/ListItemText';
 
 import { fDate } from 'src/utils/format-time';
 
-import Iconify from 'src/components/iconify';
-
-import { IProductReview } from 'src/types/product';
+import { Detail } from 'src/types/reviews';
+import { useAuthContext } from 'src/auth/hooks/use-auth-context';
+import productData from '../../../Product.json';
+import { getDummyAvtarUrl } from 'src/utils/avtarData';
 
 // ----------------------------------------------------------------------
 
 type Props = {
-  review: IProductReview;
+  review: Detail;
 };
 
 export default function ProductReviewItem({ review }: Props) {
-  const { name, rating, comment, postedAt, avatarUrl, attachments, isPurchased } = review;
+  const { rating, rating_description, created_at ,images,title} = review;
+  const {first_name,last_name,profile_icon} = review.user_id
 
   const renderInfo = (
     <Stack
@@ -34,7 +36,7 @@ export default function ProductReviewItem({ review }: Props) {
       }}
     >
       <Avatar
-        src={avatarUrl}
+        src={getDummyAvtarUrl(profile_icon).avatarUrl}
         sx={{
           width: { xs: 48, md: 64 },
           height: { xs: 48, md: 64 },
@@ -42,8 +44,8 @@ export default function ProductReviewItem({ review }: Props) {
       />
 
       <ListItemText
-        primary={name}
-        secondary={fDate(postedAt)}
+        primary={first_name+" "+last_name}
+        secondary={fDate(created_at)}
         primaryTypographyProps={{
           noWrap: true,
           typography: 'subtitle2',
@@ -62,7 +64,7 @@ export default function ProductReviewItem({ review }: Props) {
     <Stack spacing={1} flexGrow={1}>
       <Rating size="small" value={rating} precision={0.1} readOnly />
 
-      {isPurchased && (
+      {/* {isPurchased && (
         <Stack
           direction="row"
           alignItems="center"
@@ -74,25 +76,25 @@ export default function ProductReviewItem({ review }: Props) {
           <Iconify icon="ic:round-verified" width={16} sx={{ mr: 0.5 }} />
           Verified purchase
         </Stack>
-      )}
+      )} */}
 
-      <Typography variant="body2">{comment}</Typography>
+      <Typography variant="subtitle2">{title}</Typography>
+      <Typography variant="body2" sx={{width:'1000px', maxWidth:'100%'}}>{rating_description}</Typography>
 
-      {!!attachments?.length && (
+      {!!images?.length && (
         <Stack direction="row" flexWrap="wrap" spacing={1} sx={{ pt: 1 }}>
-          {attachments.map((attachment) => (
+          {images.map((images) => (
             <Box
               component="img"
-              key={attachment}
-              alt={attachment}
-              src={attachment}
+              key={images._id}
+              src={images.image_url}
               sx={{ width: 64, height: 64, borderRadius: 1.5 }}
             />
           ))}
         </Stack>
       )}
 
-      <Stack direction="row" spacing={2} sx={{ pt: 1.5 }}>
+      {/* <Stack direction="row" spacing={2} sx={{ pt: 1.5 }}>
         <Stack direction="row" alignItems="center" sx={{ typography: 'caption' }}>
           <Iconify icon="solar:like-outline" width={16} sx={{ mr: 0.5 }} />
           123
@@ -102,7 +104,7 @@ export default function ProductReviewItem({ review }: Props) {
           <Iconify icon="solar:dislike-outline" width={16} sx={{ mr: 0.5 }} />
           34
         </Stack>
-      </Stack>
+      </Stack> */}
     </Stack>
   );
 

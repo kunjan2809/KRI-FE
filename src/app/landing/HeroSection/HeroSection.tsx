@@ -1,10 +1,16 @@
 
 import React from 'react';
+
 import { Box, Button, Typography } from '@mui/material';
-import Iconify from 'src/components/iconify';
-import bgImage from '../../../../public/assets/hero-section.webp';
+
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
+
+import Iconify from 'src/components/iconify';
+
+
+import bgImage from '../../../../public/assets/hero-section.webp';
+
 const HeroSection = () => {
     const router = useRouter();
     return (

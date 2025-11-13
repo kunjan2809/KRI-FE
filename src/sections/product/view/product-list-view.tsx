@@ -3,10 +3,13 @@
 import isEqual from 'lodash/isEqual';
 import { useState, useEffect, useCallback } from 'react';
 
+import { Box } from '@mui/material';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
+import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
+import Typography from '@mui/material/Typography';
 import {
   DataGrid,
   GridColDef,
@@ -28,19 +31,18 @@ import { RouterLink } from 'src/routes/components';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
-import { deleteProduct, useGetProducts } from 'src/api/product';
+import { useAuthToken } from 'src/auth/hooks';
 import { PRODUCT_STOCK_OPTIONS } from 'src/_mock';
+import { deleteProduct, patchFeaturedStatus, useGetProducts } from 'src/api/product';
 
+import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import { useSnackbar } from 'src/components/snackbar';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
-import Alert from '@mui/material/Alert';
-import Typography from '@mui/material/Typography';
 
 import { IProductTableFilters, IProductTableFilterValue } from 'src/types/product';
-import { useAuthToken } from 'src/auth/hooks';
 
 import ProductTableToolbar from '../product-table-toolbar';
 import ProductTableFiltersResult from '../product-table-filters-result';
@@ -96,6 +98,7 @@ export default function ProductListView() {
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(20);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState<string>('');
   const [deleteRowIds, setDeleteRowIds] = useState<string[]>([]);
 
@@ -119,7 +122,7 @@ export default function ProductListView() {
   });
 
   const [selectedRowIds, setSelectedRowIds] = useState<GridRowSelectionModel>([]);
-
+ 
   const [columnVisibilityModel, setColumnVisibilityModel] =
     useState<GridColumnVisibilityModel>(HIDE_COLUMNS);
 
@@ -128,6 +131,7 @@ export default function ProductListView() {
     if (products && products.length) {
       setTableData(products);
     }
+   
   }, [products]);
 
 
@@ -186,7 +190,15 @@ export default function ProductListView() {
     },
     [router]
   );
+  const handleFeaturedToggole = async (productId: string, status: boolean) => {
+    try {
+     await patchFeaturedStatus(token, productId, !status)
+     reFetchProducts()
+    } catch (error) {
+      console.log("Somthing get wrong", error)
+    }
 
+  }
   const columns: GridColDef[] = [
     {
       field: 'name',
@@ -224,7 +236,12 @@ export default function ProductListView() {
       type: 'singleSelect',
       editable: true,
       valueOptions: PUBLISH_OPTIONS,
-      renderCell: (params) => <RenderCellPublish params={params} />,
+      renderCell: (params) => <Box>
+        {params.row.featured && <Label variant="soft" color='success'>
+          featured
+        </Label>
+        }<RenderCellPublish params={params} />
+      </Box>
     },
     {
       type: 'actions',
@@ -251,6 +268,12 @@ export default function ProductListView() {
         />,
         <GridActionsCellItem
           showInMenu
+          icon={<Iconify icon="ph-star" />}
+          label={params.row.featured ? 'Remove featured' : 'Make featured'}
+          onClick={() => handleFeaturedToggole(params.row._id, params.row.featured)}
+        />,
+        <GridActionsCellItem
+          showInMenu
           icon={<Iconify icon="solar:trash-bin-trash-bold" />}
           label="Delete"
           onClick={() => {
@@ -273,7 +296,7 @@ export default function ProductListView() {
         publishOptions={PUBLISH_OPTIONS}
       />
 
-      <GridToolbarQuickFilter 
+      <GridToolbarQuickFilter
         placeholder="Search products..."
         debounceMs={1000}
       />

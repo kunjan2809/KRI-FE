@@ -2,7 +2,6 @@
 
 import { _id } from 'src/_mock/assets';
 
-
 const ROOTS = {
   AUTH: '/auth',
   ADMIN: '/admin',
@@ -41,9 +40,21 @@ export const paths = {
       registry: '/registry',
     },
     cart: '/cart',
-    orderDetails: '/order-details',
+    orders: {
+      root: '/order',
+      details: (id: string) => `/orders/${id}`,
+      demo: {
+        details: `/orders/${MOCK_ID}`,
+      },
+    },
     profile: '/profile',
-    orders: '/orders',
+    orders: {
+      root: '/orders',
+      details: (id: string) => `/orders/${id}`,
+      demo: {
+        details: `/orders/${MOCK_ID}`,
+      },
+    },
     helpCenter: '/help-center',
     wishlist: '/wishlist',
   },

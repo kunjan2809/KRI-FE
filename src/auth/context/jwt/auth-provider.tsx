@@ -187,12 +187,13 @@ export function AuthProvider({ children }: Props) {
 
   // REGISTER
   const register = useCallback(
-    async (email: string, password: string, firstName: string, lastName: string, profileIcon?: string) => {
+    async (email: string, password: string, firstName: string, lastName: string,mobile_number:string, profileIcon?: string) => {
       const data = {
         email,
         password,
         first_name: firstName,
         last_name: lastName,
+        mobile_number,
         profile_icon: profileIcon || "1", // Default to first avatar if not provided
       };
 

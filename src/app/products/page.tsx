@@ -41,7 +41,7 @@ import { useRouter, usePathname, useSearchParams } from 'src/routes/hooks';
 
 import { AddToCart } from 'src/api/cart'
 import { useAuthToken } from 'src/auth/hooks';
-import { useGetCategories } from 'src/api/category';
+import { useGetCategories, useGetVariation } from 'src/api/category';
 import { getProduct, GetProductParama } from 'src/api/product';
 import { addWishlist, removeWishlist } from 'src/api/wishlist';
 
@@ -55,6 +55,7 @@ import ProductPageSort from 'src/sections/product/productPage-sort';
 import { ProductCardSkeleton } from 'src/sections/product/product-skeleton';
 
 import { Product, PaginationPayload } from 'src/types/product';
+import { VariationOption } from 'src/types/category';
 
 
 
@@ -69,11 +70,7 @@ const filterOptions = [
   { value: 'low_to_high', label: 'Price: Low to High', isSelected: false },
   { value: 'highest_rated', label: 'Highest Rated', isSelected: false },
 ];
-const colours = [
-  "Red",
-  "Bule",
-  "Green"
-]
+
 // filterOptions interface
 interface Filter {
   value: string,
@@ -84,7 +81,7 @@ interface Filter {
 
 export default function ProductsPage() {
   const { categories } = useGetCategories()
-
+  const { variation } = useGetVariation()
   // hookes
   const { enqueueSnackbar } = useSnackbar()
   const searchParams = useSearchParams();
@@ -105,8 +102,8 @@ export default function ProductsPage() {
     priceRange: [0, 1000],
     currentPage: 1,
   })
+
   const [showFilters, setShowFilters] = useState(false);
-  console.log('showFilters', showFilters)
   const [filterExpanded, setFilterExpanded] = useState(filterExpandedOptions);
   const [animate, setAnimate] = useState('');
 
@@ -114,7 +111,6 @@ export default function ProductsPage() {
 
   // gobal genric function for filters
   const updateFilter = (key: string, value: any) => {
-    console.log(key, value)
     setFilters((prev) => (
       {
         ...prev,
@@ -130,7 +126,7 @@ export default function ProductsPage() {
       if (value === "" || value == null || (Array.isArray(value) && value.length === 0)) {
         params.delete(key)
       } else if (Array.isArray(value)) {
-        params.set(key, value.join(','))
+        value.map((e, index) => index === 0 ? params.set(key, e) : params.append(key, e))
       }
       else {
         params.set(key, String(value))
@@ -197,7 +193,6 @@ export default function ProductsPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-
   const handleAddToWishlist = async (event: React.MouseEvent<HTMLDivElement>, product: Product) => {
     event.stopPropagation();
     setAnimate(product._id);
@@ -211,10 +206,10 @@ export default function ProductsPage() {
     setTimeout(() => setAnimate(''), 500);
   };
 
-  const handleAddToCart = async (event: React.MouseEvent<HTMLButtonElement>, productId: string) => {
+  const handleAddToCart = async (event: React.MouseEvent<HTMLButtonElement>, productId: string, variationId: string) => {
     event.stopPropagation()
     try {
-      const response = await AddToCart(token, productId)
+      const response = await AddToCart(token, productId, variationId)
       if (response.success) {
         enqueueSnackbar(response.message, { variant: "success" })
       }
@@ -240,7 +235,6 @@ export default function ProductsPage() {
     router.push(`${pathname}`)
     setFilters(filters)
   };
-
 
   const formatPrice = (price: number) => new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -269,7 +263,8 @@ export default function ProductsPage() {
         min_price: filters.priceRange[0],
         max_price: filters.priceRange[1],
         page: filters.currentPage,
-        search: filters.searchTerm
+        search: filters.searchTerm,
+        color: filters.color.toString()
       }
       const response = await getProduct(token, queryParams)
       if (response.success) {
@@ -285,15 +280,14 @@ export default function ProductsPage() {
   useEffect(() => {
     const search = searchParams.get('searchStr') || "";
     const categoryId = searchParams.get('categoryId') || "";
-    const colors = searchParams.get('color') || ""
+    const colors = searchParams.getAll('color')
     const page = Number(searchParams.get("page")) || 1
     const minPrice = Number(searchParams.get("min_price")) || 0
     const maxPrice = Number(searchParams.get("max_price")) || 1000
-
     setFilters({
       searchTerm: search,
       category: categoryId,
-      color: colors.split(','),
+      color: colors,
       currentPage: page,
       priceRange: [minPrice, maxPrice]
     })
@@ -453,8 +447,7 @@ export default function ProductsPage() {
                   }
 
                 }} >
-                  {colours.map((color) =>
-
+                  {variation?.colors?.map((color) =>
                   (
                     <ListItem sx={{ py: 0 }} >
                       <Checkbox checked={filters.color.includes(color)} onChange={() => handleCheckBox(color)} />
@@ -567,7 +560,7 @@ export default function ProductsPage() {
                               <CardMedia
                                 component="img"
                                 height="250"
-                                image={product.primary_image?.image_url}
+                                image={product.primary_image ? product.primary_image.image_url : "https://nraasmart.orderz.app/images/item_placeholder.jpg"}
                                 alt={product.name}
                                 sx={{ objectFit: 'cover' }}
                               />
@@ -670,7 +663,7 @@ export default function ProductsPage() {
                               </Typography>
 
                               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
-                                <Button variant="outlined" onClick={(event) => handleAddToCart(event, product._id)} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                <Button variant="outlined" onClick={(event) => handleAddToCart(event, product._id, product.variations[0]._id)} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                                   <Iconify icon="eva:shopping-cart-outline" width={20} />
                                   Add to cart
                                 </Button>

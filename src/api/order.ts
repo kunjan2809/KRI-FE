@@ -15,6 +15,7 @@ import {
   IOrderItemTableData,
   Order,
   ReturnOrder,
+  IOrdersDetail,
 } from 'src/types/order';
 import { OrderData } from 'src/types/analytics';
 

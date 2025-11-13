@@ -268,6 +268,7 @@ export interface Product {
   available_colors: string[];
   available_sizes: string[];
   primary_image: ProductPrimaryImage;
+  variations: Variation[];
   searchScore: number;
 }
 export interface ProductPrimaryImage {
@@ -540,7 +541,7 @@ export interface SuggestionData {
   total_suggestions: number;
 }
 
-export interface Suggestion {
+export interface Suggestion{
   _id: string;
   id: string;
   name: string;

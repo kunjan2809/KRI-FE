@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, SyntheticEvent } from 'react';
 
 import {
   Box,
@@ -244,7 +244,7 @@ export default function CartPage() {
                           <CardMedia
                             component="img"
                             height="120"
-                            image={item.product.primary_image?.image_url}
+                            image={item.product.primary_image?item.product.primary_image.image_url:"https://nraasmart.orderz.app/images/item_placeholder.jpg"}
                             alt={item.product.name}
                             sx={{ objectFit: 'cover', borderRadius: 1 }}
                           />

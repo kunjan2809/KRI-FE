@@ -157,6 +157,7 @@ export const endpoints = {
     add: '/api/category/add',
     edit: '/api/category/edit',
     delete: '/api/category/delete',
+   variation:'/api/products/variation-options'
   },
   wishlist: {
     all: '/api/wishlist',

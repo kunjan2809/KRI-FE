@@ -60,9 +60,9 @@ const ProductCarousel: React.FC<CarouselProps> = ({ products, direction, }) => {
         ]
     };
 
-    const addToCart = async (productId: string) => {
+    const addToCart = async (productId: string ,variationId?:string) => {
         try {
-            const response = await AddToCart(token, productId)
+            const response = await AddToCart(token, productId,variationId)
             if (response.success) {
                 enqueueSnackbar(response.message, { variant: "success" })
             }

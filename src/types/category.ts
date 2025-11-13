@@ -32,3 +32,12 @@ export interface ICategoryUpdateRequest {
   description?: string;
 }
 
+// category 
+
+export interface VariationOption {
+  colors: string[]
+  sizes: string[]
+  total_colors: number
+  total_sizes: number
+}
+

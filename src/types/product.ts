@@ -270,7 +270,7 @@ export interface Product {
   primary_image: ProductPrimaryImage;
   images: ProductPrimaryImage[];
   searchScore: number;
-   variations?: Variation[] | [];
+    variations: Variation[];
 }
 
 export interface ProductPrimaryImage {
@@ -543,7 +543,7 @@ export interface SuggestionData {
   total_suggestions: number;
 }
 
-export interface Suggestion {
+export interface Suggestion{
   _id: string;
   id: string;
   name: string;

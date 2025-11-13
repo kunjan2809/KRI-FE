@@ -41,7 +41,7 @@ import { useRouter, usePathname, useSearchParams } from 'src/routes/hooks';
 
 import { AddToCart } from 'src/api/cart';
 import { useAuthToken } from 'src/auth/hooks';
-import { useGetCategories } from 'src/api/category';
+import { useGetCategories, useGetVariation } from 'src/api/category';
 import { getProduct, GetProductParama } from 'src/api/product';
 import { addWishlist, removeWishlist } from 'src/api/wishlist';
 
@@ -54,6 +54,7 @@ import ProductPageSort from 'src/sections/product/productPage-sort';
 import { ProductCardSkeleton } from 'src/sections/product/product-skeleton';
 
 import { Product, PaginationPayload } from 'src/types/product';
+import { VariationOption } from 'src/types/category';
 import { useAuthContext } from 'src/auth/hooks/use-auth-context';
 import LoginPopup from '../landing/loginPopup/AuthPopup';
 
@@ -68,7 +69,6 @@ const filterOptions = [
   { value: 'low_to_high', label: 'Price: Low to High', isSelected: false },
   { value: 'highest_rated', label: 'Highest Rated', isSelected: false },
 ];
-const colours = ['Red', 'Bule', 'Green'];
 // filterOptions interface
 interface Filter {
   value: string;
@@ -77,8 +77,10 @@ interface Filter {
 }
 
 export default function ProductsPage() {
-  const { categories } = useGetCategories();
 
+  const { categories } = useGetCategories()
+  const { variation } = useGetVariation()
+  const { categories } = useGetCategories();
   // hookes
   const { enqueueSnackbar } = useSnackbar();
   const searchParams = useSearchParams();
@@ -106,11 +108,13 @@ export default function ProductsPage() {
 
   // gobal genric function for filters
   const updateFilter = (key: string, value: any) => {
-    setFilters((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-  };
+    setFilters((prev) => (
+      {
+        ...prev,
+        [key]: value
+      }
+    ))
+  }
 
   // Helper function for setparms value for all filter
   const setUrlParmas = (update: Record<string, any>) => {
@@ -119,9 +123,10 @@ export default function ProductsPage() {
       if (value === '' || value == null || (Array.isArray(value) && value.length === 0)) {
         params.delete(key);
       } else if (Array.isArray(value)) {
-        params.set(key, value.join(','));
-      } else {
-        params.set(key, String(value));
+        value.map((e, index) => index === 0 ? params.set(key, e) : params.append(key, e))
+      }
+      else {
+        params.set(key, String(value))
       }
     });
     params.set('page', '1');
@@ -204,17 +209,12 @@ export default function ProductsPage() {
     }
   };
 
-  const handleAddToCart = async (event: React.MouseEvent<HTMLButtonElement>, productId: string) => {
-    event.stopPropagation();
+  const handleAddToCart = async (event: React.MouseEvent<HTMLButtonElement>, productId: string, variationId: string) => {
+    event.stopPropagation()
     try {
-      if (!authenticated) {
-        setIsFrom((prev) => ({ ...prev, cart: true }));
-        setLoginPopupOpen(true);
-      } else {
-        const response = await AddToCart(token, productId);
-        if (response.success) {
-          enqueueSnackbar(response.message, { variant: 'success' });
-        }
+      const response = await AddToCart(token, productId, variationId)
+      if (response.success) {
+        enqueueSnackbar(response.message, { variant: "success" })
       }
     } catch (error) {
       console.log('Somthing get wrong', error);
@@ -280,8 +280,9 @@ export default function ProductsPage() {
         max_price: filters.priceRange[1],
         page: filters.currentPage,
         search: filters.searchTerm,
-      };
-      const response = await getProduct(token, queryParams);
+        color: filters.color.toString()
+      }
+      const response = await getProduct(token, queryParams)
       if (response.success) {
         setIsProductLoading(false);
         setProductData(response.data.products);
@@ -293,17 +294,16 @@ export default function ProductsPage() {
   };
 
   useEffect(() => {
-    const search = searchParams.get('searchStr') || '';
-    const categoryId = searchParams.get('categoryId') || '';
-    const colors = searchParams.get('color') || '';
-    const page = Number(searchParams.get('page')) || 1;
-    const minPrice = Number(searchParams.get('min_price')) || 0;
-    const maxPrice = Number(searchParams.get('max_price')) || 1000;
-
+    const search = searchParams.get('searchStr') || "";
+    const categoryId = searchParams.get('categoryId') || "";
+    const colors = searchParams.getAll('color')
+    const page = Number(searchParams.get("page")) || 1
+    const minPrice = Number(searchParams.get("min_price")) || 0
+    const maxPrice = Number(searchParams.get("max_price")) || 1000
     setFilters({
       searchTerm: search,
       category: categoryId,
-      color: colors.split(','),
+      color: colors,
       currentPage: page,
       priceRange: [minPrice, maxPrice],
     });
@@ -504,55 +504,42 @@ export default function ProductsPage() {
                       </FormControl>
                     </Box>
                   </Box>
-                </Collapse>
-                <ListItemButton
-                  onClick={() => handleFilterExpanded('colours')}
-                  sx={{ justifyContent: 'space-between', mt: 1, borderRadius: '8px' }}
-                >
-                  <ListItemText primary="Colours" />
-                  <Iconify
-                    icon={
-                      filterExpanded.find((f) => f.value === 'colours')?.isExpanded
-                        ? 'eva:arrow-ios-upward-fill'
-                        : 'eva:arrow-ios-downward-fill'
-                    }
-                  />
-                </ListItemButton>
-                <Collapse
-                  in={filterExpanded.find((f) => f.value === 'colours')?.isExpanded}
-                  timeout="auto"
-                  unmountOnExit
-                >
-                  <div role="group" aria-labelledby="colours-group">
-                    <List
-                      sx={{
-                        '.MuiButtonBase-root, .MuiSvgIcon-fontSizeSmall ': {
-                          color: '#212B36',
-                        },
-                      }}
-                    >
-                      {colours.map((color) => (
-                        <ListItem sx={{ py: 0 }}>
-                          <Checkbox
-                            checked={filters.color.includes(color)}
-                            onChange={() => handleCheckBox(color)}
-                          />
-                          <ListItemText primary={color} />
-                        </ListItem>
-                      ))}
-                    </List>
-                  </div>
-                </Collapse>
-              </List>
-            )}
-          </Box>
-          <Box sx={{ width: showFilters ? '80%' : '100%', transition: 'width 0.3s ease-in-out' }}>
-            {/* Search and Filters */}
-            <Box
-              sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}
-            >
-              <Stack direction="row" spacing={1} flexShrink={0} gap={2}>
-                {showFilters ? (
+                </Box>
+              </Collapse>
+              <ListItemButton onClick={() => handleFilterExpanded('colours')} sx={{ justifyContent: 'space-between', mt: 1, borderRadius: '8px' }}>
+                <ListItemText primary="Colours" />
+                <Iconify
+                  icon={filterExpanded.find(f => f.value === 'colours')?.isExpanded ? 'eva:arrow-ios-upward-fill' : 'eva:arrow-ios-downward-fill'}
+                />
+              </ListItemButton>
+              <Collapse in={filterExpanded.find(f => f.value === 'colours')?.isExpanded} timeout="auto" unmountOnExit>
+
+                <div role="group" aria-labelledby="colours-group"><List sx={{
+                  '.MuiButtonBase-root, .MuiSvgIcon-fontSizeSmall ': {
+                    color: '#212B36',
+                  }
+
+                }} >
+                  {variation?.colors?.map((color) =>
+                  (
+                    <ListItem sx={{ py: 0 }} >
+                      <Checkbox checked={filters.color.includes(color)} onChange={() => handleCheckBox(color)} />
+                      <ListItemText primary={color} />
+                    </ListItem>
+                  )
+                  )}
+                </List>
+                </div>
+              </Collapse>
+            </List>
+          )}
+        </Box>
+        <Box sx={{ width: showFilters ? '80%' : '100%', transition: 'width 0.3s ease-in-out' }}>
+          {/* Search and Filters */}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+            <Stack direction="row" spacing={1} flexShrink={0} gap={2}>
+              {showFilters ?
+                (
                   <Chip
                     key={1}
                     label="Hide filters"
@@ -595,74 +582,58 @@ export default function ProductsPage() {
                 <ProductPageSort onSort={handleFilter} sortOptions={productFilters} />
               </Box>
             </Box>
+          <>
+            {/* Products Grid */}
 
-            <>
-              {/* Products Grid */}
-
-              {isProductLoading ? (
-                <ProductCardSkeleton colCount={showFilters ? 3 : 4} />
-              ) : (
-                <>
-                  {productData.length > 0 ? (
-                    <>
-                      {isProductLoading ? (
-                        <ProductCardSkeleton colCount={showFilters ? 3 : 4} />
-                      ) : (
-                        <Grid container spacing={3} sx={{ mb: 4 }}>
-                          {productData.map((product) => (
-                            <Grid
-                              item
-                              xs={12}
-                              sm={showFilters ? 12 : 6}
-                              md={showFilters ? 6 : 4}
-                              lg={showFilters ? 4 : 3}
-                              key={product._id}
-                            >
-                              <Card
-                                sx={{
-                                  height: '100%',
-                                  cursor: 'pointer',
-                                  border: '1px solid #E0E0E0',
-                                  transition: 'transform 0.2s, box-shadow 0.2s',
-                                  '&:hover': {
-                                    transform: 'translateY(-4px)',
-                                  },
-                                  '.add-wishlist-btn': {
-                                    ...(product.is_in_wishlist
-                                      ? {
-                                          opacity: 1,
-                                          top: 5,
-                                          right: 5,
-                                          transition: 'all 0.1s ease',
-                                        }
-                                      : {
-                                          opacity: 0,
-                                          top: '25%',
-                                          transition: 'all 0.1s ease',
-                                        }),
-                                  },
-                                  '&:hover .add-wishlist-btn': {
-                                    opacity: 1,
-                                    top: 5,
-                                    right: 5,
-                                    transition: 'all 0.1s ease',
-                                  },
-                                }}
-                                onClick={() => handleProductClick(product._id)}
-                              >
-                                <Box sx={{ position: 'relative' }}>
-                                  <CardMedia
-                                    component="img"
-                                    height="250"
-                                    image={product.primary_image?.image_url}
-                                    alt={product.name}
-                                    sx={{ objectFit: 'cover' }}
-                                  />
-                                  <Box
-                                    className="add-wishlist-btn"
-                                    onClick={(event) =>
-                                      handleAddToWishlist(event, product as Product)
-                                    }
+            {isProductLoading ? <ProductCardSkeleton colCount={showFilters ? 3 : 4} />
+              :
+              <>
+                {productData.length > 0 ? (
+                  <>
+                    {isProductLoading ? <ProductCardSkeleton colCount={showFilters ? 3 : 4} /> : <Grid container spacing={3} sx={{ mb: 4 }}>
+                      {productData.map((product) => (
+                        <Grid item xs={12} sm={showFilters ? 12 : 6} md={showFilters ? 6 : 4} lg={showFilters ? 4 : 3} key={product._id}>
+                          <Card
+                            sx={{
+                              height: '100%',
+                              cursor: 'pointer',
+                              border: '1px solid #E0E0E0',
+                              transition: 'transform 0.2s, box-shadow 0.2s',
+                              '&:hover': {
+                                transform: 'translateY(-4px)',
+                              },
+                              '.add-wishlist-btn': {
+                                ...(product.is_in_wishlist ? {
+                                  opacity: 1,
+                                  top: 5,
+                                  right: 5,
+                                  transition: 'all 0.1s ease',
+                                } : {
+                                  opacity: 0,
+                                  top: '25%',
+                                  transition: 'all 0.1s ease',
+                                }),
+                              },
+                              '&:hover .add-wishlist-btn': {
+                                opacity: 1,
+                                top: 5,
+                                right: 5,
+                                transition: 'all 0.1s ease',
+                              },
+                            }}
+                            onClick={() => handleProductClick(product._id)}
+                          >
+                            <Box sx={{ position: 'relative' }}>
+                              <CardMedia
+                                component="img"
+                                height="250"
+                                image={product.primary_image ? product.primary_image.image_url : "https://nraasmart.orderz.app/images/item_placeholder.jpg"}
+                                alt={product.name}
+                                sx={{ objectFit: 'cover' }}
+                              />
+                              <Box
+                                className='add-wishlist-btn'
+                                onClick={(event) => handleAddToWishlist(event, product as Product)}
                                     sx={{
                                       position: 'absolute',
                                       top: 5,
@@ -733,80 +704,44 @@ export default function ProductsPage() {
                               }}
                             />
                           )} */}
-                                </Box>
-                                <CardContent sx={{ p: 2 }}>
-                                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                                    {product.category_name}
-                                  </Typography>
-                                  <Typography
-                                    variant="h6"
-                                    component="h3"
-                                    sx={{ mb: 1, lineHeight: 1.3, fontSize: '1rem' }}
-                                  >
-                                    {product.name}
-                                  </Typography>
-                                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                                    <Rating
-                                      value={product.average_rating}
-                                      size="small"
-                                      readOnly
-                                      sx={{ mr: 1 }}
-                                    />
-                                    <Typography variant="body2" color="text.secondary">
-                                      ({product.total_reviews})
-                                    </Typography>
-                                  </Box>
-                                  <Box
-                                    sx={{
-                                      display: 'flex',
-                                      justifyContent: 'space-between',
-                                      alignItems: 'center',
-                                      mb: 1,
-                                    }}
-                                  >
-                                    <Typography variant="h6" color="primary.main" fontWeight="bold">
-                                      {formatPrice(product.price)}
-                                    </Typography>
-                                  </Box>
+                            </Box>
+                            <CardContent sx={{ p: 2 }}>
+                              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                                {product.category_name}
+                              </Typography>
+                              <Typography variant="h6" component="h3" sx={{ mb: 1, lineHeight: 1.3, fontSize: '1rem' }}>
+                                {product.name}
+                              </Typography>
+                              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                                <Rating value={product.average_rating} size="small" readOnly sx={{ mr: 1 }} />
+                                <Typography variant="body2" color="text.secondary">
+                                  ({product.total_reviews})
+                                </Typography>
+                              </Box>
+                              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                                <Typography variant="h6" color="primary.main" fontWeight="bold">
+                                  {formatPrice(product.price)}
+                                </Typography>
 
-                                  <Typography
-                                    variant="body2"
-                                    color="text.secondary"
-                                    sx={{ mt: 1, fontSize: '0.875rem' }}
-                                  >
-                                    {0} sold
-                                  </Typography>
+                              </Box>
 
-                                  <Box
-                                    sx={{
-                                      display: 'flex',
-                                      justifyContent: 'space-between',
-                                      alignItems: 'center',
-                                      mt: 1,
-                                    }}
-                                  >
-                                    <Button
-                                      variant="outlined"
-                                      onClick={(event) => handleAddToCart(event, product._id)}
-                                      sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
-                                    >
-                                      <Iconify icon="eva:shopping-cart-outline" width={20} />
-                                      Add to cart
-                                    </Button>
+                              <Typography variant="body2" color="text.secondary" sx={{ mt: 1, fontSize: '0.875rem' }}>
+                                {0} sold
+                              </Typography>
 
-                                    <Button
-                                      variant="contained"
-                                      onClick={() => handleProductClick(product._id)}
-                                      sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
-                                    >
-                                      <Iconify icon="eva:eye-outline" width={20} />
-                                      view product
-                                    </Button>
-                                  </Box>
-                                </CardContent>
-                              </Card>
-                            </Grid>
-                          ))}
+                              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
+                                <Button variant="outlined" onClick={(event) => handleAddToCart(event, product._id, product.variations[0]._id)} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                  <Iconify icon="eva:shopping-cart-outline" width={20} />
+                                  Add to cart
+                                </Button>
+
+                                <Button variant="contained" onClick={() => handleProductClick(product._id)} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                  <Iconify icon="eva:eye-outline" width={20} />
+                                  view product
+                                </Button>
+                              </Box>
+                            </CardContent>
+                          </Card>
                         </Grid>
                       )}
 

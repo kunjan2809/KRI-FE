@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, SyntheticEvent } from 'react';
 
 import {
   Box,
@@ -239,17 +239,17 @@ export default function CartPage() {
                   <Stack spacing={3}>
                     {cartData.map((item) => (
                     <Card key={item.id} sx={{ p: 3, border: '1px solid #e0e0e0', boxShadow: 'none' }}>
-                        <Grid container spacing={3}>
-                          <Grid item xs={12} sm={3}>
-                            <CardMedia
-                              component="img"
-                              height="120"
-                              image={item.product.primary_image?.image_url}
-                              alt={item.product.name}
-                              sx={{ objectFit: 'cover', borderRadius: 1 }}
-                            />
-                          </Grid>
-                          <Grid item xs={12} sm={9}>
+                      <Grid container spacing={3}>
+                        <Grid item xs={12} sm={3}>
+                          <CardMedia
+                            component="img"
+                            height="120"
+                            image={item.product.primary_image?item.product.primary_image.image_url:"https://nraasmart.orderz.app/images/item_placeholder.jpg"}
+                            alt={item.product.name}
+                            sx={{ objectFit: 'cover', borderRadius: 1 }}
+                          />
+                        </Grid>
+                        <Grid item xs={12} sm={9}>
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                               <Box sx={{ flex: 1 }}>
                                 <Typography variant="h6" component="h3" sx={{ mb: 1 }}>

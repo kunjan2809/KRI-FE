@@ -33,6 +33,7 @@ import { useRouter } from 'src/routes/hooks';
 import { paths } from 'src/routes/paths';
 
 import { getDummyAvtarUrl } from 'src/utils/avtarData';
+import { boolean } from 'yup';
 
 // ----------------------------------------------------------------------
 
@@ -97,7 +98,6 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-
 // ----------------------------------------------------------------------
 
 export default function UserHeader() {
@@ -105,8 +105,10 @@ export default function UserHeader() {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [anchorEl1, setAnchorEl1] = useState<null | HTMLElement>(null);
-  const [loginPopupOpen, setLoginPopupOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [loginPopupOpen, setLoginPopupOpen] = useState(false);
+  const [isFrom, setIsFrom] = useState({ cart: false, wishlist: false });
+
   const router = useRouter();
   // Get user data from auth context
   const { user, authenticated, logout } = useAuthContext();
@@ -119,7 +121,15 @@ export default function UserHeader() {
     if (categoriesLoading) {
       return (
         <MenuItem disabled>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'center', width: '100%' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              justifyContent: 'center',
+              width: '100%',
+            }}
+          >
             <CircularProgress size={20} />
             <Typography variant="body2">Loading categories...</Typography>
           </Box>
@@ -159,9 +169,7 @@ export default function UserHeader() {
         }}
         key={category._id}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {category.name}
-        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>{category.name}</Box>
       </MenuItem>
     ));
   };
@@ -183,6 +191,7 @@ export default function UserHeader() {
 
   const handleLoginPopupClose = (): void => {
     setLoginPopupOpen(false);
+    setIsFrom((prev) => ({ ...prev, cart: false, wishlist: false }));
   };
 
   const handleLoginPopupOpen = () => {
@@ -216,7 +225,6 @@ export default function UserHeader() {
     setAnchorEl(null);
   };
 
-
   return (
     <>
       <AppBar
@@ -247,9 +255,14 @@ export default function UserHeader() {
                   sx={{ minWidth: 'min-content', flexShrink: 0, padding: '4px 12px' }}
                 >
                   <>
-                    <Stack direction="row" alignItems="center" spacing={1} onClick={(e) => {
-                      setAnchorEl1(e.currentTarget);
-                    }}>
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      spacing={1}
+                      onClick={(e) => {
+                        setAnchorEl1(e.currentTarget);
+                      }}
+                    >
                       <Box
                         component="span"
                         sx={{
@@ -334,7 +347,7 @@ export default function UserHeader() {
                 flex: 1,
                 display: 'flex',
                 justifyContent: 'center',
-                mx: { xs: 1, md: 3 }
+                mx: { xs: 1, md: 3 },
               }}
             >
               <Search>
@@ -357,9 +370,15 @@ export default function UserHeader() {
 
             {/* Right Side - User Actions */}
             <Stack direction="row" alignItems="center" spacing={1}>
-              <IconButton size="small" sx={{ color: 'text.primary' }} onClick={() => {
-                window.location.href = paths.user.wishlist;
-              }}>
+              <IconButton
+                size="small"
+                sx={{ color: 'text.primary' }}
+                onClick={() => {
+                  !authenticated
+                    ? (setIsFrom((prev) => ({ ...prev, wishlist: true })), setLoginPopupOpen(true))
+                    : (window.location.href = paths.user.wishlist);
+                }}
+              >
                 <Tooltip title="Wishlist">
                   <Iconify icon="eva:heart-outline" width={24} height={24} />
                 </Tooltip>
@@ -370,7 +389,9 @@ export default function UserHeader() {
                 size="small"
                 sx={{ color: 'text.primary' }}
                 onClick={() => {
-                  window.location.href = paths.user.cart;
+                  !authenticated
+                    ? (setIsFrom((prev) => ({ ...prev, cart: true })), setLoginPopupOpen(true))
+                    : (window.location.href = paths.user.cart);
                 }}
               >
                 <Tooltip title="Cart">
@@ -388,7 +409,9 @@ export default function UserHeader() {
                     <Tooltip title={user?.email}>
                       {/* <Iconify icon="eva:person-outline" width={24} height={24} /> */}
                       <Avatar
-                        src={user?.photoURL || getDummyAvtarUrl(user?.profile_icon || '25').avatarUrl}
+                        src={
+                          user?.photoURL || getDummyAvtarUrl(user?.profile_icon || '25').avatarUrl
+                        }
                         alt={user?.displayName}
                         sx={{ width: 24, height: 24 }}
                       />
@@ -439,7 +462,7 @@ export default function UserHeader() {
                     textDecoration: 'none',
                     typography: 'body1',
                     '&:hover': { color: '#212B36' },
-                    display: { xs: 'none', sm: 'block' }
+                    display: { xs: 'none', sm: 'block' },
                   }}
                 >
                   Sign in
@@ -499,7 +522,6 @@ export default function UserHeader() {
                   </Box>
                 </MenuItem>
               </Menu> */}
-
             </Stack>
           </Toolbar>
         </Container>
@@ -544,7 +566,18 @@ export default function UserHeader() {
         </Box> */}
       </AppBar>
 
-      <LoginPopup open={loginPopupOpen} onClose={handleLoginPopupClose} />
+      <LoginPopup
+        title={isFrom.cart || isFrom.wishlist ? 'Login' : undefined}
+        description={
+          isFrom.cart
+            ? 'Please  login to check cart'
+            : isFrom.wishlist
+              ? 'Please login to check wishlist'
+              : undefined
+        }
+        open={loginPopupOpen}
+        onClose={handleLoginPopupClose}
+      />
 
       {/* Mobile Menu Drawer */}
       {/* <Drawer

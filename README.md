@@ -7,7 +7,7 @@
 - yarn install
 - yarn dev
 
-## USING NPM
+## USING NPM.
 
 - npm i OR npm i --legacy-peer-deps
 - npm run dev

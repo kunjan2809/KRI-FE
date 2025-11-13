@@ -12,7 +12,6 @@ export type IOrderFilters = {
 // ----------------------------------------------------------------------
 // order-list page table row type
 
-
 export type IOrderItem = {
   id: string;
   order_id: string;
@@ -60,13 +59,13 @@ export type IOrderDelivery = {
   delivery_status?: 'pending' | 'in_transit' | 'delivered' | 'failed';
 };
 
-export type IOrderTableFilterValue = null|string | string[];
+export type IOrderTableFilterValue = null | string | string[];
 
 export type IOrderTableFilters = {
   status: string;
   payment_status: string[];
-  dateRange:{startDate:Date|null,endDate:Date|null}
-  search:string
+  dateRange: { startDate: Date | null; endDate: Date | null };
+  search: string;
 };
 
 // ----------------------------------------------------------------------
@@ -154,7 +153,7 @@ export type IOrderFiltersResponse = {
   };
 };
 
-// get all of Admin orders 
+// get all of Admin orders
 
 export type IOrderItemTableData = {
   _id: string;
@@ -178,126 +177,126 @@ export type IOrderItemTableData = {
 //order detail
 
 export interface IOrdersDetail {
-  order: Order
-  order_items: IOrderDetailItem[]
+  order: Order;
+  order_items: IOrderDetailItem[];
 }
 
 export interface Order {
-  _id: string
-  user_id: UserId
-  shipping_address_id: ShippingAddressId
+  _id: string;
+  user_id: UserId;
+  shipping_address_id: ShippingAddressId;
   order_status: 'pending' | 'shipped' | 'cancelled' | 'delivered' | 'return';
-  delivered_at: any
+  delivered_at: any;
   payment_status: 'paid' | 'cod' | 'unpaid' | 'refunded';
-  discount_type: any
-  discount_rate: number
-  total_amount: number
-  created_at: string
-  order_number: string
-  __v: number
-  order_items: OrderItem[]
+  discount_type: any;
+  discount_rate: number;
+  total_amount: number;
+  created_at: string;
+  order_number: string;
+  __v: number;
+  order_items: OrderItem[];
 }
 
 export interface UserId {
-  _id: string
-  first_name: string
-  last_name: string
-  email: string
-  profile_icon: any
-  mobile_number: string
+  _id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  profile_icon: any;
+  mobile_number: string;
 }
 
 export interface ShippingAddressId {
-  _id: string
-  full_name: string
-  mobile_number: string
-  address_line_1: string
-  address_line_2: string
-  landmark: string
-  city: string
-  state: string
-  postal_code: string
-  country: string
-  is_default: boolean
+  _id: string;
+  full_name: string;
+  mobile_number: string;
+  address_line_1: string;
+  address_line_2: string;
+  landmark: string;
+  city: string;
+  state: string;
+  postal_code: string;
+  country: string;
+  is_default: boolean;
 }
 
 export interface IOrderDetailItem {
- _id: string
- id:string
-  order_id: string
-  product_id: ProductId
-  variation_id: any
-  product_name_snapshot: string
-  product_price_snapshot: number
-  quantity: number
-  price: number
-  __v: number
-  primary_image: PrimaryImage
-  mrp: number
+  _id: string;
+  id: string;
+  order_id: string;
+  product_id: ProductId;
+  variation_id: any;
+  product_name_snapshot: string;
+  product_price_snapshot: number;
+  quantity: number;
+  __v: number;
+  primary_image: PrimaryImage;
 }
 
 export interface OrderItem {
-  _id: string
-  total_value: number
-  item_discount: number
-  discount_percentage: number
-  id: string
-  order_id: string
-  product_id: ProductId
-  variation_id: any
-  product_name_snapshot: string
-  product_price_snapshot: number
-  quantity: number
-  price: number
-  __v: number
+  _id: string;
+  total_value: number;
+  item_discount: number;
+  discount_percentage: number;
+  id: string;
+  order_id: string;
+  product_id: ProductId;
+  variation_id: any;
+  product_name_snapshot: string;
+  product_price_snapshot: number;
+  quantity: number;
+  price: number;
+  __v: number;
 }
 
 export interface PrimaryImage {
-  _id: string
-  image_url: string
-  alt_text: string
-  is_primary: boolean
+  _id: string;
+  image_url: string;
+  alt_text: string;
+  is_primary: boolean;
 }
 
 export interface ProductId {
-  _id: string
-  name: string
-  sku: string
-  description: string
-  discount_amount: number
-  in_stock: boolean
-  low_stock: boolean
-  out_of_stock: boolean
-  is_deleted: boolean
-  id: string
+  _id: string;
+  id: string;
+  name: string;
+  sku: string;
+  description: string;
+  price: number;
+  mrp: number;
+  discount_amount: number;
+  in_stock: boolean;
+  low_stock: boolean;
+  out_of_stock: boolean;
+  is_deleted: boolean;
 }
 
 export interface UserOrders {
-  _id: string
-  user_id: string
-  shipping_address_id: ShippingAddressId
-  order_status: string
-  delivered_at: any
-  payment_status: string
-  discount_type: any
-  discount_rate: number
-  total_amount: number
-  created_at: string
-  order_number: string
-  __v: number
-  order_items: OrderItem[]
+  _id: string;
+  user_id: string;
+  shipping_address_id: ShippingAddressId;
+  order_status: string;
+  delivered_at: any;
+  payment_status: string;
+  discount_type: any;
+  discount_rate: number;
+  total_amount: number;
+  created_at: string;
+  order_number: string;
+  __v: number;
+  order_items: OrderItem[];
 }
 
 export interface OrderPagination {
-  current_page: number
-  total_pages: number
-  total_orders: number
-  limit: number
+  current_page: number;
+  total_pages: number;
+  total_orders: number;
+  limit: number;
 }
 
 export interface ReturnOrder {
-  order_item_id: string
-  reason: string
-  return_type: string
-  notes: string
+  order_item_id: string;
+  reason: string;
+  return_type: string;
+  notes: string;
 }

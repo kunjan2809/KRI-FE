@@ -18,7 +18,7 @@ import RecommendedProductsCard from '../../cart/RecommendedProductsCard';
 
 interface CarouselProps {
     products: Suggestion[];
-    direction: 'left' | 'right;'
+    direction: 'left' | 'right'
 }
 
 const ProductCarousel: React.FC<CarouselProps> = ({ products, direction, }) => {

@@ -10,10 +10,12 @@ import MailVerification from './mailVerification/MailVerfication';
 
 interface LoginPopupProps {
   open: boolean;
+  title?: string | undefined;
+  description?: string | undefined;
   onClose: () => void;
 }
 
-const LoginPopup = ({ open, onClose }: LoginPopupProps) => {
+const LoginPopup = ({ open, onClose, title, description }: LoginPopupProps) => {
   const [isSignup, setIsSignup] = useState(false);
   const [isEmailVerification, setIsEmailVerification] = useState(false);
   const [userEmail, setUserEmail] = useState('');
@@ -28,6 +30,8 @@ const LoginPopup = ({ open, onClose }: LoginPopupProps) => {
           onClose={onClose}
           setIsEmailVerification={setIsEmailVerification}
           setUserEmail={setUserEmail}
+          title={title}
+          description={description}
         />
       ) : (
         <>
@@ -49,8 +53,7 @@ const LoginPopup = ({ open, onClose }: LoginPopupProps) => {
               setUserEmail={setUserEmail}
               userEmail={userEmail}
             />
-          )
-          }
+          )}
         </>
       )}
     </>

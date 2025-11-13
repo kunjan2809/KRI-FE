@@ -29,7 +29,7 @@ import { paths } from 'src/routes/paths';
 import ProductDetailsDescription from 'src/sections/product/product-details-description';
 import Iconify from 'src/components/iconify';
 import ProductDetailsCarousel from 'src/sections/product/product-details-carousel';
-import { IProductItem, Reviews, Suggestion, TransformProduct, Variation } from 'src/types/product';
+import { IProductItem, Product, ProductDetailsRoot, Reviews, Suggestion, Variation } from 'src/types/product';
 import ProductDetailsReview from 'src/sections/product/product-details-review';
 import RecommendedProductsCard from 'src/app/cart/RecommendedProductsCard';
 
@@ -41,6 +41,8 @@ import { addWishlist, removeWishlist } from 'src/api/wishlist';
 import { ProductDetailsLoading } from 'src/sections/product/product-skeleton';
 import { ReviewLoading } from 'src/sections/product/review-skeleton';
 import { SuggestionCardLoading } from 'src/sections/product/suggestion-card-skeleton';
+import LoginPopup from 'src/app/landing/loginPopup/AuthPopup';
+import { useAuthContext } from 'src/auth/hooks/use-auth-context';
 
 // ----------------------------------------------------------------------
 
@@ -72,18 +74,20 @@ export default function ProductDetailsPage() {
   const theme = useTheme();
   const token = useAuthToken();
   const params = useParams();
+  const { authenticated } = useAuthContext();
   const router = useRouter();
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState(0);
   const [reviewSuccess, setReviewSuccess] = useState(false);
-  const [productData, setProductData] = useState<TransformProduct | null>(null);
+  const [productData, setProductData] = useState<Product | null>(null);
   const [review, setReview] = useState<Reviews | null>(null);
   const [suggestionData, setSuggestionData] = useState<Suggestion[] | []>([]);
   const [isProductDetailsLoading, setIsProductDetailsLoading] = useState<Boolean>(true);
   const [isReviewLoading, setIsReviewLoading] = useState<Boolean>(true);
   const [isSuggestionLoading, setIsSuggestionLoading] = useState<Boolean>(true);
+  const [loginPopupOpen, setLoginPopupOpen] = useState(false);
 
   const productId = params.id as string;
 
@@ -145,11 +149,15 @@ export default function ProductDetailsPage() {
 
   const handleAddToCart = async (productId: string, variation?: Variation[]) => {
     try {
-      const selectedVariation =
-        variation && variation.find((v) => v.color === selectedColor && v.size === selectedSize);
-      const variationId = selectedVariation?.id ?? null;
-      await AddToCart(token, productId, variationId as string, quantity);
-      router.push(paths.user.cart);
+      if (!authenticated) {
+        setLoginPopupOpen(true);
+      } else {
+        const selectedVariation =
+          variation && variation.find((v) => v.color === selectedColor && v.size === selectedSize);
+        const variationId = selectedVariation?.id ?? null;
+        await AddToCart(token, productId, variationId as string, quantity);
+        router.push(paths.user.cart);
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to product add to cart';
       enqueueSnackbar(errorMessage, { variant: 'error' });
@@ -167,6 +175,10 @@ export default function ProductDetailsPage() {
 
   const handleSelectedVariation = (event: SelectChangeEvent) => {
     setSelectedColor(event.target.value as string);
+  };
+
+  const handleLoginPopupClose = (): void => {
+    setLoginPopupOpen(false);
   };
 
   useEffect(() => {
@@ -214,11 +226,11 @@ export default function ProductDetailsPage() {
 
         <Container maxWidth="xl" sx={{ py: 4 }}>
           {/* Success Alert */}
-          {reviewSuccess && (
+          {/* {reviewSuccess && (
             <Alert severity="success" sx={{ mb: 3 }}>
               Thank you for your review! It has been submitted successfully.
             </Alert>
-          )}
+          )} */}
 
           {/* Product Details */}
 
@@ -568,6 +580,14 @@ export default function ProductDetailsPage() {
           </Box>
         </Container>
       </Box>
+      {loginPopupOpen && (
+        <LoginPopup
+          open={loginPopupOpen}
+          onClose={handleLoginPopupClose}
+          title="Login"
+          description="Please login to check cart"
+        />
+      )}
     </>
   );
 }

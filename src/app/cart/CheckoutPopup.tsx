@@ -117,7 +117,7 @@ export default function CheckoutPopup({
     city: '',
     state: '',
     postal_code: '',
-    country: 'United States',
+    country: '',
   });
   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
 
@@ -220,8 +220,9 @@ export default function CheckoutPopup({
     const updatedCart = localCartData.map((item) =>
       item.id === itemId ? { ...item, quantity: newQuantity } : item
     );
+     setLocalCartData(updatedCart);
     await updateItemQuantity(itemId, token, newQuantity);
-    setLocalCartData(updatedCart);
+   
     onUpdateCart(updatedCart);
   };
 
@@ -269,7 +270,7 @@ export default function CheckoutPopup({
     setIsAddNewAddress(true);
     const address: Address = {
       ...newAddress,
-      isDefault: false,
+      is_default:true,
     } as Address;
 
     // In real app, save to backend
@@ -456,8 +457,7 @@ export default function CheckoutPopup({
                   Your address is empty. Please add address before checkout.
                 </Alert>
               )}
-              {alladdress.map((address) => {
-                return (
+              {alladdress.map((address) => (
                   <Card
                     key={address._id}
                     sx={{
@@ -510,8 +510,7 @@ export default function CheckoutPopup({
                       />
                     </Box>
                   </Card>
-                );
-              })}
+                ))}
               {showNewAddressForm && (
                 <Card sx={{ p: 3, mt: 2, boxShadow: 'none' }}>
                   <Typography variant="h6" sx={{ mb: 2 }}>
@@ -612,7 +611,7 @@ export default function CheckoutPopup({
                         />
                       </Box>
                     </Grid>
-                    {/* <Grid item xs={12} sm={4}>
+                    <Grid item xs={12} sm={4}>
                         <Box sx={{ width: '100%' }}>
                           <Typography variant="subtitle2" fontWeight="medium" >
                             Country
@@ -625,7 +624,7 @@ export default function CheckoutPopup({
                             onChange={(e) => setNewAddress({ ...newAddress, country: e.target.value })}
                           />
                         </Box>
-                      </Grid> */}
+                      </Grid>
                     <Grid item xs={12}>
                       <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
                         <Button

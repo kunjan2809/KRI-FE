@@ -77,10 +77,8 @@ interface Filter {
 }
 
 export default function ProductsPage() {
-
-  const { categories } = useGetCategories()
-  const { variation } = useGetVariation()
   const { categories } = useGetCategories();
+  const { variation } = useGetVariation();
   // hookes
   const { enqueueSnackbar } = useSnackbar();
   const searchParams = useSearchParams();
@@ -108,13 +106,11 @@ export default function ProductsPage() {
 
   // gobal genric function for filters
   const updateFilter = (key: string, value: any) => {
-    setFilters((prev) => (
-      {
-        ...prev,
-        [key]: value
-      }
-    ))
-  }
+    setFilters((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
 
   // Helper function for setparms value for all filter
   const setUrlParmas = (update: Record<string, any>) => {
@@ -123,10 +119,9 @@ export default function ProductsPage() {
       if (value === '' || value == null || (Array.isArray(value) && value.length === 0)) {
         params.delete(key);
       } else if (Array.isArray(value)) {
-        value.map((e, index) => index === 0 ? params.set(key, e) : params.append(key, e))
-      }
-      else {
-        params.set(key, String(value))
+        value.map((e, index) => (index === 0 ? params.set(key, e) : params.append(key, e)));
+      } else {
+        params.set(key, String(value));
       }
     });
     params.set('page', '1');
@@ -209,12 +204,16 @@ export default function ProductsPage() {
     }
   };
 
-  const handleAddToCart = async (event: React.MouseEvent<HTMLButtonElement>, productId: string, variationId: string) => {
-    event.stopPropagation()
+  const handleAddToCart = async (
+    event: React.MouseEvent<HTMLButtonElement>,
+    productId: string,
+    variationId: string
+  ) => {
+    event.stopPropagation();
     try {
-      const response = await AddToCart(token, productId, variationId)
+      const response = await AddToCart(token, productId, variationId);
       if (response.success) {
-        enqueueSnackbar(response.message, { variant: "success" })
+        enqueueSnackbar(response.message, { variant: 'success' });
       }
     } catch (error) {
       console.log('Somthing get wrong', error);
@@ -280,9 +279,9 @@ export default function ProductsPage() {
         max_price: filters.priceRange[1],
         page: filters.currentPage,
         search: filters.searchTerm,
-        color: filters.color.toString()
-      }
-      const response = await getProduct(token, queryParams)
+        color: filters.color.toString(),
+      };
+      const response = await getProduct(token, queryParams);
       if (response.success) {
         setIsProductLoading(false);
         setProductData(response.data.products);
@@ -294,12 +293,12 @@ export default function ProductsPage() {
   };
 
   useEffect(() => {
-    const search = searchParams.get('searchStr') || "";
-    const categoryId = searchParams.get('categoryId') || "";
-    const colors = searchParams.getAll('color')
-    const page = Number(searchParams.get("page")) || 1
-    const minPrice = Number(searchParams.get("min_price")) || 0
-    const maxPrice = Number(searchParams.get("max_price")) || 1000
+    const search = searchParams.get('searchStr') || '';
+    const categoryId = searchParams.get('categoryId') || '';
+    const colors = searchParams.getAll('color');
+    const page = Number(searchParams.get('page')) || 1;
+    const minPrice = Number(searchParams.get('min_price')) || 0;
+    const maxPrice = Number(searchParams.get('max_price')) || 1000;
     setFilters({
       searchTerm: search,
       category: categoryId,
@@ -504,42 +503,55 @@ export default function ProductsPage() {
                       </FormControl>
                     </Box>
                   </Box>
-                </Box>
-              </Collapse>
-              <ListItemButton onClick={() => handleFilterExpanded('colours')} sx={{ justifyContent: 'space-between', mt: 1, borderRadius: '8px' }}>
-                <ListItemText primary="Colours" />
-                <Iconify
-                  icon={filterExpanded.find(f => f.value === 'colours')?.isExpanded ? 'eva:arrow-ios-upward-fill' : 'eva:arrow-ios-downward-fill'}
-                />
-              </ListItemButton>
-              <Collapse in={filterExpanded.find(f => f.value === 'colours')?.isExpanded} timeout="auto" unmountOnExit>
-
-                <div role="group" aria-labelledby="colours-group"><List sx={{
-                  '.MuiButtonBase-root, .MuiSvgIcon-fontSizeSmall ': {
-                    color: '#212B36',
-                  }
-
-                }} >
-                  {variation?.colors?.map((color) =>
-                  (
-                    <ListItem sx={{ py: 0 }} >
-                      <Checkbox checked={filters.color.includes(color)} onChange={() => handleCheckBox(color)} />
-                      <ListItemText primary={color} />
-                    </ListItem>
-                  )
-                  )}
-                </List>
-                </div>
-              </Collapse>
-            </List>
-          )}
-        </Box>
-        <Box sx={{ width: showFilters ? '80%' : '100%', transition: 'width 0.3s ease-in-out' }}>
-          {/* Search and Filters */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-            <Stack direction="row" spacing={1} flexShrink={0} gap={2}>
-              {showFilters ?
-                (
+                </Collapse>
+                <ListItemButton
+                  onClick={() => handleFilterExpanded('colours')}
+                  sx={{ justifyContent: 'space-between', mt: 1, borderRadius: '8px' }}
+                >
+                  <ListItemText primary="Colours" />
+                  <Iconify
+                    icon={
+                      filterExpanded.find((f) => f.value === 'colours')?.isExpanded
+                        ? 'eva:arrow-ios-upward-fill'
+                        : 'eva:arrow-ios-downward-fill'
+                    }
+                  />
+                </ListItemButton>
+                <Collapse
+                  in={filterExpanded.find((f) => f.value === 'colours')?.isExpanded}
+                  timeout="auto"
+                  unmountOnExit
+                >
+                  <div role="group" aria-labelledby="colours-group">
+                    <List
+                      sx={{
+                        '.MuiButtonBase-root, .MuiSvgIcon-fontSizeSmall ': {
+                          color: '#212B36',
+                        },
+                      }}
+                    >
+                      {variation?.colors?.map((color) => (
+                        <ListItem sx={{ py: 0 }}>
+                          <Checkbox
+                            checked={filters.color.includes(color)}
+                            onChange={() => handleCheckBox(color)}
+                          />
+                          <ListItemText primary={color} />
+                        </ListItem>
+                      ))}
+                    </List>
+                  </div>
+                </Collapse>
+              </List>
+            )}
+          </Box>
+          <Box sx={{ width: showFilters ? '80%' : '100%', transition: 'width 0.3s ease-in-out' }}>
+            {/* Search and Filters */}
+            <Box
+              sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}
+            >
+              <Stack direction="row" spacing={1} flexShrink={0} gap={2}>
+                {showFilters ? (
                   <Chip
                     key={1}
                     label="Hide filters"
@@ -582,102 +594,122 @@ export default function ProductsPage() {
                 <ProductPageSort onSort={handleFilter} sortOptions={productFilters} />
               </Box>
             </Box>
-          <>
-            {/* Products Grid */}
+            <>
+              {/* Products Grid */}
 
-            {isProductLoading ? <ProductCardSkeleton colCount={showFilters ? 3 : 4} />
-              :
-              <>
-                {productData.length > 0 ? (
-                  <>
-                    {isProductLoading ? <ProductCardSkeleton colCount={showFilters ? 3 : 4} /> : <Grid container spacing={3} sx={{ mb: 4 }}>
-                      {productData.map((product) => (
-                        <Grid item xs={12} sm={showFilters ? 12 : 6} md={showFilters ? 6 : 4} lg={showFilters ? 4 : 3} key={product._id}>
-                          <Card
-                            sx={{
-                              height: '100%',
-                              cursor: 'pointer',
-                              border: '1px solid #E0E0E0',
-                              transition: 'transform 0.2s, box-shadow 0.2s',
-                              '&:hover': {
-                                transform: 'translateY(-4px)',
-                              },
-                              '.add-wishlist-btn': {
-                                ...(product.is_in_wishlist ? {
-                                  opacity: 1,
-                                  top: 5,
-                                  right: 5,
-                                  transition: 'all 0.1s ease',
-                                } : {
-                                  opacity: 0,
-                                  top: '25%',
-                                  transition: 'all 0.1s ease',
-                                }),
-                              },
-                              '&:hover .add-wishlist-btn': {
-                                opacity: 1,
-                                top: 5,
-                                right: 5,
-                                transition: 'all 0.1s ease',
-                              },
-                            }}
-                            onClick={() => handleProductClick(product._id)}
-                          >
-                            <Box sx={{ position: 'relative' }}>
-                              <CardMedia
-                                component="img"
-                                height="250"
-                                image={product.primary_image ? product.primary_image.image_url : "https://nraasmart.orderz.app/images/item_placeholder.jpg"}
-                                alt={product.name}
-                                sx={{ objectFit: 'cover' }}
-                              />
-                              <Box
-                                className='add-wishlist-btn'
-                                onClick={(event) => handleAddToWishlist(event, product as Product)}
-                                    sx={{
-                                      position: 'absolute',
+              {isProductLoading ? (
+                <ProductCardSkeleton colCount={showFilters ? 3 : 4} />
+              ) : (
+                <>
+                  {productData.length > 0 ? (
+                    <>
+                      {isProductLoading ? (
+                        <ProductCardSkeleton colCount={showFilters ? 3 : 4} />
+                      ) : (
+                        <>
+                          <Grid container spacing={3} sx={{ mb: 4 }}>
+                            {productData.map((product) => (
+                              <Grid
+                                item
+                                xs={12}
+                                sm={showFilters ? 12 : 6}
+                                md={showFilters ? 6 : 4}
+                                lg={showFilters ? 4 : 3}
+                                key={product._id}
+                              >
+                                <Card
+                                  sx={{
+                                    height: '100%',
+                                    cursor: 'pointer',
+                                    border: '1px solid #E0E0E0',
+                                    transition: 'transform 0.2s, box-shadow 0.2s',
+                                    '&:hover': {
+                                      transform: 'translateY(-4px)',
+                                    },
+                                    '.add-wishlist-btn': {
+                                      ...(product.is_in_wishlist
+                                        ? {
+                                            opacity: 1,
+                                            top: 5,
+                                            right: 5,
+                                            transition: 'all 0.1s ease',
+                                          }
+                                        : {
+                                            opacity: 0,
+                                            top: '25%',
+                                            transition: 'all 0.1s ease',
+                                          }),
+                                    },
+                                    '&:hover .add-wishlist-btn': {
+                                      opacity: 1,
                                       top: 5,
                                       right: 5,
-                                      zIndex: 10,
-                                      width: 36,
-                                      height: 36,
-                                      borderRadius: '50%',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'center',
-                                      overflow: 'hidden',
-                                      backgroundColor: 'white',
-                                      svg: {
-                                        transition: 'transform 0.3s ease, color 0.3s ease',
-                                        color: 'white',
-                                        stroke: '#212B36',
-                                        ...(product.is_in_wishlist && {
-                                          transition: 'color 0.3s ease',
-                                          color: 'red',
-                                          stroke: 'red',
-                                        }),
-                                        ...(animate === product._id && {
-                                          animation: 'beat 0.5s ease',
-                                          color: 'red',
-                                          stroke: 'white',
-                                        }),
-                                      },
-                                      '@keyframes beat': {
-                                        '0%': {
-                                          transform: 'scale(1)',
+                                      transition: 'all 0.1s ease',
+                                    },
+                                  }}
+                                  onClick={() => handleProductClick(product._id)}
+                                >
+                                  <Box sx={{ position: 'relative' }}>
+                                    <CardMedia
+                                      component="img"
+                                      height="250"
+                                      image={
+                                        product.primary_image
+                                          ? product.primary_image.image_url
+                                          : 'https://nraasmart.orderz.app/images/item_placeholder.jpg'
+                                      }
+                                      alt={product.name}
+                                      sx={{ objectFit: 'cover' }}
+                                    />
+                                    <Box
+                                      className="add-wishlist-btn"
+                                      onClick={(event) =>
+                                        handleAddToWishlist(event, product as Product)
+                                      }
+                                      sx={{
+                                        position: 'absolute',
+                                        top: 5,
+                                        right: 5,
+                                        zIndex: 10,
+                                        width: 36,
+                                        height: 36,
+                                        borderRadius: '50%',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        overflow: 'hidden',
+                                        backgroundColor: 'white',
+                                        svg: {
+                                          transition: 'transform 0.3s ease, color 0.3s ease',
+                                          color: 'white',
+                                          stroke: '#212B36',
+                                          ...(product.is_in_wishlist && {
+                                            transition: 'color 0.3s ease',
+                                            color: 'red',
+                                            stroke: 'red',
+                                          }),
+                                          ...(animate === product._id && {
+                                            animation: 'beat 0.5s ease',
+                                            color: 'red',
+                                            stroke: 'white',
+                                          }),
                                         },
-                                        '50%': {
-                                          transform: 'scale(1.25)',
+                                        '@keyframes beat': {
+                                          '0%': {
+                                            transform: 'scale(1)',
+                                          },
+                                          '50%': {
+                                            transform: 'scale(1.25)',
+                                          },
+                                          '100%': {
+                                            transform: 'scale(1)',
+                                          },
                                         },
-                                        '100%': {
-                                          transform: 'scale(1)',
-                                        },
-                                      },
-                                    }}
-                                  >
-                                    <Iconify icon="eva:heart-fill" width={24} />
-                                  </Box>
-                                  {/* {product.newLabel?.enabled && (
+                                      }}
+                                    >
+                                      <Iconify icon="eva:heart-fill" width={24} />
+                                    </Box>
+                                    {/* {product.newLabel?.enabled && (
                             <Chip
                               label={product.newLabel.content}
                               color="primary"
@@ -704,59 +736,117 @@ export default function ProductsPage() {
                               }}
                             />
                           )} */}
+                                  </Box>
+                                  <CardContent sx={{ p: 2 }}>
+                                    <Typography
+                                      variant="body2"
+                                      color="text.secondary"
+                                      sx={{ mb: 1 }}
+                                    >
+                                      {product.category_name}
+                                    </Typography>
+                                    <Typography
+                                      variant="h6"
+                                      component="h3"
+                                      sx={{ mb: 1, lineHeight: 1.3, fontSize: '1rem' }}
+                                    >
+                                      {product.name}
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                                      <Rating
+                                        value={product.average_rating}
+                                        size="small"
+                                        readOnly
+                                        sx={{ mr: 1 }}
+                                      />
+                                      <Typography variant="body2" color="text.secondary">
+                                        ({product.total_reviews})
+                                      </Typography>
+                                    </Box>
+                                    <Box
+                                      sx={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        mb: 1,
+                                      }}
+                                    >
+                                      <Typography
+                                        variant="h6"
+                                        color="primary.main"
+                                        fontWeight="bold"
+                                      >
+                                        {formatPrice(product.price)}
+                                      </Typography>
+                                    </Box>
+
+                                    <Typography
+                                      variant="body2"
+                                      color="text.secondary"
+                                      sx={{ mt: 1, fontSize: '0.875rem' }}
+                                    >
+                                      {0} sold
+                                    </Typography>
+
+                                    <Box
+                                      sx={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        mt: 1,
+                                      }}
+                                    >
+                                      <Button
+                                        variant="outlined"
+                                        onClick={(event) =>
+                                          handleAddToCart(
+                                            event,
+                                            product._id,
+                                            product.variations[0]._id
+                                          )
+                                        }
+                                        sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
+                                      >
+                                        <Iconify icon="eva:shopping-cart-outline" width={20} />
+                                        Add to cart
+                                      </Button>
+
+                                      <Button
+                                        variant="contained"
+                                        onClick={() => handleProductClick(product._id)}
+                                        sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
+                                      >
+                                        <Iconify icon="eva:eye-outline" width={20} />
+                                        view product
+                                      </Button>
+                                    </Box>
+                                  </CardContent>
+                                </Card>
+                              </Grid>
+                            ))}
+                          </Grid>
+
+                          {/* Pagination */}
+                          {pagenation!.total_pages > 1 && (
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                width: '100%',
+                                mt: 4,
+                              }}
+                            >
+                              <Pagination
+                                count={pagenation?.total_pages}
+                                page={filters.currentPage}
+                                onChange={handlePageChange}
+                                size="large"
+                                showFirstButton
+                                showLastButton
+                              />
                             </Box>
-                            <CardContent sx={{ p: 2 }}>
-                              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                                {product.category_name}
-                              </Typography>
-                              <Typography variant="h6" component="h3" sx={{ mb: 1, lineHeight: 1.3, fontSize: '1rem' }}>
-                                {product.name}
-                              </Typography>
-                              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                                <Rating value={product.average_rating} size="small" readOnly sx={{ mr: 1 }} />
-                                <Typography variant="body2" color="text.secondary">
-                                  ({product.total_reviews})
-                                </Typography>
-                              </Box>
-                              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                                <Typography variant="h6" color="primary.main" fontWeight="bold">
-                                  {formatPrice(product.price)}
-                                </Typography>
-
-                              </Box>
-
-                              <Typography variant="body2" color="text.secondary" sx={{ mt: 1, fontSize: '0.875rem' }}>
-                                {0} sold
-                              </Typography>
-
-                              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
-                                <Button variant="outlined" onClick={(event) => handleAddToCart(event, product._id, product.variations[0]._id)} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                  <Iconify icon="eva:shopping-cart-outline" width={20} />
-                                  Add to cart
-                                </Button>
-
-                                <Button variant="contained" onClick={() => handleProductClick(product._id)} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                  <Iconify icon="eva:eye-outline" width={20} />
-                                  view product
-                                </Button>
-                              </Box>
-                            </CardContent>
-                          </Card>
-                        </Grid>
-                      )}
-
-                      {/* Pagination */}
-                      {pagenation!.total_pages > 1 && (
-                        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-                          <Pagination
-                            count={pagenation?.total_pages}
-                            page={filters.currentPage}
-                            onChange={handlePageChange}
-                            size="large"
-                            showFirstButton
-                            showLastButton
-                          />
-                        </Box>
+                          )}
+                        </>
                       )}
                     </>
                   ) : (

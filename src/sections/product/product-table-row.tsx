@@ -28,12 +28,17 @@ export function RenderCellPrice({ params }: ParamsProps) {
   );
 }
 
-export function RenderCellPublish({ params }: ParamsProps)  {
+export function RenderCellPublish({ params }: ParamsProps) {
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center',height:'100%' }}>
-    <Label variant="soft" color={(params.row.status === 'published' && 'info') || 'default'}>
-      {params.row.status}
-    </Label>
+    <Box sx={{ display: 'flex',justifyContent: 'center', alignItems: 'center',height:'100%',flexDirection:'column',gap:'10px'}}>
+        {params.row.featured && (
+        <Label variant="soft" color="success" sx={{width:'100%'}}>
+          featured
+        </Label>
+      )}
+      <Label variant="soft" color={(params.row.status === 'published' && 'info') || 'default'} sx={{width:'100%'}}>
+        {params.row.status}
+      </Label>
     </Box>
   );
 }

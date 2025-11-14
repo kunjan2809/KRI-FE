@@ -87,7 +87,6 @@ export default function ProductDetailsPage() {
   const [selectedColor, setSelectedColor] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState(0);
-  const [reviewSuccess, setReviewSuccess] = useState(false);
   const [productData, setProductData] = useState<Product | null>(null);
   const [review, setReview] = useState<Reviews | null>(null);
   const [suggestionData, setSuggestionData] = useState<Suggestion[] | []>([]);
@@ -254,7 +253,7 @@ export default function ProductDetailsPage() {
           <Grid container spacing={6}>
             <Grid item xs={12} md={6}>
               <Box sx={{ position: 'relative' }}>
-                <ProductDetailsCarousel product={productData}  />
+                <ProductDetailsCarousel product={productData} />
               </Box>
             </Grid>
 
@@ -544,7 +543,7 @@ export default function ProductDetailsPage() {
             </TabPanel>
 
             <TabPanel value={activeTab} index={1}>
-              <ProductDetailsReview />
+              <ProductDetailsReview getProductDataById={getProductDataById} />
             </TabPanel>
           </Box>
         )}

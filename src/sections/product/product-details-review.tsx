@@ -24,8 +24,11 @@ import { useAuthContext } from 'src/auth/hooks/use-auth-context';
 import LoginPopup from 'src/app/landing/loginPopup/AuthPopup';
 
 // ----------------------------------------------------------------------
+interface ProductDetailReview {
+  getProductDataById: () => Promise<void>;
+}
 
-export default function ProductDetailsReview() {
+export default function ProductDetailsReview({ getProductDataById }: ProductDetailReview) {
   const { authenticated } = useAuthContext();
   const param = useParams();
   const token = useAuthToken();
@@ -42,6 +45,7 @@ export default function ProductDetailsReview() {
         if (reviews) {
           setProductReviews(reviews);
         }
+        getProductDataById();
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to fetch product';
         enqueueSnackbar(errorMessage, { variant: 'error' });
@@ -167,7 +171,11 @@ export default function ProductDetailsReview() {
 
       {productReviews && <ProductReviewList reviews={productReviews} />}
 
-      <ProductReviewNewForm open={review} onClose={()=>setReview(false)} />
+      <ProductReviewNewForm
+        open={review}
+        onClose={() => setReview(false)}
+        getReviewById={getReviewById}
+      />
       {loginPopupOpen && (
         <LoginPopup
           open={loginPopupOpen}

@@ -19,7 +19,6 @@ export async function addReview(
 ) {
   const baseUrl = BASE_API;
   const URL = `${baseUrl}${endpoints.reviews.add}${productId}`;
-  console.log('review', review)
   const response = await fetch(URL, {
     method: 'POST',
     headers: {
@@ -38,8 +37,7 @@ export async function addReview(
   const reviewId = data.data.review._id
   try{
     if(reviewId){
-      const reviewImg = reviewImageData.file?.forEach((reviewImage)=>{
-        console.log('reviewImage', reviewImage)
+         reviewImageData.file?.forEach((reviewImage)=>{
          uploadReviewImage(reviewId,reviewImage,token)
       })
     }
@@ -90,7 +88,6 @@ export async function uploadReviewImage(
   }
 
   formData.append('review_id', reviewId);
-  
   const response = await fetch(URL, {
     method: 'POST',
     headers: {

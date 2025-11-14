@@ -245,16 +245,7 @@ export default function ProductListView() {
       type: 'singleSelect',
       editable: true,
       valueOptions: PUBLISH_OPTIONS,
-      renderCell: (params) => (
-        <Box>
-          {params.row.featured && (
-            <Label variant="soft" color="success">
-              featured
-            </Label>
-          )}
-          <RenderCellPublish params={params} />
-        </Box>
-      ),
+      renderCell: (params) => <RenderCellPublish params={params} />,
     },
     {
       type: 'actions',

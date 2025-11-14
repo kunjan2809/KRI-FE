@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -30,7 +29,14 @@ import { paths } from 'src/routes/paths';
 import ProductDetailsDescription from 'src/sections/product/product-details-description';
 import Iconify from 'src/components/iconify';
 import ProductDetailsCarousel from 'src/sections/product/product-details-carousel';
-import { IProductItem, Product, ProductDetailsRoot, Reviews, Suggestion, Variation } from 'src/types/product';
+import {
+  IProductItem,
+  Product,
+  ProductDetailsRoot,
+  Reviews,
+  Suggestion,
+  Variation,
+} from 'src/types/product';
 import ProductDetailsReview from 'src/sections/product/product-details-review';
 import RecommendedProductsCard from 'src/app/cart/RecommendedProductsCard';
 
@@ -100,11 +106,8 @@ export default function ProductDetailsPage() {
           const { product, reviews } = response.data ?? {};
 
           if (product) {
-            const transformedArray = product?.images?.map((img) => `${img?.image_url}`);
-            setProductData({
-              ...product,
-              images: [...transformedArray],
-            });
+            // const transformedArray = product?.images?.map((img) => `${img?.image_url}`);
+            setProductData(product);
             if (product.variations && product?.variations?.length > 0) {
               setSelectedSize(product.variations[0].size);
               setSelectedColor(product.variations[0].color);
@@ -204,7 +207,6 @@ export default function ProductDetailsPage() {
   const totalReviews = (review && review.summary.total_reviews) || 0;
 
   return (
-
     <Box>
       {/* Hero Section */}
       {/* <Box
@@ -227,11 +229,11 @@ export default function ProductDetailsPage() {
 
       <Container maxWidth="xl" sx={{ py: 4 }}>
         {/* Success Alert */}
-<!--         {reviewSuccess && (
+        {/* {reviewSuccess && (
           <Alert severity="success" sx={{ mb: 3 }}>
             Thank you for your review! It has been submitted successfully.
           </Alert>
-        )} -->
+        )}  */}
 
         {/* Product Details */}
 
@@ -252,7 +254,7 @@ export default function ProductDetailsPage() {
           <Grid container spacing={6}>
             <Grid item xs={12} md={6}>
               <Box sx={{ position: 'relative' }}>
-                <ProductDetailsCarousel product={productData as unknown as IProductItem} />
+                <ProductDetailsCarousel product={productData}  />
               </Box>
             </Grid>
 
@@ -515,10 +517,10 @@ export default function ProductDetailsPage() {
                     <Typography variant="h6">Purchase Protection</Typography>
                   </Box>
                   <Typography variant="body2" color="text.secondary">
-                    Your order is covered by our Buyer Protection Policy, ensuring a safe and
-                    secure shopping experience. If any issue arises with your purchase, our
-                    support team will resolve it promptly and fairly. We’re committed to ensuring
-                    every experience with us is secure, seamless, and worry-free.
+                    Your order is covered by our Buyer Protection Policy, ensuring a safe and secure
+                    shopping experience. If any issue arises with your purchase, our support team
+                    will resolve it promptly and fairly. We’re committed to ensuring every
+                    experience with us is secure, seamless, and worry-free.
                   </Typography>
                 </Card>
               </Stack>
@@ -578,41 +580,8 @@ export default function ProductDetailsPage() {
               })}
             </Grid>
           )}
-          <Box sx={{ mb: 6 }}>
-            <Typography variant="h3" component="h2" sx={{ mb: 4, fontWeight: 'bold' }}>
-              Complete Your Look With These Gems
-            </Typography>
-
-            {isSuggestionLoading ? (
-              <SuggestionCardLoading />
-            ) : (
-              <Grid container spacing={3}>
-                {suggestionData.map((recommendedProduct) => {
-                  const suggestion = {
-                    ...recommendedProduct,
-                    collection: recommendedProduct.category.name,
-                    originalPrice: recommendedProduct.mrp,
-                    id: recommendedProduct._id,
-                    image: recommendedProduct.primary_image?.image_url,
-                    wishlist: recommendedProduct.is_in_wishlist,
-                  };
-                  return (
-                    <Grid item xs={12} sm={6} md={3} key={recommendedProduct.category_id}>
-                      <RecommendedProductsCard
-                        product={suggestion as Suggestion}
-                        addToCart={() =>
-                          handleAddToCart(recommendedProduct._id, recommendedProduct.variations)
-                        }
-                        addToWishlist={handleWishlist}
-                      />
-                    </Grid>
-                  );
-                })}
-              </Grid>
-            )}
-          </Box>
-        </Container>
-      </Box>
+        </Box>
+      </Container>
       {loginPopupOpen && (
         <LoginPopup
           open={loginPopupOpen}
@@ -621,6 +590,6 @@ export default function ProductDetailsPage() {
           description="Please login to check cart"
         />
       )}
-    </>
+    </Box>
   );
 }

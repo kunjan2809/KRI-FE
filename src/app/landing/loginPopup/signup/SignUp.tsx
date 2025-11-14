@@ -95,7 +95,7 @@ const SignUp = ({
       );
       // After successful registration, show email verification
       setUserEmail(data.email);
-      setIsEmailVerification(true);
+      // setIsEmailVerification(true);
       reset();
     } catch (error) {
       console.error(error);

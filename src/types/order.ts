@@ -174,7 +174,7 @@ export type IOrderItemTableData = {
   tracking_number?: string;
 };
 
-//order detail
+// order detail
 
 export interface IOrdersDetail {
   order: Order;

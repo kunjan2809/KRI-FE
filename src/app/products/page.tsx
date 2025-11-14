@@ -508,7 +508,7 @@ export default function ProductsPage() {
                   onClick={() => handleFilterExpanded('colours')}
                   sx={{ justifyContent: 'space-between', mt: 1, borderRadius: '8px' }}
                 >
-                  <ListItemText primary="Colours" />
+                  <ListItemText primary="Colors" />
                   <Iconify
                     icon={
                       filterExpanded.find((f) => f.value === 'colours')?.isExpanded

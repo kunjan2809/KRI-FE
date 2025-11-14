@@ -377,6 +377,7 @@ export default function CheckoutPopup({
                         </Typography>
                       </Grid>
                       <Grid item xs={3}>
+                        <Box sx={{display:'flex',alignItems:'center',gap:'20px'}}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <IconButton
                             size="small"
@@ -399,14 +400,15 @@ export default function CheckoutPopup({
                           >
                             <Iconify icon="eva:plus-outline" />
                           </IconButton>
-                        </Box>
+                          </Box>
                         <IconButton
                           size="small"
                           onClick={() => removeItem(item.id)}
-                          sx={{ color: 'error.main', mt: 1 }}
+                          sx={{ color: 'error.main' }}
                         >
                           <Iconify icon="eva:trash-2-outline" />
                         </IconButton>
+                        </Box>
                       </Grid>
                     </Grid>
                   </Card>

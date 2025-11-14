@@ -211,7 +211,7 @@ export default function ProductsPage() {
   ) => {
     event.stopPropagation();
     try {
-      const response = await AddToCart(token, productId, variationId);
+      const response = variationId ? await AddToCart(token, productId, variationId) : await AddToCart(token, productId) 
       if (response.success) {
         enqueueSnackbar(response.message, { variant: 'success' });
       }
@@ -802,7 +802,7 @@ export default function ProductsPage() {
                                           handleAddToCart(
                                             event,
                                             product._id,
-                                            product.variations[0]._id
+                                            product?.variations[0]?._id
                                           )
                                         }
                                         sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}

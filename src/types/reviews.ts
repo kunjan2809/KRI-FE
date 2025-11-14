@@ -40,7 +40,7 @@ export interface Detail {
   order_id: string
   created_at: string
   edited_at: string
-  images: Image[]
+  images?: Image[]
 }
 
 export interface UserId {

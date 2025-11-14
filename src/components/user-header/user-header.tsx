@@ -209,6 +209,7 @@ export default function UserHeader() {
   const handleLogout = async () => {
     try {
       await logout();
+      setAnchorEl(null)
     } catch (error) {
       console.error('Logout failed:', error);
     }

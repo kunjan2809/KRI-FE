@@ -182,7 +182,7 @@ const RecommendedProductsCard = ({
           <Button
             variant="outlined"
             fullWidth
-            onClick={() => addToCart(product.id, product.variations[0]?._id)}
+            onClick={() => addToCart(product.id, product?.variations[0]?._id)}
             startIcon={<Iconify icon="eva:shopping-cart-outline" />}
           >
             Add to Cart

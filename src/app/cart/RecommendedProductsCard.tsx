@@ -14,10 +14,10 @@ const formatPrice = (price: number) =>
   }).format(price);
 
 interface RecommendedProductsCardProps {
-    product: Suggestion;
-    addToCart: (productId: string,variationId?:string) => void;
-    addToWishlist: (productId:string,wishlist:boolean) => void;
-    showWishlistButton?: boolean;
+  product: Suggestion;
+  addToCart: (productId: string, variationId?: string) => void;
+  addToWishlist: (productId: string, wishlist: boolean) => void;
+  showWishlistButton?: boolean;
 }
 
 const RecommendedProductsCard = ({
@@ -80,22 +80,26 @@ const RecommendedProductsCard = ({
                   top: '25%',
                   transition: 'all 0.1s ease',
                 }),
-            },
-            '&:hover .add-wishlist-btn': {
-                opacity: 1,
-                top: 5,
-                right: 5,
-                transition: 'all 0.1s ease',
-            },
-        }}>
-            <CardMedia
-                component="img"
-                height="200"
-                image={product.image ? product.image :"https://nraasmart.orderz.app/images/item_placeholder.jpg"}
-                alt={product.name}
-                sx={{ objectFit: 'cover' }}
-               
-            />
+          },
+          '&:hover .add-wishlist-btn': {
+            opacity: 1,
+            top: 5,
+            right: 5,
+            transition: 'all 0.1s ease',
+          },
+        }}
+      >
+        <CardMedia
+          component="img"
+          height="200"
+          image={
+            product.image
+              ? product.image
+              : 'https://nraasmart.orderz.app/images/item_placeholder.jpg'
+          }
+          alt={product.name}
+          sx={{ objectFit: 'cover' }}
+        />
 
         {/* <Button
                 onClick={() => addToCart(product.id)}
@@ -174,34 +178,18 @@ const RecommendedProductsCard = ({
                 {formatPrice(product.originalPrice)}
               </Typography>
             )}
-            <CardContent sx={{ p: 2 , height:`calc(100% - 200)`}}>
-                <Typography variant="h6" component="h3" sx={{ mb: 1, fontSize: '1rem',margin:'auto'}}>
-                    {product.name}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                    {product.collection}
-                </Typography>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                    <Typography variant="h6" color="primary.main" fontWeight="bold">
-                        {formatPrice(product.price)}
-                    </Typography>
-                    {product.originalPrice && (
-                        <Typography variant="body2" color="text.secondary" sx={{ textDecoration: 'line-through' }}>
-                            {formatPrice(product.originalPrice)}
-                        </Typography>
-                    )}
-                </Box>
-                <Button
-                    variant="outlined"
-                    fullWidth
-                    onClick={() => addToCart(product.id,product.variations[0]?._id)}
-                    startIcon={<Iconify icon="eva:shopping-cart-outline" />}
-                >
-                    Add to Cart
-                </Button>
-            </CardContent>
-        </Card>
-        
+          </Box>
+          <Button
+            variant="outlined"
+            fullWidth
+            onClick={() => addToCart(product.id, product.variations[0]?._id)}
+            startIcon={<Iconify icon="eva:shopping-cart-outline" />}
+          >
+            Add to Cart
+          </Button>
+        </CardContent>
+      </Card>
+
       {loginPopupOpen && (
         <LoginPopup
           open={loginPopupOpen}
@@ -217,7 +205,7 @@ const RecommendedProductsCard = ({
         />
       )}
     </>
-    );
-}
+  );
+};
 
 export default RecommendedProductsCard;

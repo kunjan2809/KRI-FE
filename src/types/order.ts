@@ -241,6 +241,7 @@ export interface OrderItem {
   id: string;
   order_id: string;
   product_id: ProductId;
+  primary_image: PrimaryImage;
   variation_id: any;
   product_name_snapshot: string;
   product_price_snapshot: number;

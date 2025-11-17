@@ -87,6 +87,7 @@ export default function OrderListView() {
   const confirm = useBoolean();
 
   const [filters, setFilters] = useState(defaultFilters);
+  console.log('filters', filters.dateRange)
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -239,7 +240,7 @@ export default function OrderListView() {
               boxShadow: (theme) => `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`,
             }}
           >
-            {orderStatic?.by_status.map((tab, index) => (
+            {orderStatic?.by_status.map((tab, index) =>  (
               <Tab
                 key={index}
                 iconPosition="end"
@@ -248,7 +249,7 @@ export default function OrderListView() {
                 icon={
                   <Label
                     variant={
-                      ((tab.status === 'all' || filters.status.includes(tab.status)) && 'filled') || 'soft'
+                      ((tab.status === "all" || filters.status.includes(tab.status)) && 'filled') || 'soft'
                     }
                     color={
                       (tab.status === 'delivered' && 'success') ||

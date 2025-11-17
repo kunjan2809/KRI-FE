@@ -64,6 +64,8 @@ const RecommendedProductsCard = ({
           cursor: 'pointer',
           transition: 'transform 0.2s, box-shadow 0.2s',
           border: '1px solid #E0E0E0',
+          display:"flex",
+          flexDirection:"column",
           '&:hover': {
             transform: 'translateY(-4px)',
           },
@@ -156,11 +158,12 @@ const RecommendedProductsCard = ({
             <Iconify icon="eva:heart-fill" width={24} />
           </Box>
         )}
-        <CardContent sx={{ p: 2, height: `calc(100% - 200)` }}>
-          <Typography variant="h6" component="h3" sx={{ mb: 1, fontSize: '1rem', margin: 'auto' }}>
+        <CardContent sx={{ p: 2, height: `calc(100% - 200)`, display:"flex", flexDirection:"column", flex:1}}>
+          <Typography variant="h6" component="h3" sx={{ mb: 1, fontSize: '1rem' }}>
             {product.name}
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+          
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1, marginTop:"auto"}}>
             {product.collection}
           </Typography>
           <Box

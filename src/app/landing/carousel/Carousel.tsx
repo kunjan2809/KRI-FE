@@ -81,6 +81,7 @@ const ProductCarousel: React.FC<CarouselProps> = ({ products, direction, }) => {
                         originalPrice: product.mrp,
                         id: product._id
                     }
+                    console.log(producat)
                     return (
                         <Box key={product.id} sx={{ px: 3 }}>
                             <RecommendedProductsCard product={producat} addToCart={addToCart} addToWishlist={() => { }} showWishlistButton={false} />

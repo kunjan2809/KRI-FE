@@ -148,6 +148,7 @@ export const endpoints = {
     export: '/api/orders/admin/export',
     orderDetails: '/api/orders/',
     returnRequest: '/api/orders/:orderId/return',
+    cancel:'/api/orders/:orderId/cancel'
   },
   user: {
     all: '/api/users/admin/all',

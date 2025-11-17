@@ -21,15 +21,17 @@ import { alpha } from '@mui/material/styles';
 import Iconify from 'src/components/iconify';
 
 // Import Product.json data
-import { useGetOrderDetail } from 'src/api/order';
+import { createCancelRequest, useGetOrderDetail } from 'src/api/order';
 import { IOrderDetailItem, Order } from 'src/types/order';
 import { paths } from 'src/routes/paths';
 import { useParams, useRouter } from 'src/routes/hooks';
 import { OrderDetailSkeleton } from 'src/sections/order/order-detail-skeleton';
 import OrderReturnRequestForm from 'src/sections/order/order-return-request-view';
+import { useAuthToken } from 'src/auth/hooks';
+import { enqueueSnackbar } from 'notistack';
 
 // ----------------------------------------------------------------------
-const statusOrder = ['pending', 'shipped', 'delivered', 'return'];
+const statusOrder = ['pending', 'shipped', 'delivered', 'return', 'cancelled'];
 
 // ----------------------------------------------------------------------
 
@@ -45,7 +47,7 @@ interface OrderSummaryProps {
 interface TimelineStep {
   id: string;
   title: string;
-  status: 'pending' | 'shipped' | 'delivered' | 'return';
+  status: 'pending' | 'shipped' | 'delivered' | 'return' | 'cancelled';
   icon: React.ReactNode;
 }
 
@@ -92,6 +94,12 @@ const OrderDetails = () => {
       status: 'return',
       icon: <Iconify icon="tabler:truck-return" />,
     },
+    {
+      id: '5',
+      title: 'Cancelled',
+      status: 'cancelled',
+      icon: <Iconify icon="ix:cancel" />,
+    },
   ];
 
   const { orderDetail, orderDetailError } = useGetOrderDetail(orderId);
@@ -110,7 +118,6 @@ const OrderDetails = () => {
       </Container>
     );
   }
-  
   return (
     <Box>
       {/* Hero Section */}
@@ -305,8 +312,14 @@ const OrderSummary = ({
         <Grid container spacing={4}>
           <Grid item xs={12} md={6}>
             <Stack spacing={2}>
-
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 1 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  py: 1,
+                }}
+              >
                 <Typography color="text.secondary">Order Total</Typography>
                 <Typography fontWeight="medium">{formatPrice(orderTotal)}</Typography>
               </Box>
@@ -349,13 +362,27 @@ const OrderSummary = ({
           </Grid>
           <Grid item xs={12} md={6}>
             <Stack spacing={2}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 1 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  py: 1,
+                }}
+              >
                 <Typography color="text.secondary">Shipping Method</Typography>
                 <Typography>{shippingMethod}</Typography>
               </Box>
               <Divider />
 
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 1 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  py: 1,
+                }}
+              >
                 <Typography color="text.secondary">Estimated Delivery</Typography>
                 <Typography>{estimatedDelivery}</Typography>
               </Box>
@@ -389,7 +416,6 @@ const OrderSummary = ({
 
 // ----------------------------------------------------------------------
 
-
 const OrderTracking = ({
   timelineSteps,
   order,
@@ -399,30 +425,46 @@ const OrderTracking = ({
 }) => {
   const currentStepIndex = statusOrder.indexOf(order.order_status);
   const isReturn = order.order_status === 'return';
-  const orderTrakingLine = timelineSteps.length - (isReturn ? 1 : 2);
+  const isCancel = order.order_status === 'cancelled';
+  const orderTrakingLine = timelineSteps.length - (isReturn ? 2 : isCancel ? 4 : 3);
 
-  const timeLine = isReturn ? timelineSteps : timelineSteps.slice(0, -1);
+  const firstCancelled = timelineSteps.slice(0, 1);
+  const secondCancelled = timelineSteps.slice(4);
+  const finalCanclled = firstCancelled.concat(secondCancelled);
+
+  const timeLine = isReturn
+    ? timelineSteps.slice(0, -1)
+    : isCancel
+      ? finalCanclled
+      : timelineSteps.slice(0, 3);
 
   return (
     <Card>
       <CardHeader title="Order Tracking" />
       <CardContent>
         <Box sx={{ position: 'relative' }}>
-
           <Grid container spacing={2} justifyContent="start">
             {timeLine.map((step, index) => {
               const isCompleted = index <= currentStepIndex;
               const isActive = index === currentStepIndex;
+              const isCancelled =
+                step.status === 'cancelled' ||
+                (step.status === 'pending' && order.order_status === 'cancelled');
               return (
-                <Grid item key={step.id} xs={12} sm={isReturn ? 3 : 4} sx={{ height: '100%' }}>
+                <Grid item key={step.id} xs={12} sm={isReturn ? 3 : isCancel? 6 : 4} sx={{ height: '100%' }}>
                   <Box sx={{ textAlign: 'center', position: 'relative' }}>
                     <Box
                       sx={{
                         width: 40,
                         height: 40,
                         borderRadius: '50%',
-                        bgcolor: isCompleted ? 'success.main' : 'grey.300',
-                        color: isCompleted ? 'white' : 'text.secondary',
+                        bgcolor:
+                          step.status === 'cancelled'
+                            ? 'error.main'
+                            : isCompleted
+                              ? 'success.main'
+                              : 'grey.300',
+                        color: isCancelled ? 'white' : isCompleted ? 'white' : 'text.secondary',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -442,7 +484,10 @@ const OrderTracking = ({
                       {step.title}
                     </Typography>
                     {isActive && (
-                      <Typography variant="caption" color="success.main">
+                      <Typography
+                        variant="caption"
+                        color={step.status === 'cancelled' ? 'error.main' : 'success.main'}
+                      >
                         {order.order_status === 'delivered'
                           ? 'Delivered Successfully'
                           : !isReturn && 'In Progress'}
@@ -456,7 +501,11 @@ const OrderTracking = ({
                           left: '50%',
                           width: '100%',
                           height: 2,
-                          bgcolor: isCompleted ? 'success.main' : 'grey.300',
+                          bgcolor: isCancelled
+                            ? 'error.main'
+                            : index < currentStepIndex
+                              ? 'success.main'
+                              : 'grey.300',
                           zIndex: 0,
                         }}
                       />
@@ -474,7 +523,6 @@ const OrderTracking = ({
 
 // ----------------------------------------------------------------------
 
-
 const OrderItems = ({
   orderItems,
   orderStatus,
@@ -482,11 +530,13 @@ const OrderItems = ({
   orderItems: IOrderDetailItem[];
   orderStatus: string;
 }) => {
+  const token = useAuthToken();
   const router = useRouter();
-
+  const params = useParams();
+  const orderId = params.id as string;
   const [isOrderReturn, setIsOrderReturn] = useState<boolean>(false);
   const [orderItemId, setOrderItemId] = useState<string | null>(null);
-  const [orderId, setOrderId] = useState<string | null>(null);
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -498,11 +548,33 @@ const OrderItems = ({
     router.push(paths.user.products.details(productId));
   };
 
+  const handleCancelOrder = async () => {
+    try {
+      await createCancelRequest(orderId, token);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to cancel order';
+      enqueueSnackbar(errorMessage, { variant: 'error' });
+    }
+  };
+
   return (
     <>
       <Card>
         <CardHeader title="Items in this Order" />
         <CardContent>
+          <Box sx={{ display: 'flex', justifyContent: 'end', marginBottom: 2 }}>
+            {orderStatus === 'pending' && (
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<Iconify icon="material-symbols:cancel" sx={{ rotate: '90deg' }} />}
+                sx={{ textTransform: 'none', backgroundColor: 'error.main', color: 'white' }}
+                onClick={handleCancelOrder}
+              >
+                Cancel order
+              </Button>
+            )}
+          </Box>
           <Stack spacing={3}>
             {orderItems.map((item) => {
               return (
@@ -573,9 +645,7 @@ const OrderItems = ({
                               }
                               sx={{ textTransform: 'none' }}
                               onClick={() => {
-                                (setOrderId(item.order_id),
-                                  setOrderItemId(item._id),
-                                  setIsOrderReturn(true));
+                                (setOrderItemId(item._id), setIsOrderReturn(true));
                               }}
                             >
                               Request Return
@@ -613,4 +683,3 @@ const OrderItems = ({
 };
 
 export default OrderDetails;
-

@@ -200,16 +200,18 @@ export default function UserHeader() {
 
   const handleOrdersClick = () => {
     router.push(paths.user.orders.root);
+    setAnchorEl(null);
   };
 
   const handleProfileClick = () => {
     router.push(paths.user.profile);
+    setAnchorEl(null);
   };
 
   const handleLogout = async () => {
     try {
       await logout();
-      setAnchorEl(null)
+      setAnchorEl(null);
     } catch (error) {
       console.error('Logout failed:', error);
     }

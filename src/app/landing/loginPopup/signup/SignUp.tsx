@@ -95,7 +95,7 @@ const SignUp = ({
       );
       // After successful registration, show email verification
       setUserEmail(data.email);
-      setIsEmailVerification(true);
+      // setIsEmailVerification(true);
       reset();
     } catch (error) {
       console.error(error);
@@ -118,27 +118,27 @@ const SignUp = ({
     setIsSignup(!isSignup);
   };
 
-  const handleSocialLogin = async (provider: 'google' | 'apple') => {
-    try {
-      // Here you would typically integrate with your authentication provider
-      // For example, using Firebase Auth, Auth0, or your own OAuth implementation
+  // const handleSocialLogin = async (provider: 'google' | 'apple') => {
+  //   try {
+  //     // Here you would typically integrate with your authentication provider
+  //     // For example, using Firebase Auth, Auth0, or your own OAuth implementation
 
-      // Example implementation:
-      // if (provider === 'google') {
-      //     await signInWithGoogle();
-      // } else if (provider === 'apple') {
-      //     await signInWithApple();
-      // }
+  //     // Example implementation:
+  //     // if (provider === 'google') {
+  //     //     await signInWithGoogle();
+  //     // } else if (provider === 'apple') {
+  //     //     await signInWithApple();
+  //     // }
 
-      // For now, just close the modal and show success
-      onClose();
-      reset();
-      setErrorMsg('');
-    } catch (error) {
-      console.error(`${provider} login error:`, error);
-      setErrorMsg(`Failed to sign in with ${provider}. Please try again.`);
-    }
-  };
+  //     // For now, just close the modal and show success
+  //     onClose();
+  //     reset();
+  //     setErrorMsg('');
+  //   } catch (error) {
+  //     console.error(`${provider} login error:`, error);
+  //     setErrorMsg(`Failed to sign in with ${provider}. Please try again.`);
+  //   }
+  // };
 
   const renderForm = (
     <Stack spacing={2.5}>
@@ -233,7 +233,7 @@ const SignUp = ({
       </Button>
 
       {/* OR Separator */}
-      <Box sx={{ position: 'relative', my: 3 }}>
+      {/* <Box sx={{ position: 'relative', my: 3 }}>
         <Box
           sx={{
             width: '100%',
@@ -255,10 +255,10 @@ const SignUp = ({
         >
           OR
         </Typography>
-      </Box>
+      </Box> */}
 
       {/* Social Login Buttons */}
-      <Stack spacing={1.5}>
+      {/* <Stack spacing={1.5}>
         <Button
           fullWidth
           variant="outlined"
@@ -283,7 +283,8 @@ const SignUp = ({
         >
           Continue with Apple
         </Button>
-      </Stack>
+      </Stack> */}
+      
       <Stack direction="row" spacing={0.5} sx={{ alignSelf: 'center', marginBottom: 2, mt: 2 }}>
         <Typography variant="body2">Already have an account?</Typography>
 

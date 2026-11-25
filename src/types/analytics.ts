@@ -39,3 +39,20 @@ export interface Product {
   product_id: string
   quantity: number
 }
+
+export interface OrderStatistics{
+  summary: Summary
+  by_status: OrderStatus[]
+}
+
+export interface Summary {
+  total_orders: number
+  total_revenue: number
+}
+
+export interface OrderStatus {
+  status: string
+  display_name: string
+  count: number
+  total_revenue: number
+}

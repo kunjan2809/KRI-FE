@@ -1,431 +1,595 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-
-import Tab from '@mui/material/Tab';
-import Box from '@mui/material/Box';
-import Tabs from '@mui/material/Tabs';
-import Card from '@mui/material/Card';
-import Button from '@mui/material/Button';
+import { useState, useEffect } from 'react';
+import {
+  Box,
+  Container,
+  Grid,
+  Typography,
+  Button,
+  Card,
+  Tabs,
+  Tab,
+  Rating,
+  Stack,
+  TextField,
+  IconButton,
+  useTheme,
+  Alert,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
+} from '@mui/material';
 import { alpha } from '@mui/material/styles';
-import Container from '@mui/material/Container';
-import Grid from '@mui/material/Unstable_Grid2';
-import Typography from '@mui/material/Typography';
-
+import { useParams, useRouter } from 'src/routes/hooks';
 import { paths } from 'src/routes/paths';
-import { RouterLink } from 'src/routes/components';
 
-import { useSnackbar } from 'src/components/snackbar';
+// Import Product.json data
 
-import { getProductById, updateProductStatus } from 'src/api/product';
-import { IProductAPIResponse, IProductCreateRequest, IProductStatus  } from 'src/types/product';
-
-import { PRODUCT_PUBLISH_OPTIONS } from 'src/_mock';
-
+import ProductDetailsDescription from 'src/sections/product/product-details-description';
 import Iconify from 'src/components/iconify';
-import EmptyContent from 'src/components/empty-content';
-import { useSettingsContext } from 'src/components/settings';
+import ProductDetailsCarousel from 'src/sections/product/product-details-carousel';
+import {
+  IProductItem,
+  Product,
+  ProductDetailsRoot,
+  Reviews,
+  Suggestion,
+  Variation,
+} from 'src/types/product';
+import ProductDetailsReview from 'src/sections/product/product-details-review';
+import RecommendedProductsCard from 'src/app/cart/RecommendedProductsCard';
 
+import { getSuggestionById, getUserProductById } from 'src/api/product';
 import { useAuthToken } from 'src/auth/hooks';
-
-import { ProductDetailsSkeleton } from '../product-skeleton';
-import ProductDetailsReview from '../product-details-review';
-import ProductDetailsSummary from '../product-details-summary';
-import ProductDetailsToolbar from '../product-details-toolbar';
-import ProductDetailsCarousel from '../product-details-carousel';
-import ProductDetailsDescription from '../product-details-description';
-
-// ----------------------------------------------------------------------
-
-const SUMMARY = [
-  {
-    title: '100% Original',
-    description: 'Chocolate bar candy canes ice cream toffee cookie halvah.',
-    icon: 'solar:medal-ribbon-star-bold',
-  },
-  {
-    title: '2 Day size Replacement',
-    description: 'Marshmallow biscuit donut dragée fruitcake wafer.',
-    icon: 'solar:refresh-circle-bold',
-  },
-  {
-    title: '1 Year Warranty',
-    description: 'Cotton candy gingerbread cake I love sugar sweet.',
-    icon: 'solar:shield-check-bold',
-  },
-];
+import { enqueueSnackbar } from 'notistack';
+import { AddToCart } from 'src/api/cart';
+import { addWishlist, removeWishlist } from 'src/api/wishlist';
+import { ProductDetailsLoading } from 'src/sections/product/product-skeleton';
+import { ReviewLoading } from 'src/sections/product/review-skeleton';
+import { SuggestionCardLoading } from 'src/sections/product/suggestion-card-skeleton';
+import LoginPopup from 'src/app/landing/loginPopup/AuthPopup';
+import { useAuthContext } from 'src/auth/hooks/use-auth-context';
 
 // ----------------------------------------------------------------------
 
-type Props = {
-  id: string;
-};
-
-const product = {
-  "id": "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b1",
-  "gender": [
-    "Kids"
-  ],
-  "images": [
-    "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-1.webp",
-    "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-2.webp",
-    "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-3.webp",
-    "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-4.webp",
-    "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-5.webp",
-    "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-6.webp",
-    "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-7.webp",
-    "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-8.webp"
-  ],
-  "reviews": [
-    {
-      "id": "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b1",
-      "name": "Jayvion Simon",
-      "postedAt": "2025-08-02T09:52:39+00:00",
-      "comment": "The sun slowly set over the horizon, painting the sky in vibrant hues of orange and pink.",
-      "isPurchased": true,
-      "rating": 4.2,
-      "avatarUrl": "https://api-prod-minimal-v700.pages.dev/assets/images/avatar/avatar-1.webp",
-      "helpful": 9911,
-      "attachments": []
-    },
-    {
-      "id": "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b2",
-      "name": "Lucian Obrien",
-      "postedAt": "2025-08-01T08:52:39+00:00",
-      "comment": "She eagerly opened the gift, her eyes sparkling with excitement.",
-      "isPurchased": true,
-      "rating": 3.7,
-      "avatarUrl": "https://api-prod-minimal-v700.pages.dev/assets/images/avatar/avatar-2.webp",
-      "helpful": 1947,
-      "attachments": [
-        "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-1.webp"
-      ]
-    },
-    {
-      "id": "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b3",
-      "name": "Deja Brady",
-      "postedAt": "2025-07-31T07:52:39+00:00",
-      "comment": "The old oak tree stood tall and majestic, its branches swaying gently in the breeze.",
-      "isPurchased": true,
-      "rating": 4.5,
-      "avatarUrl": "https://api-prod-minimal-v700.pages.dev/assets/images/avatar/avatar-3.webp",
-      "helpful": 9124,
-      "attachments": []
-    },
-    {
-      "id": "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b4",
-      "name": "Harrison Stein",
-      "postedAt": "2025-07-30T06:52:39+00:00",
-      "comment": "The aroma of freshly brewed coffee filled the air, awakening my senses.",
-      "isPurchased": false,
-      "rating": 3.5,
-      "avatarUrl": "https://api-prod-minimal-v700.pages.dev/assets/images/avatar/avatar-4.webp",
-      "helpful": 6984,
-      "attachments": [
-        "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-3.webp",
-        "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-4.webp"
-      ]
-    },
-    {
-      "id": "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b5",
-      "name": "Reece Chung",
-      "postedAt": "2025-07-29T05:52:39+00:00",
-      "comment": "The children giggled with joy as they ran through the sprinklers on a hot summer day.",
-      "isPurchased": false,
-      "rating": 0.5,
-      "avatarUrl": "https://api-prod-minimal-v700.pages.dev/assets/images/avatar/avatar-5.webp",
-      "helpful": 8488,
-      "attachments": []
-    },
-    {
-      "id": "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b6",
-      "name": "Lainey Davidson",
-      "postedAt": "2025-07-28T04:52:39+00:00",
-      "comment": "He carefully crafted a beautiful sculpture out of clay, his hands skillfully shaping the intricate details.",
-      "isPurchased": true,
-      "rating": 3,
-      "avatarUrl": "https://api-prod-minimal-v700.pages.dev/assets/images/avatar/avatar-6.webp",
-      "helpful": 2034,
-      "attachments": [
-        "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-6.webp",
-        "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-7.webp",
-        "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-8.webp"
-      ]
-    },
-    {
-      "id": "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b7",
-      "name": "Cristopher Cardenas",
-      "postedAt": "2025-07-27T03:52:39+00:00",
-      "comment": "The concert was a mesmerizing experience, with the music filling the venue and the crowd cheering in delight.",
-      "isPurchased": false,
-      "rating": 2.5,
-      "avatarUrl": "https://api-prod-minimal-v700.pages.dev/assets/images/avatar/avatar-7.webp",
-      "helpful": 3364,
-      "attachments": []
-    },
-    {
-      "id": "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b8",
-      "name": "Melanie Noble",
-      "postedAt": "2025-07-26T02:52:39+00:00",
-      "comment": "The waves crashed against the shore, creating a soothing symphony of sound.",
-      "isPurchased": false,
-      "rating": 2.8,
-      "avatarUrl": "https://api-prod-minimal-v700.pages.dev/assets/images/avatar/avatar-8.webp",
-      "helpful": 8401,
-      "attachments": []
-    }
-  ],
-  "publish": "draft",
-  "wishlist": false,
-  "ratings": [
-    {
-      "name": "1 Star",
-      "starCount": 9911,
-      "reviewCount": 1947
-    },
-    {
-      "name": "2 Star",
-      "starCount": 1947,
-      "reviewCount": 9124
-    },
-    {
-      "name": "3 Star",
-      "starCount": 9124,
-      "reviewCount": 6984
-    },
-    {
-      "name": "4 Star",
-      "starCount": 6984,
-      "reviewCount": 8488
-    },
-    {
-      "name": "5 Star",
-      "starCount": 8488,
-      "reviewCount": 2034
-    }
-  ],
-  "category": "Accessories",
-  "available": 0,
-  "priceSale": 83.74,
-  "taxes": 10,
-  "quantity": 80,
-  "inventoryType": "out of stock",
-  "tags": [
-    "Technology",
-    "Health and Wellness",
-    "Travel",
-    "Finance",
-    "Education"
-  ],
-  "code": "38BEE270",
-  "description": "\n<h6>Specifications</h6>\n<table>\n  <tbody>\n    <tr>\n      <td>Category</td>\n      <td>Mobile</td>\n    </tr>\n    <tr>\n      <td>Manufacturer</td>\n      <td>Apple</td>\n    </tr>\n    <tr>\n      <td>Warranty</td>\n      <td>12 Months</td>\n    </tr>\n    <tr>\n      <td>Serial number</td>\n      <td>358607726380311</td>\n    </tr>\n    <tr>\n      <td>Ships from</td>\n      <td>United States</td>\n    </tr>\n  </tbody>\n</table>\n\n<h6>Product details</h6>\n<ul>\n  <li>\n    <p>The foam sockliner feels soft and comfortable</p>\n  </li>\n  <li>\n    <p>Pull tab</p>\n  </li>\n  <li>\n    <p>Not intended for use as Personal Protective Equipment</p>\n  </li>\n  <li>\n    <p>Colour Shown: White/Black/Oxygen Purple/Action Grape</p>\n  </li>\n  <li>\n    <p>Style: 921826-109</p>\n  </li>\n  <li>\n    <p>Country/Region of Origin: China</p>\n  </li>\n</ul>\n<h6>Benefits</h6>\n<ul>\n  <li>\n    <p>Mesh and synthetic materials on the upper keep the fluid look of the OG while adding comfort</p>\n    and durability.\n  </li>\n  <li>\n    <p>Originally designed for performance running, the full-length Max Air unit adds soft, comfortable cushio</p>\n    ning underfoot.\n  </li>\n  <li>\n    <p>The foam midsole feels springy and soft.</p>\n  </li>\n  <li>\n    <p>The rubber outsole adds traction and durability.</p>\n  </li>\n</ul>\n<h6>Delivery and returns</h6>\n<p>Your order of $200 or more gets free standard delivery.</p>\n<ul>\n  <li>\n    <p>Standard delivered 4-5 Business Days</p>\n  </li>\n  <li>\n    <p>Express delivered 2-4 Business Days</p>\n  </li>\n</ul>\n<p>Orders are processed and delivered Monday-Friday (excluding public holidays)</p>\n\n",
-  "sku": "WW75K5210YW/SV",
-  "createdAt": "2025-08-02T09:52:39+00:00",
-  "name": "Urban Explorer Sneakers",
-  "price": 83.74,
-  "coverUrl": "https://api-prod-minimal-v700.pages.dev/assets/images/m-product/product-1.webp",
-  "colors": [
-    "#FF4842",
-    "#1890FF"
-  ],
-  "totalRatings": 4.2,
-  "totalSold": 763,
-  "totalReviews": 1947,
-  "newLabel": {
-    "enabled": false,
-    "content": "NEW"
-  },
-  "saleLabel": {
-    "enabled": false,
-    "content": "SALE"
-  },
-  "sizes": [
-    "6",
-    "7",
-    "8",
-    "8.5",
-    "9",
-    "9.5",
-    "10",
-    "10.5",
-    "11",
-    "11.5",
-    "12",
-    "13"
-  ],
-  "subDescription": "Featuring the original ripple design inspired by Japanese bullet trains, the Nike Air Max 97 lets you push your style full-speed ahead."
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
 }
 
-export default function ProductDetailsView({ id }: Props) {
-
-  const settings = useSettingsContext();
-  const token = useAuthToken();
-  const { enqueueSnackbar } = useSnackbar();
-  const [currentTab, setCurrentTab] = useState('description');
-  const [productById, setProductById] = useState<IProductCreateRequest | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [publish, setPublish] = useState('');
-
-
-  useEffect(() => {
-    if (productById) {
-      setPublish(productById?.status);
-    }
-  }, [productById]);
-
-  useEffect(() => {
-    const fetchProduct = async () => {
-      if (!token) {
-        setError('Authentication required');
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        setIsLoading(true);
-        const response = await getProductById(id, token);
-        setProductById(response.data.product);
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to fetch product';
-        setError(errorMessage);
-        enqueueSnackbar(errorMessage, { variant: 'error' });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchProduct();
-  }, [id, token, enqueueSnackbar]);
-
-  const handleChangePublish = useCallback((newValue: string) => {
-    setPublish(newValue);
-    try { 
-      const productId = productById?._id
-      const productStatus: IProductStatus = {
-        status: newValue,
-      };
-      updateProductStatus(productId, productStatus, token);
-    } catch (err) {
-      console.error(err);
-    }
-  }, [productById, token]);
-
-  const handleChangeTab = useCallback((event: React.SyntheticEvent, newValue: string) => {
-    setCurrentTab(newValue);
-  }, []);
-
-  const renderSkeleton = <ProductDetailsSkeleton />;
-
-  // const renderError = (
-  //   <EmptyContent
-  //     filled
-  //     title={`${productError?.message}`}
-  //     action={
-  //       <Button
-  //         component={RouterLink}
-  //         href={paths.dashboard.product.root}
-  //         startIcon={<Iconify icon="eva:arrow-ios-back-fill" width={16} />}
-  //         sx={{ mt: 3 }}
-  //       >
-  //         Back to List
-  //       </Button>
-  //     }
-  //     sx={{ py: 10 }}
-  //   />
-  // );
-
-  const renderProduct = productById && (
-    <>
-      <ProductDetailsToolbar
-        backLink={paths.dashboard.product.root}
-        editLink={paths.dashboard.product.edit(`${productById?._id}`)}
-        liveLink={paths.dashboard.product.details(`${productById?._id}`)}
-        publish={publish || ''}
-        onChangePublish={handleChangePublish}
-        publishOptions={PRODUCT_PUBLISH_OPTIONS}
-      />
-
-      <Grid container spacing={{ xs: 3, md: 5, lg: 8 }}>
-        <Grid xs={12} md={6} lg={7}>
-          <ProductDetailsCarousel product={productById as IProductCreateRequest} />
-        </Grid>
-
-        <Grid xs={12} md={6} lg={5}>
-          <ProductDetailsSummary productById={productById as IProductCreateRequest} />
-        </Grid>
-      </Grid>
-
-      <Box
-        gap={5}
-        display="grid"
-        gridTemplateColumns={{
-          xs: 'repeat(1, 1fr)',
-          md: 'repeat(3, 1fr)',
-        }}
-        sx={{ my: 10 }}
-      >
-        {SUMMARY.map((item) => (
-          <Box key={item.title} sx={{ textAlign: 'center', px: 5 }}>
-            <Iconify icon={item.icon} width={32} sx={{ color: 'primary.main' }} />
-
-            <Typography variant="subtitle1" sx={{ mb: 1, mt: 2 }}>
-              {item.title}
-            </Typography>
-
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              {item.description}
-            </Typography>
-          </Box>
-        ))}
-      </Box>
-
-      <Card>
-        {/* <Tabs
-          value={currentTab}
-          onChange={handleChangeTab}
-          sx={{
-            px: 3,
-            boxShadow: (theme) => `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`,
-          }}
-        >
-          {[
-            {
-              value: 'description',
-              label: 'Description',
-            },
-            // {
-            //   value: 'reviews',
-            //   label: `Reviews (${productById?.reviews.length})`,
-            // },
-          ].map((tab) => (
-            <Tab key={tab.value} value={tab.value} label={tab.label} />
-          ))}
-        </Tabs>
-
-        {currentTab === 'description' && (
-          <ProductDetailsDescription description={productById?.description} />
-        )} */}
-
-         <ProductDetailsReview
-            ratings={productById?.ratings || []}  
-            reviews={productById?.reviews || []}
-            totalRatings={productById?.totalRatings || 0}
-            totalReviews={productById?.totalReviews || 0}
-          />
-      </Card>
-
-      
-    </>
-  );
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
 
   return (
-    <Container maxWidth={settings.themeStretch ? false : 'lg'}>
-      {/* {productLoading && renderSkeleton} */}
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`product-tabpanel-${index}`}
+      aria-labelledby={`product-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
+    </div>
+  );
+}
 
-      {/* {productError && renderError} */}
+// ----------------------------------------------------------------------
 
-      {productById && renderProduct}
-    </Container>
+export default function ProductDetailsView() {
+  const theme = useTheme();
+  const token = useAuthToken();
+  const params = useParams();
+  const { authenticated } = useAuthContext();
+  const router = useRouter();
+  const [selectedSize, setSelectedSize] = useState('');
+  const [selectedColor, setSelectedColor] = useState('');
+  const [quantity, setQuantity] = useState(1);
+  const [activeTab, setActiveTab] = useState(0);
+  const [reviewSuccess, setReviewSuccess] = useState(false);
+  const [productData, setProductData] = useState<Product | null>(null);
+  const [review, setReview] = useState<Reviews | null>(null);
+  const [suggestionData, setSuggestionData] = useState<Suggestion[] | []>([]);
+  const [isProductDetailsLoading, setIsProductDetailsLoading] = useState<Boolean>(true);
+  const [isReviewLoading, setIsReviewLoading] = useState<Boolean>(true);
+  const [isSuggestionLoading, setIsSuggestionLoading] = useState<Boolean>(true);
+  const [loginPopupOpen, setLoginPopupOpen] = useState(false);
+
+  const productId = params.id as string;
+
+  const getProductDataById = async () => {
+    if (productId) {
+      try {
+        let response = await getUserProductById(productId, token);
+        if (response.success) {
+          const { product, reviews } = response.data ?? {};
+
+          if (product) {
+            // const transformedArray = product?.images?.map((img) => `${img?.image_url}`);
+            setProductData(product);
+            if (product.variations && product?.variations?.length > 0) {
+              setSelectedSize(product.variations[0].size);
+              setSelectedColor(product.variations[0].color);
+            }
+          }
+          if (reviews) {
+            setReview(reviews);
+          }
+        }
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to fetch product';
+        enqueueSnackbar(errorMessage, { variant: 'error' });
+      } finally {
+        setIsProductDetailsLoading(false);
+        setIsReviewLoading(false);
+      }
+    }
+  };
+
+  const getProductSuggestion = async () => {
+    if (productId) {
+      try {
+        let response = await getSuggestionById(productId, token);
+        if (response.success) {
+          const { suggestions } = response.data ?? {};
+          if (suggestions) {
+            setSuggestionData(suggestions);
+          }
+        }
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to fetch suggestions product';
+        enqueueSnackbar(errorMessage, { variant: 'error' });
+      } finally {
+        setIsSuggestionLoading(false);
+      }
+    }
+  };
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setActiveTab(newValue);
+  };
+
+  const handleAddToCart = async (productId: string, variation?: Variation[]) => {
+    try {
+      if (!authenticated) {
+        setLoginPopupOpen(true);
+      } else {
+        const selectedVariation =
+          variation && variation.find((v) => v.color === selectedColor && v.size === selectedSize);
+        const variationId = selectedVariation?.id ?? null;
+        await AddToCart(token, productId, variationId as string, quantity);
+        router.push(paths.user.cart);
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to product add to cart';
+      enqueueSnackbar(errorMessage, { variant: 'error' });
+    }
+  };
+
+  const handleWishlist = async (productId: string, wishlist: boolean) => {
+    try {
+      !wishlist ? await addWishlist(productId, token) : await removeWishlist(productId, token);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to product add to cart';
+      enqueueSnackbar(errorMessage, { variant: 'error' });
+    }
+  };
+
+  const handleSelectedVariation = (event: SelectChangeEvent) => {
+    setSelectedColor(event.target.value as string);
+  };
+
+  const handleLoginPopupClose = (): void => {
+    setLoginPopupOpen(false);
+  };
+
+  useEffect(() => {
+    const sizeOfPresentVariation =
+      productData?.variations && productData.variations.find((v) => v.color === selectedColor);
+    if (sizeOfPresentVariation) setSelectedSize(sizeOfPresentVariation.size);
+  }, [selectedColor]);
+
+  const formatPrice = (price: number) =>
+    new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(price);
+
+  useEffect(() => {
+    getProductDataById();
+    getProductSuggestion();
+  }, [productId]);
+
+  // Use product data from Product.json
+  const totalRating = (review && review.summary.average_rating) || 0;
+  const totalReviews = (review && review.summary.total_reviews) || 0;
+
+  return (
+    <Box>
+      {/* Hero Section */}
+      {/* <Box
+        sx={{
+          background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+          color: 'white',
+          py: 6,
+          textAlign: 'center',
+        }}
+      >
+        <Container maxWidth="lg">
+          <Typography variant="h3" component="h1" sx={{ mb: 2, fontWeight: 'bold' }}>
+            Discover Your Perfect Style
+          </Typography>
+          <Typography variant="h6" sx={{ opacity: 0.9, maxWidth: 800, mx: 'auto' }}>
+            Explore our curated collection of handcrafted pieces that tell your unique story.
+          </Typography>
+        </Container>
+      </Box> */}
+
+      <Container maxWidth="xl" sx={{ py: 4 }}>
+        {/* Success Alert */}
+        {/* {reviewSuccess && (
+          <Alert severity="success" sx={{ mb: 3 }}>
+            Thank you for your review! It has been submitted successfully.
+          </Alert>
+        )}  */}
+
+        {/* Product Details */}
+
+        {isProductDetailsLoading ? (
+          <ProductDetailsLoading />
+        ) : !productData ? (
+          <Container maxWidth="lg" sx={{ py: 8, textAlign: 'center' }}>
+            <Typography variant="h4">Product not found</Typography>
+            <Button
+              variant="contained"
+              onClick={() => router.push(paths.user.products.root)}
+              sx={{ mt: 2 }}
+            >
+              Back to Products
+            </Button>
+          </Container>
+        ) : (
+          <Grid container spacing={6}>
+            <Grid item xs={12} md={6}>
+              <Box sx={{ position: 'relative' }}>
+                <ProductDetailsCarousel product={productData}  />
+              </Box>
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <Stack spacing={3}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    gap: 2,
+                  }}
+                >
+                  <Box>
+                    <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
+                      {productData.name}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <Rating value={totalRating} precision={0.1} readOnly />
+                    <Typography variant="body2" color="text.secondary">
+                      {totalRating.toFixed(2)} ({totalReviews} reviews)
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      • {productData.sold} sold
+                    </Typography>
+                  </Box>
+                </Box>
+
+                <Box>
+                  <Typography variant="h4" color="primary.main" fontWeight="bold">
+                    {formatPrice(productData.price)}
+                  </Typography>
+                  {productData.mrp && (
+                    <Typography
+                      variant="h6"
+                      color="text.secondary"
+                      sx={{ textDecoration: 'line-through', mt: 1 }}
+                    >
+                      {formatPrice(productData.mrp)}
+                    </Typography>
+                  )}
+                </Box>
+
+                <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.6 }}>
+                  {productData.description}
+                </Typography>
+
+                {productData.variations && productData.variations.length > 0 && (
+                  <Box>
+                    <Typography variant="h6" sx={{ mb: 2 }}>
+                      Color
+                    </Typography>
+                    <Select
+                      value={selectedColor}
+                      placeholder="Select a color"
+                      onChange={handleSelectedVariation}
+                      sx={{ maxWidth: '50%', width: '400px' }}
+                    >
+                      {productData.variations.map((variation) => (
+                        <MenuItem key={variation.color} value={variation.color}>
+                          {variation.color}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </Box>
+                )}
+
+                {productData.variations && productData.variations.length > 0 && (
+                  <Box width="100%">
+                    <Typography variant="h6" sx={{ mb: 2 }}>
+                      Size
+                    </Typography>
+                    <Select
+                      value={selectedSize}
+                      onChange={(event) => setSelectedSize(event.target.value as string)}
+                      placeholder="Select a size"
+                      sx={{ maxWidth: '50%', width: '400px' }}
+                    >
+                      {productData.variations
+                        .filter((variation) => variation.color === selectedColor)
+                        .map((variation) => (
+                          <MenuItem key={variation.size} value={variation.size}>
+                            {variation.size}
+                          </MenuItem>
+                        ))}
+                    </Select>
+                  </Box>
+                )}
+
+                <Box>
+                  <Typography variant="h6" sx={{ mb: 2 }}>
+                    Quantity
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <IconButton
+                      size="small"
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      sx={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Iconify icon="eva:minus-fill" />
+                    </IconButton>
+                    <TextField
+                      value={quantity}
+                      onChange={(e) => setQuantity(parseInt(e.target.value, 10) || 1)}
+                      size="small"
+                      sx={{ width: 80 }}
+                      inputProps={{ style: { textAlign: 'center' } }}
+                    />
+                    <IconButton
+                      size="small"
+                      onClick={() => setQuantity(quantity + 1)}
+                      sx={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Iconify icon="eva:plus-fill" />
+                    </IconButton>
+                  </Box>
+                </Box>
+
+                <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+                  <Button
+                    variant="contained"
+                    size="large"
+                    fullWidth
+                    onClick={() => handleAddToCart(productId, productData?.variations)}
+                    sx={{ py: 1.5 }}
+                  >
+                    <Iconify icon="eva:shopping-cart-fill" /> Add to Cart
+                  </Button>
+
+                  <Button
+                    variant="outlined"
+                    size="large"
+                    fullWidth
+                    // onClick={handleBuyNow}
+                    sx={{ py: 1.5 }}
+                  >
+                    <Iconify icon="eva:shopping-cart-fill" /> Buy Now
+                  </Button>
+                </Stack>
+
+                <Card
+                  sx={{
+                    p: 3,
+                    bgcolor: alpha(theme.palette.primary.main, 0.05),
+                    boxShadow: 'none',
+                  }}
+                >
+                  <Typography variant="h6" sx={{ mb: 2 }}>
+                    Product Highlights
+                  </Typography>
+                  <Stack spacing={1}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box
+                        sx={{
+                          width: 8,
+                          height: 8,
+                          borderRadius: '50%',
+                          bgcolor: 'text.secondary',
+                        }}
+                      />
+                      <Typography variant="body2" color="text.secondary">
+                        Premium quality materials
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box
+                        sx={{
+                          width: 8,
+                          height: 8,
+                          borderRadius: '50%',
+                          bgcolor: 'text.secondary',
+                        }}
+                      />
+                      <Typography variant="body2" color="text.secondary">
+                        Expert Craftsmanship
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box
+                        sx={{
+                          width: 8,
+                          height: 8,
+                          borderRadius: '50%',
+                          bgcolor: 'text.secondary',
+                        }}
+                      />
+                      <Typography variant="body2" color="text.secondary">
+                        Timeless & Elegant Design
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box
+                        sx={{
+                          width: 8,
+                          height: 8,
+                          borderRadius: '50%',
+                          bgcolor: 'text.secondary',
+                        }}
+                      />
+                      <Typography variant="body2" color="text.secondary">
+                        Enhanced Comfort & Usability
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </Card>
+
+                <Card sx={{ p: 3, boxShadow: 'none', border: '1px solid #E0E0E0' }}>
+                  <Typography variant="h6" sx={{ mb: 2 }}>
+                    Delivery & Returns
+                  </Typography>
+                  <Stack spacing={1}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Iconify icon="eva:briefcase-outline" color="text.secondary" />
+                      <Typography variant="body2" color="text.secondary">
+                        {' '}
+                        Complimentary standard delivery
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Iconify icon="ant-design:truck-outlined" color="text.secondary" />
+                      <Typography variant="body2" color="text.secondary">
+                        {' '}
+                        Express delivery available
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Iconify icon="ant-design:clock-circle-outlined" color="text.secondary" />
+                      <Typography variant="body2" color="text.secondary">
+                        {' '}
+                        14-day return policy
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </Card>
+
+                <Card
+                  sx={{
+                    p: 3,
+                    bgcolor: alpha(theme.palette.success.main, 0.05),
+                    boxShadow: 'none',
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                    <Iconify icon="icomoon-free:shield" color="text.secondary" />
+                    <Typography variant="h6">Purchase Protection</Typography>
+                  </Box>
+                  <Typography variant="body2" color="text.secondary">
+                    Your order is covered by our Buyer Protection Policy, ensuring a safe and secure
+                    shopping experience. If any issue arises with your purchase, our support team
+                    will resolve it promptly and fairly. We’re committed to ensuring every
+                    experience with us is secure, seamless, and worry-free.
+                  </Typography>
+                </Card>
+              </Stack>
+            </Grid>
+          </Grid>
+        )}
+
+        {isReviewLoading ? (
+          <ReviewLoading />
+        ) : (
+          <Box sx={{ mt: 8 }}>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+              <Tabs value={activeTab} onChange={handleTabChange}>
+                <Tab label="Description" />
+                <Tab label="Reviews" />
+              </Tabs>
+            </Box>
+
+            <TabPanel value={activeTab} index={0}>
+              <ProductDetailsDescription description={productData?.description as string} />
+            </TabPanel>
+
+            <TabPanel value={activeTab} index={1}>
+              <ProductDetailsReview />
+            </TabPanel>
+          </Box>
+        )}
+        <Box sx={{ mb: 6 }}>
+          <Typography variant="h3" component="h2" sx={{ mb: 4, fontWeight: 'bold' }}>
+            Complete Your Look With These Gems
+          </Typography>
+
+          {isSuggestionLoading ? (
+            <SuggestionCardLoading />
+          ) : (
+            <Grid container spacing={3}>
+              {suggestionData.map((recommendedProduct) => {
+                const suggestion = {
+                  ...recommendedProduct,
+                  collection: recommendedProduct.category.name,
+                  originalPrice: recommendedProduct.mrp,
+                  id: recommendedProduct._id,
+                  image: recommendedProduct.primary_image?.image_url,
+                  wishlist: recommendedProduct.is_in_wishlist,
+                };
+                return (
+                  <Grid item xs={12} sm={6} md={3} key={recommendedProduct.category_id}>
+                    <RecommendedProductsCard
+                      product={suggestion as Suggestion}
+                      addToCart={() =>
+                        handleAddToCart(recommendedProduct._id, recommendedProduct.variations)
+                      }
+                      addToWishlist={handleWishlist}
+                    />
+                  </Grid>
+                );
+              })}
+            </Grid>
+          )}
+        </Box>
+      </Container>
+      {loginPopupOpen && (
+        <LoginPopup
+          open={loginPopupOpen}
+          onClose={handleLoginPopupClose}
+          title="Login"
+          description="Please login to check cart"
+        />
+      )}
+    </Box>
   );
 }

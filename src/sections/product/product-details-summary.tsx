@@ -22,7 +22,7 @@ import FormProvider, { RHFSelect, RHFTextField } from 'src/components/hook-form'
 import Iconify from 'src/components/iconify';
 import Label from 'src/components/label';
 import { ICheckoutItem } from 'src/types/checkout';
-import { IProductAPIResponse, IProductQuantity } from 'src/types/product';
+import { IProductAPIResponse, IProductQuantity, Product } from 'src/types/product';
 import { discountPrice, fCurrency, fShortenNumber } from 'src/utils/format-number';
 
 // ----------------------------------------------------------------------
@@ -220,7 +220,7 @@ const product = {
   "subDescription": "Featuring the original ripple design inspired by Japanese bullet trains, the Nike Air Max 97 lets you push your style full-speed ahead."
 }
 type Props = {
-  productById: IProductAPIResponse;
+  productById: Product;
   items?: ICheckoutItem[];
   disabledActions?: boolean;
   onGotoStep?: (step: number) => void;
@@ -312,20 +312,6 @@ export default function ProductDetailsSummary({
     }
   });
 
-  const handleAddCart = useCallback(() => {
-    try {
-      const quantityValue = methods.getValues('quantity');
-      onAddCart?.({
-        ...data,
-        colors: [values.colors],
-        quantity: quantityValue,
-        subTotal: data.price * quantityValue,
-      });
-    } catch (error) {
-      console.error(error);
-    }
-  }, [onAddCart, values]);
-
   const handleUpdateQuantity = useCallback(async () => {
     try {
       // Validate only the quantity field
@@ -416,27 +402,6 @@ export default function ProductDetailsSummary({
         <Iconify icon="solar:share-bold" width={16} sx={{ mr: 1 }} />
         Share
       </Link>
-    </Stack>
-  );
-
-  const renderColorOptions = (
-    <Stack direction="row">
-      <Typography variant="subtitle2" sx={{ flexGrow: 1 }}>
-        Color
-      </Typography>
-
-      <Controller
-        name="colors"
-        control={control}
-        render={({ field }) => (
-          <ColorPicker
-            colors={colors}
-            selected={field.value}
-            onSelectColor={(color) => field.onChange(color as string)}
-            limit={4}
-          />
-        )}
-      />
     </Stack>
   );
 

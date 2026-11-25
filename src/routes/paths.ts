@@ -41,20 +41,13 @@ export const paths = {
     },
     cart: '/cart',
     orders: {
-      root: '/order',
-      details: (id: string) => `/orders/${id}`,
-      demo: {
-        details: `/orders/${MOCK_ID}`,
-      },
-    },
-    profile: '/profile',
-    orders: {
       root: '/orders',
       details: (id: string) => `/orders/${id}`,
       demo: {
         details: `/orders/${MOCK_ID}`,
       },
     },
+    profile: '/profile',
     helpCenter: '/help-center',
     wishlist: '/wishlist',
   },

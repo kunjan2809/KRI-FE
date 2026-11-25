@@ -20,16 +20,22 @@ import { useEffect, useState } from 'react';
 import { Reviews } from 'src/types/reviews';
 import { getReviewDetail } from 'src/api/reviews';
 import { enqueueSnackbar } from 'notistack';
+import { useAuthContext } from 'src/auth/hooks/use-auth-context';
+import LoginPopup from 'src/app/landing/loginPopup/AuthPopup';
 
 // ----------------------------------------------------------------------
+interface ProductDetailReview {
+  getProductDataById: () => Promise<void>;
+}
 
-
-export default function ProductDetailsReview() {
-  const review = useBoolean();
+export default function ProductDetailsReview({ getProductDataById }: ProductDetailReview) {
+  const { authenticated } = useAuthContext();
   const param = useParams();
   const token = useAuthToken();
   const productId = param.id as string;
   const [productReviews, setProductReviews] = useState<Reviews | null>(null);
+  const [loginPopupOpen, setLoginPopupOpen] = useState(false);
+  const [review,setReview] = useState(false);
 
   const getReviewById = async () => {
     if (productId) {
@@ -39,18 +45,23 @@ export default function ProductDetailsReview() {
         if (reviews) {
           setProductReviews(reviews);
         }
+        getProductDataById();
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to fetch product';
         enqueueSnackbar(errorMessage, { variant: 'error' });
       }
     }
   };
+  const handleLoginPopupClose = (): void => {
+    setLoginPopupOpen(false);
+  };
 
   useEffect(() => {
     getReviewById();
-  }, [productId,productReviews]);
+  }, [productId]);
 
-  const totalRatings = (productReviews && Number(productReviews.summary.average_rating.toFixed(1))) || 0;
+  const totalRatings =
+    (productReviews && Number(productReviews.summary.average_rating.toFixed(1))) || 0;
   const totalReviews = (productReviews && productReviews.summary.total_reviews) || 0;
   const total =
     productReviews &&
@@ -86,7 +97,8 @@ export default function ProductDetailsReview() {
     >
       {[...Array(5)].map((_, index) => {
         const star = 5 - index;
-        const rating = productReviews && productReviews.summary.rating_distribution.find((r) => r._id === star);
+        const rating =
+          productReviews && productReviews.summary.rating_distribution.find((r) => r._id === star);
         const count = rating ? rating.count : 0;
         const percentage = total ? (count / total) * 100 : 0;
 
@@ -128,7 +140,7 @@ export default function ProductDetailsReview() {
         size="large"
         variant="soft"
         color="inherit"
-        onClick={review.onTrue}
+        onClick={() => (!authenticated ? setLoginPopupOpen(true) : setReview(true))}
         startIcon={<Iconify icon="solar:pen-bold" />}
       >
         Write your review
@@ -159,7 +171,19 @@ export default function ProductDetailsReview() {
 
       {productReviews && <ProductReviewList reviews={productReviews} />}
 
-      <ProductReviewNewForm open={review.value} onClose={review.onFalse} />
+      <ProductReviewNewForm
+        open={review}
+        onClose={() => setReview(false)}
+        getReviewById={getReviewById}
+      />
+      {loginPopupOpen && (
+        <LoginPopup
+          open={loginPopupOpen}
+          onClose={handleLoginPopupClose}
+          title="Login"
+          description="Please login to give review"
+        />
+      )}
     </>
   );
 }

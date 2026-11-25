@@ -28,7 +28,7 @@ export default function AuthGuard({ children }: Props) {
 function Container({ children }: Props) {
   const router = useRouter();
 
-  const { authenticated, method } = useAuthContext();
+  const { authenticated, method, user } = useAuthContext();
 
   const [checked, setChecked] = useState(false);
 
@@ -49,7 +49,11 @@ function Container({ children }: Props) {
   }, [authenticated, method, router]);
 
   useEffect(() => {
-    check();
+    if (!user?.is_admin) {
+      router.replace(paths.user.landing);
+    } else {
+      check();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

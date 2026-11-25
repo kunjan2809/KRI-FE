@@ -15,6 +15,7 @@ import {
   IOrderItemTableData,
   Order,
   ReturnOrder,
+  IOrdersDetail,
 } from 'src/types/order';
 import { OrderData } from 'src/types/analytics';
 
@@ -527,6 +528,28 @@ export async function createReturnRequest(
   if (!response.ok) {
     const errorDetails = await response.json();
     throw new Error(errorDetails.message || 'Error create return request');
+  }
+
+  return response.json();
+}
+
+export async function createCancelRequest(
+  orderId: string,
+  token: string
+) {
+  const baseUrl = BASE_API;
+  const URL = `${baseUrl}${endpoints.order.cancel.replace(':orderId', `${orderId}`)}`;
+  const response = await fetch(URL, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorDetails = await response.json();
+    throw new Error(errorDetails.message || 'Error create cancel request');
   }
 
   return response.json();

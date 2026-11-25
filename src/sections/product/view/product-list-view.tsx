@@ -1,7 +1,7 @@
 'use client';
 
 import isEqual from 'lodash/isEqual';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, SetStateAction } from 'react';
 
 import { Box } from '@mui/material';
 import Card from '@mui/material/Card';
@@ -54,6 +54,22 @@ import {
   RenderCellCreatedAt,
 } from '../product-table-row';
 
+interface ReturnType {
+  value: boolean;
+  onTrue: () => void;
+  onFalse: () => void;
+  onToggle: () => void;
+  setValue: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+interface CustomToolbarType {
+  selectedRowIds: GridRowSelectionModel | null;
+  confirmRows: ReturnType;
+  setDeleteRowIds: (value: SetStateAction<string[]>) => void;
+  filters: IProductTableFilters;
+  handleFilters: (name: string, value: IProductTableFilterValue) => void;
+}
+
 // ----------------------------------------------------------------------
 
 const PUBLISH_OPTIONS = [
@@ -90,7 +106,6 @@ export default function ProductListView() {
 
   const settings = useSettingsContext();
 
-
   const [tableData, setTableData] = useState<any[]>([]);
 
   const [filters, setFilters] = useState(defaultFilters);
@@ -98,7 +113,7 @@ export default function ProductListView() {
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(20);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  
+
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState<string>('');
   const [deleteRowIds, setDeleteRowIds] = useState<string[]>([]);
 
@@ -121,25 +136,21 @@ export default function ProductListView() {
     limit,
   });
 
-  const [selectedRowIds, setSelectedRowIds] = useState<GridRowSelectionModel>([]);
- 
+  const [selectedRowIds, setSelectedRowIds] = useState<GridRowSelectionModel | null>(null);
+
   const [columnVisibilityModel, setColumnVisibilityModel] =
     useState<GridColumnVisibilityModel>(HIDE_COLUMNS);
-
 
   useEffect(() => {
     if (products && products.length) {
       setTableData(products);
     }
-   
   }, [products]);
-
 
   // Use server-side data directly since filtering is handled by API
   const dataFiltered = products || [];
 
   const canReset = !isEqual(defaultFilters, filters);
-
 
   const handleFilters = useCallback((name: string, value: IProductTableFilterValue) => {
     setFilters((prevState) => ({
@@ -161,21 +172,20 @@ export default function ProductListView() {
     setPage(1);
   }, []);
 
-  const handleDeleteRows = useCallback(
-    () => {
-      const deletePromises = deleteRowIds.map((id) => deleteProduct(id, token));
-      Promise.all(deletePromises).then(() => {
+  const handleDeleteRows = useCallback(() => {
+    const deletePromises = deleteRowIds.map((id) => deleteProduct(id, token));
+    Promise.all(deletePromises)
+      .then(() => {
         enqueueSnackbar('Delete success!');
         setTableData(tableData.filter((row) => !deleteRowIds.includes(row._id)));
         setDeleteRowIds([]);
         reFetchProducts();
         confirmRows.onFalse();
-      }).catch((error) => {
+      })
+      .catch((error) => {
         enqueueSnackbar('Delete failed!', { variant: 'error' });
       });
-    },
-    [enqueueSnackbar, tableData, token, reFetchProducts, confirmRows, deleteRowIds]
-  );
+  }, [enqueueSnackbar, tableData, token, reFetchProducts, confirmRows, deleteRowIds]);
 
   const handleEditRow = useCallback(
     (id: string) => {
@@ -186,19 +196,18 @@ export default function ProductListView() {
 
   const handleViewRow = useCallback(
     (id: string) => {
-      router.push(paths.user.products.details(id));
+      router.push(paths.dashboard.product.details(id));
     },
     [router]
   );
   const handleFeaturedToggole = async (productId: string, status: boolean) => {
     try {
-     await patchFeaturedStatus(token, productId, !status)
-     reFetchProducts()
+      await patchFeaturedStatus(token, productId, !status);
+      reFetchProducts();
     } catch (error) {
-      console.log("Somthing get wrong", error)
+      console.log('Somthing get wrong', error);
     }
-
-  }
+  };
   const columns: GridColDef[] = [
     {
       field: 'name',
@@ -236,12 +245,7 @@ export default function ProductListView() {
       type: 'singleSelect',
       editable: true,
       valueOptions: PUBLISH_OPTIONS,
-      renderCell: (params) => <Box>
-        {params.row.featured && <Label variant="soft" color='success'>
-          featured
-        </Label>
-        }<RenderCellPublish params={params} />
-      </Box>
+      renderCell: (params) => <RenderCellPublish params={params} />,
     },
     {
       type: 'actions',
@@ -280,64 +284,70 @@ export default function ProductListView() {
             confirmRows.onTrue();
             setDeleteRowIds([params.row._id]);
           }}
-          sx={{ color: 'error.main' }}
+          style={{ color: 'error.main' }}
         />,
       ],
     },
   ];
 
+  const CustomToolbar = ({
+    selectedRowIds,
+    confirmRows,
+    setDeleteRowIds,
+    filters,
+    handleFilters,
+  }: CustomToolbarType) => {
+    return (
+      <>
+        {/* <ProductTableToolbar
+          filters={filters}
+          onFilters={handleFilters}
+          stockOptions={PRODUCT_STOCK_OPTIONS}
+          publishOptions={PUBLISH_OPTIONS}
+        /> */}
 
-  const CustomToolbar = () => (
-    <GridToolbarContainer>
-      <ProductTableToolbar
-        filters={filters}
-        onFilters={handleFilters}
-        stockOptions={PRODUCT_STOCK_OPTIONS}
-        publishOptions={PUBLISH_OPTIONS}
-      />
-
-      <GridToolbarQuickFilter
-        placeholder="Search products..."
-        debounceMs={1000}
-      />
-
-      <Stack
-        spacing={1}
-        flexGrow={1}
-        direction="row"
-        alignItems="center"
-        justifyContent="flex-end"
-      >
-        {!!selectedRowIds.length && (
-          <Button
-            size="small"
-            color="error"
-            startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
-            onClick={() => {
-              confirmRows.onTrue();
-              setDeleteRowIds(selectedRowIds.map((id) => id as string));
-            }}
+        {/* <GridToolbarContainer> */}
+        {/* <GridToolbarQuickFilter placeholder="Search products..." debounceMs={1000} /> */}
+        {selectedRowIds && selectedRowIds.ids.size > 0 && (
+          <Stack
+            spacing={1}
+            py={2}
+            px={2}
+            flexGrow={1}
+            direction="row"
+            alignItems="center"
+            justifyContent="flex-end"
           >
-            Delete ({selectedRowIds.length})
-          </Button>
+            <Button
+              size="small"
+              color="error"
+              sx={{padding:'4px 8px'}}
+              startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
+              onClick={() => {
+                confirmRows.onTrue();
+                setDeleteRowIds(Array.from(selectedRowIds.ids) as string[]);
+              }}
+            >
+              Delete ({selectedRowIds.ids.size}) Products
+            </Button>
+
+            {/* <GridToolbarColumnsButton /> */}
+            {/* <GridToolbarFilterButton /> */}
+            {/* <GridToolbarExport /> */}
+          </Stack>
         )}
 
-        <GridToolbarColumnsButton />
-        <GridToolbarFilterButton />
-        <GridToolbarExport />
-      </Stack>
-    </GridToolbarContainer>
-  );
+        {/* </GridToolbarContainer> */}
+      </>
+    );
+  };
 
   return (
     <>
       <Container maxWidth={settings.themeStretch ? false : 'lg'}>
         <CustomBreadcrumbs
           heading="Product List"
-          links={[
-            { name: 'Dashboard', href: paths.dashboard.root },
-            { name: 'Product' },
-          ]}
+          links={[{ name: 'Dashboard', href: paths.dashboard.root }, { name: 'Product' }]}
           action={
             <Button
               component={RouterLink}
@@ -365,7 +375,6 @@ export default function ProductListView() {
           </Alert>
         )}
 
-
         <Card>
           {canReset && (
             <ProductTableFiltersResult
@@ -376,7 +385,13 @@ export default function ProductListView() {
               sx={{ p: 2.5, pt: 0 }}
             />
           )}
-
+          <CustomToolbar
+            selectedRowIds={selectedRowIds}
+            confirmRows={confirmRows}
+            setDeleteRowIds={setDeleteRowIds}
+            filters={filters}
+            handleFilters={handleFilters}
+          />
           <DataGrid
             rows={dataFiltered}
             columns={columns}
@@ -391,7 +406,7 @@ export default function ProductListView() {
               setPage(newPage + 1);
               setLimit(newPageSize);
             }}
-            filterMode='server'
+            filterMode="server"
             onFilterModelChange={handleSearch}
             pageSizeOptions={[20, 50, 100]}
             disableRowSelectionOnClick
@@ -410,21 +425,16 @@ export default function ProductListView() {
             onColumnVisibilityModelChange={(newModel) => {
               setColumnVisibilityModel(newModel);
             }}
-            slots={{
-              toolbar: CustomToolbar,
-            }}
             sx={{
               '& .MuiDataGrid-cell': {
                 borderBottom: '1px dashed #919eab33',
               },
-            }}
-            slotProps={{
-              toolbar: {
-                selectedRowIds,
-                onDeleteRows: handleDeleteRows,
-                onEditRows: () => {
-                  console.info('EDIT ROWS', selectedRowIds);
-                },
+              '& .MuiDataGrid-toolbarContainer': {
+                display: 'flex !important',
+                visibility: 'visible !important',
+                height: 'auto !important',
+                minHeight: '56px',
+                padding: '8px 16px',
               },
             }}
           />

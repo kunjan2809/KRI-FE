@@ -8,31 +8,37 @@ import {
   Button,
   Box,
   Typography,
+  FormControlLabel,
+  Switch,
 } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import FormProvider, { RHFTextField } from 'src/components/hook-form';
+import FormProvider, { RHFSwitch, RHFTextField } from 'src/components/hook-form';
 import { useAuthToken } from 'src/auth/hooks';
 import { addAddress, editAddress, updateUserInfo } from 'src/api/user';
 import { enqueueSnackbar } from 'notistack';
 import { AddAddress, UserAddress } from 'src/types/user';
 import { LoadingButton } from '@mui/lab';
-import { useEffect } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 
 interface Props {
   open: boolean;
   onClose: VoidFunction;
   currentAddress?: UserAddress | null;
   onSuccess: VoidFunction;
+  defaultToggle:boolean
+  setDefaultToggle:Dispatch<SetStateAction<boolean>>
 }
 
-const AddressFormDialog = ({ open, onClose, currentAddress, onSuccess }: Props) => {
+const AddressFormDialog = ({ open, onClose, currentAddress, onSuccess,defaultToggle,setDefaultToggle}: Props) => {
   const token = useAuthToken();
-  const phoneReg = /^\+[1-9]\d{7,14}$/
+  const phoneReg = /^\+[1-9]\d{7,14}$/;
 
   const AddressSchema = Yup.object().shape({
     full_name: Yup.string().required('Full name is required'),
-    mobile_number: Yup.string().required('Phone number is required') .matches(phoneReg, "Phone number is not valid"),
+    mobile_number: Yup.string()
+      .required('Phone number is required')
+      .matches(phoneReg, 'Phone number is not valid'),
     address_line_1: Yup.string().required('Address line 1 is required'),
     address_line_2: Yup.string().optional(),
     landmark: Yup.string().optional(),
@@ -40,6 +46,7 @@ const AddressFormDialog = ({ open, onClose, currentAddress, onSuccess }: Props) 
     state: Yup.string().required('State is required'),
     postal_code: Yup.string().required('Postal code is required'),
     country: Yup.string().required('Country is required'),
+    isDefault: Yup.boolean(),
   });
 
   const defaultValues = {
@@ -52,6 +59,7 @@ const AddressFormDialog = ({ open, onClose, currentAddress, onSuccess }: Props) 
     state: currentAddress?.state || '',
     postal_code: currentAddress?.postal_code || '',
     country: currentAddress?.country || '',
+    isDefault: defaultToggle ? defaultToggle : currentAddress?.is_default,
   };
 
   const methods = useForm({
@@ -81,12 +89,13 @@ const AddressFormDialog = ({ open, onClose, currentAddress, onSuccess }: Props) 
         state: data.state,
         postal_code: data.postal_code,
         country: data.country,
-        is_default: false,
+        is_default: defaultToggle ? defaultToggle : (data.isDefault as boolean),
       };
+
       if (currentAddress?._id) {
         await editAddress(currentAddress._id, addAddressData, token);
       } else {
-        await addAddress({ ...data, is_default: false }, token);
+        await addAddress(addAddressData, token);
         enqueueSnackbar('Address added successfully', { variant: 'success' });
       }
 
@@ -104,6 +113,13 @@ const AddressFormDialog = ({ open, onClose, currentAddress, onSuccess }: Props) 
     }
     onClose();
   };
+
+  const handleDefaultToggle = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const isEnabled = event.target.checked;
+    if (!defaultToggle) setValue('isDefault', isEnabled);
+  };
+
+
 
   useEffect(() => {
     setValue('full_name', currentAddress ? currentAddress?.full_name : '');
@@ -164,13 +180,25 @@ const AddressFormDialog = ({ open, onClose, currentAddress, onSuccess }: Props) 
             </Grid>
           </Grid>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCancel} variant="outlined" color="inherit">
-            Cancel
-          </Button>
-          <LoadingButton type="submit" variant="contained">
-            {currentAddress ? 'Save Changes' : 'Add Address'}
-          </LoadingButton>
+        <DialogActions sx={{ justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
+          <FormControlLabel
+            label="Set as default"
+            control={
+              <Switch
+                checked={defaultToggle ? defaultToggle :values.isDefault }
+                onChange={handleDefaultToggle}
+                name="jason"
+              />
+            }
+          />
+          <Box sx={{ display: 'flex', gap: '10px' }}>
+            <Button onClick={handleCancel} variant="outlined" color="inherit">
+              Cancel
+            </Button>
+            <LoadingButton type="submit" variant="contained">
+              {currentAddress ? 'Save Changes' : 'Add Address'}
+            </LoadingButton>
+          </Box>
         </DialogActions>
       </FormProvider>
     </Dialog>

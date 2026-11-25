@@ -27,9 +27,10 @@ import { enqueueSnackbar } from 'notistack';
 
 interface Props extends DialogProps {
   onClose: VoidFunction;
+  getReviewById: () => Promise<void>;
 }
 
-export default function ProductReviewNewForm({ onClose, ...other }: Props) {
+export default function ProductReviewNewForm({ onClose,getReviewById,...other }: Props) {
   const token = useAuthToken();
   const param = useParams();
   const productId = param.id as string;
@@ -98,9 +99,10 @@ export default function ProductReviewNewForm({ onClose, ...other }: Props) {
 
         if (values.images) {
           const reviewImageData: IUploadReviewImage = {
-            file: values.images,
+            file: values?.images,
           };
-          await addReview(productId, reviewImageData, reviewData, token);
+          await addReview(productId, reviewImageData, reviewData, token)
+          getReviewById()
         }
       
       reset();

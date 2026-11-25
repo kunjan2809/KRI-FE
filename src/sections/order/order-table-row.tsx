@@ -75,7 +75,6 @@ export default function OrderTableRow({
       data?.address_line_1,
       data?.address_line_2,
       data?.landmark,
-      data?.street,
       data?.city,
       data?.state,
       data?.postal_code,
@@ -207,7 +206,7 @@ export default function OrderTableRow({
         >
           <Stack component={Paper} sx={{ m: 1.5 }}>
             {order_items?.map((item) => {
-              const { name, sku } = item.product_id
+              const { name} = item.product_id
               return (
                 <Stack
                   key={_id}
@@ -221,7 +220,7 @@ export default function OrderTableRow({
                   }}
                 >
                   <Avatar
-                    src={name}
+                    src={item.primary_image?.image_url}
                     variant="rounded"
                     sx={{ width: 48, height: 48, mr: 2 }}
                   />

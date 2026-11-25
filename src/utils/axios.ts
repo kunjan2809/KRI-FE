@@ -87,6 +87,7 @@ export const endpoints = {
     revenue: '/api/analytics/revenue/',
     yearlyOrders: '/api/analytics/yearly/',
     status: '/api/analytics/users/status',
+    orderStatus:'/api/orders/admin/statistics/order-status'
   },
   mail: {
     list: '/api/mail/list',
@@ -157,6 +158,7 @@ export const endpoints = {
     add: '/api/category/add',
     edit: '/api/category/edit',
     delete: '/api/category/delete',
+   variation:'/api/products/variation-options'
   },
   wishlist: {
     all: '/api/wishlist',

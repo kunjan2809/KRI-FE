@@ -166,7 +166,7 @@ export default function ProductsPage() {
                           <CardMedia
                             component="img"
                             height="250"
-                            image={item.product.primary_image?.image_url}
+                            image={item.product.primary_image ? item.product.primary_image.image_url :"https://nraasmart.orderz.app/images/item_placeholder.jpg"}
                             alt={item.product.name}
                             sx={{ objectFit: 'cover' }}
                           />

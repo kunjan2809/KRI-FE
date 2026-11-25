@@ -4,6 +4,7 @@ import { useMemo } from "react";
 
 import { BASE_API } from "src/config-global";
 import { apiProductFetcher, endpoints } from "src/utils/axios";
+import { OrderStatistics } from "src/types/analytics";
 
 
 //------------------------------------------------------------------------------------
@@ -197,6 +198,34 @@ export function useGetUserStatus(token: string) {
         userloading: isLoading,
         userError: error,
         userValidating: isValidating,
+    }),
+        [data?.data, error, isLoading, isValidating]
+    );
+
+    return memoizedValue;
+}
+
+export function useGetOrderStatus(token: string) {
+    const baseUrl = BASE_API;
+    const URL = `${baseUrl}${endpoints.analytics.orderStatus}`;
+
+    const { data, isLoading, error, isValidating } = useSWR(
+        token ? { url: URL, token } : null,
+        apiProductFetcher,
+        {
+            revalidateOnFocus: false,
+            revalidateOnReconnect: false,
+            errorRetryCount: 3,
+            onError: (err) => {
+                console.error('useGetUserStatus error:', err);
+            }
+        });
+
+    const memoizedValue = useMemo(() => ({
+        orderStatic: data?.data as OrderStatistics,
+        orderStatusloading: isLoading,
+        orderStatusrError: error,
+        orderStatusValidating: isValidating,
     }),
         [data?.data, error, isLoading, isValidating]
     );

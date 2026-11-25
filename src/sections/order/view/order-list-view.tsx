@@ -40,6 +40,7 @@ import Scrollbar from 'src/components/scrollbar';
 
 import { useAuthToken } from 'src/auth/hooks';
 import { useGetOrders, deleteOrder } from 'src/api/order';
+import { useGetOrderStatus } from 'src/api/analytics';
 import { IOrderTableFilters, IOrderTableFilterValue } from 'src/types/order';
 
 import OrderTableRow from '../order-table-row';
@@ -86,13 +87,13 @@ export default function OrderListView() {
   const confirm = useBoolean();
 
   const [filters, setFilters] = useState(defaultFilters);
+  console.log('filters', filters.dateRange)
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(20);
 
-
-
+  const {orderStatic}=useGetOrderStatus(token)
   // API parameters
   const apiParams = {
     page: currentPage,
@@ -112,6 +113,7 @@ export default function OrderListView() {
     pagination,
     ordersEmpty
   } = useGetOrders(apiParams);
+
 
   const denseHeight = table.dense ? 56 : 56 + 20;
 
@@ -238,30 +240,27 @@ export default function OrderListView() {
               boxShadow: (theme) => `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`,
             }}
           >
-            {STATUS_OPTIONS.map((tab) => (
+            {orderStatic?.by_status.map((tab, index) =>  (
               <Tab
-                key={tab.value}
+                key={index}
                 iconPosition="end"
-                value={tab.value}
-                label={tab.label}
+                value={tab.status}
+                label={tab.display_name}
                 icon={
                   <Label
                     variant={
-                      ((tab.value === 'all' || filters.status.includes(tab.value)) && 'filled') || 'soft'
+                      ((tab.status === "all" || filters.status.includes(tab.status)) && 'filled') || 'soft'
                     }
                     color={
-                      (tab.value === 'delivered' && 'success') ||
-                      (tab.value === 'pending' && 'warning') ||
-                      (tab.value === 'cancelled' && 'error') ||
-                      (tab.value === 'shipped' && 'info') ||
-                      (tab.value === 'return' && 'secondary') ||
+                      (tab.status === 'delivered' && 'success') ||
+                      (tab.status === 'pending' && 'warning') ||
+                      (tab.status === 'cancelled' && 'error') ||
+                      (tab.status === 'shipped' && 'info') ||
+                      (tab.status === 'return' && 'secondary') ||
                       'default'
                     }
                   >
-
-                    {ordersLoading ? '...' :
-                      tab.value === 'all' ? pagination?.total_orders || 0 :
-                        orders.filter((order) => order.order_status === tab.value).length}
+                    {tab.count}
                   </Label>
                 }
               />
@@ -356,7 +355,7 @@ export default function OrderListView() {
             rowsPerPage={rowsPerPage}
             onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
-            //
+            rowsPerPageOptions={[20,50,100]}
             dense={table.dense}
             onChangeDense={table.onChangeDense}
           />

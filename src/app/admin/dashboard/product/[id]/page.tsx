@@ -15,9 +15,8 @@ type Props = {
 };
 
 export default function ProductDetailsPage({ params }: Props) {
-  const { id } = params;
 
-  return <ProductDetailsView id={id} />;
+  return <ProductDetailsView />;
 }
 
 // export async function generateStaticParams() {
